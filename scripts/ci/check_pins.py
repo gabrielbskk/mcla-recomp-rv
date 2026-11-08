@@ -1,17 +1,18 @@
 """Consistency checks that need no build: python check_pins.py [repository root]
 
 - scripts/ci/tools.json pins the same llvm-mingw and Clang (version and SHA-256) as scripts/make_pc.ps1;
-- every patches/rexglue-*.patch is applied by make_pc.ps1 (or is one of the Linux-only ones), and
+- every patches/rexglue-*.patch is applied by make_pc.ps1 (or is one of the documented Linux/Android-only ones), and
   every patch make_pc.ps1 applies is in patches/ (a patch added to the folder and not to the
   script, or the other way round, is otherwise found only by a player's build);
 - every patch make_pc.ps1 applies is in FORK.md's order of `git apply` lines, in the same order;
 - the workflows pin every action by commit SHA, never use pull_request_target, default to read-only permissions;
-- no tracked file looks like game data (a disc image, a .xex, an .rpf, a .bik, a key...) or is
-  over 8 MB;
+- no tracked file looks like game data (a disc image, a .xex, an .rpf, a .bik, a key...); the
+  one Android SDK source patch over 8 MB must match its reviewed SHA-256;
 - scripts/ci/game-files.json (the fingerprints the setup wizard checks the player's game against) has the
   shape the wizard reads: the title id, a version, and files with a plain relative name, a size and a
   64-digit SHA-256, default.xex among them. (Only the shape: what it lists is a decision of the maintainer.)
 """
+import hashlib
 import json
 import pathlib
 import re
@@ -44,8 +45,15 @@ if len(set(applied)) != len(applied):
     errors.append("make_pc.ps1 names a patch twice: " + ", ".join(sorted(p for p in set(applied) if applied.count(p) > 1)))
 in_folder = sorted(p.name for p in (root / "patches").glob("rexglue-*.patch"))
 linux_only = {n for n in in_folder if n.startswith("rexglue-linux-")}
+android_only = {
+    "rexglue-android-arm64.patch",
+    "rexglue-turnip-loader.patch",
+    "rexglue-driver-cache-path.patch",
+}
+for name in sorted(android_only - set(in_folder)):
+    errors.append(f"missing Android SDK patch: patches/{name}")
 for name in in_folder:
-    if name not in applied and name not in linux_only:
+    if name not in applied and name not in linux_only and name not in android_only:
         errors.append(f"patches/{name} is not applied by make_pc.ps1 (add it to $laterPatches, in the order it goes on)")
 for name in applied:
     if name not in in_folder:
@@ -67,13 +75,17 @@ if fork_later != [n for n in later if n in fork_later]:
 import subprocess
 tracked = subprocess.run(["git", "-C", str(root), "ls-files", "-z"], capture_output=True, check=True).stdout.decode("utf-8").split("\0")
 tracked = [t for t in tracked if t]
-forbidden = re.compile(r"\.(iso|xex|xexp|rpf|bik|pe|bin|god|key)$", re.I)
+forbidden = re.compile(r"\.(iso|xex|xexp|rpf|bik|pe|bin|god|key|apk|keystore|jks|p12|pfx|pem|shaderpack)$", re.I)
 for t in tracked:
-    if forbidden.search(t):
-        errors.append(f"{t} is tracked: game data and keys never go into the repository")
+    if forbidden.search(t) or t.startswith(("game/", "out/", "third_party/", "generated/default/", "shaderpack/")):
+        errors.append(f"{t} is tracked: game data, build output and keys never go into the repository")
     size = (root / t).stat().st_size if (root / t).is_file() else 0
-    if size > 8_000_000:
+    if size > 8_000_000 and t != "patches/rexglue-android-arm64.patch":
         errors.append(f"{t} is {size / 1e6:.1f} MB: no tracked file is over 8 MB (is it game data?)")
+    if t == "patches/rexglue-android-arm64.patch":
+        digest = hashlib.sha256((root / t).read_bytes()).hexdigest()
+        if digest != "a59701f759c084db1a0b36e5707aacf404cddb43a632f71b2d3e4082bc221299":
+            errors.append(f"{t}: SHA-256 changed; review the large patch before updating its pin")
 
 # The workflows: every third-party action is pinned by a full commit SHA, no pull_request_target,
 # and the default permissions are read-only.

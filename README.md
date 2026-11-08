@@ -1,22 +1,40 @@
-# MCLA Recomp RV — Android ARM64 experimental port
+<p align="center"><img src="docs/assets/mcla-rv-banner.svg" alt="MCLA Recomp RV — Android ARM64 experimental port" width="100%"></p>
 
-Este repositório reúne o trabalho experimental de portar [mcla-recomp](https://github.com/holdmysocks/mcla-recomp) para Android ARM64. Ele parte do [fork de Renan Queiroz](https://github.com/RenanQueiroz/mcla-recomp). Os créditos completos e a distinção entre código aproveitado, ferramentas e referências estão em [CREDITS.md](CREDITS.md); as licenças de terceiros estão em [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+# MCLA Recomp RV
 
-O port usa C++23, SDL3 e Vulkan e chegou ao jogo em um aparelho Adreno 740, mas ainda é experimental. Comece pelo [estado técnico atual](docs/android-handoff.md), siga o [guia de build](docs/android-build.md) e consulte as [instruções de instalação](docs/android-testing.md). Cada pessoa precisa fornecer os arquivos de sua própria cópia do jogo. O código fonte aqui não inclui ISO, assets, saves, chaves, driver Turnip ou código recompilado gerado localmente. O [APK experimental publicado](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/android-arm64-2026-11-08) contém bibliotecas nativas geradas a partir do jogo e pode ser copiado por qualquer pessoa.
+**Port comunitário experimental para Android ARM64.** Código C++23 recompilado, janela e áudio via SDL3, gráficos Vulkan. O jogo chegou à rua com HUD em um realme RMX5070 / Adreno 740. Ainda faltam testes e otimização de desempenho.
 
-O shader pack pré-gerado presente no fork base foi removido desta publicação por conter dados derivados do jogo. A preparação de shaders deve ser feita localmente pelo usuário. O APK de teste não inclui os 13 arquivos do disco, mas distribui `libmain.so` gerada a partir do executável do jogo; considere isso ao usar ou redistribuir a release.
+| Comece aqui | O que encontrar |
+| --- | --- |
+| [APK experimental](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/android-arm64-2026-11-08) | A mesma build entregue em 2026-11-08, com SHA-256 e limites publicados. |
+| [Instalação e importação](docs/android-testing.md) | Como fornecer os 13 arquivos extraídos da sua própria cópia do jogo. |
+| [Estado técnico](docs/android-handoff.md) | O que funcionou, evidências e problemas ainda abertos. |
+| [Compilar no Termux](docs/android-build.md) | Dependências, patches do SDK e comandos de build. |
+| [Diário de builds](docs/android-build-journal.md) | Registro do APK atual e modelo para as próximas versões. |
 
-Os workflows herdados do fork base verificam principalmente o build Windows. O CI desse port é manual e não deve ser interpretado como validação do APK Android. A validação Android registrada está no [diário de builds](docs/android-build-journal.md).
+O repositório parte de [holdmysocks/mcla-recomp](https://github.com/holdmysocks/mcla-recomp) e diretamente do [fork de Renan Queiroz](https://github.com/RenanQueiroz/mcla-recomp). [Créditos completos](CREDITS.md), [licenças de terceiros](THIRD-PARTY-NOTICES.md) e [investigação cronológica](ANDROID-PORT-NOTES.md) acompanham o código. É um projeto **não oficial** e não tem afiliação com a marca Xbox ou com os titulares do jogo.
 
-**Nota do mantenedor:** usei ferramentas de inteligência artificial para ajudar a pesquisar, escrever, revisar e portar o projeto. Peço desculpas por ainda não conseguir fazer esse trabalho sem essa ajuda; estou aprendendo. A ajuda de IA não substitui os créditos dos autores originais nem transforma hipóteses em testes. Os resultados e limites estão documentados no [handoff](docs/android-handoff.md) e no [diário de builds](docs/android-build-journal.md).
+### Estado do Android
+
+| Área | Situação |
+| --- | --- |
+| ARM64, Vulkan, menus, cena 3D e fullscreen | Observados no aparelho de teste. |
+| Driver Vulkan do sistema | Corrigiu a piscada branca da lanterna traseira nos testes do usuário. |
+| Turnip opcional | Carrega e renderiza, mas as variantes testadas ainda piscam a lanterna. |
+| Desempenho | FPS baixo e alguns engasgos; a GPU sofreu limitação térmica. |
+| Último APK publicado | Compilado e verificado; **essa versão exata não passou por novo teste de gameplay**. |
+
+Cada pessoa precisa fornecer sua própria cópia de *Midnight Club: Los Angeles Complete Edition* para Xbox 360. O código fonte não inclui ISO, assets, saves, chaves, driver Turnip nem código recompilado gerado localmente. O shader pack pré-gerado do fork base foi removido desta publicação por conter dados derivados do jogo. O APK da release não inclui os 13 arquivos do disco, mas contém `libmain.so` gerada a partir do executável; qualquer pessoa pode copiá-lo.
+
+Os workflows herdados do fork base verificam principalmente o build Windows. O CI deste port é manual e não valida o APK Android. A verificação Android registrada está no [diário de builds](docs/android-build-journal.md).
+
+**Nota do mantenedor:** usei ferramentas de inteligência artificial para pesquisar, escrever, revisar e portar o projeto. Peço desculpas por ainda não conseguir fazer esse trabalho sem essa ajuda; estou aprendendo. A ajuda de IA não substitui os créditos dos autores originais nem transforma hipóteses em testes. Os resultados e limites estão documentados.
 
 ## About the base fork
 
-## What this is
-
 *Midnight Club: Los Angeles Complete Edition* (Xbox 360, title `545407F8`) running natively on a PC. This is a fork of [holdmysocks/mcla-recomp](https://github.com/holdmysocks/mcla-recomp), the static recompilation of the game to native code for Windows, Linux and jailbroken PS5 consoles, built on the [ReXGlue SDK](https://github.com/rexglue/rexglue-sdk). On top of upstream's `main` the fork adds performance work on both Windows renderers (Direct3D 12 and Vulkan) so that higher resolutions and frame rates hold, a Windows launcher with a setup wizard that builds, updates and starts the game, HDR, FSR 3.1 and frame generation, and several game fixes. The changes meant for upstream are offered there as pull requests over time.
 
-**This repository contains no game code, assets or keys.** You supply your own legally obtained disc image (`.iso`); the game is built on your PC from it, and the recompiled code is generated locally and never committed. What you build is for you, not for sharing.
+**This source tree contains no generated game code, game assets or keys.** You supply your own disc image (`.iso`); the game is built locally from it, and the recompiled code is never committed. The separate experimental Android APK is described above.
 
 ## Which release of the game
 
@@ -33,7 +51,7 @@ Only **Midnight Club: Los Angeles Complete Edition, USA/Europe, for Xbox 360** (
 | Linux, Vulkan | Upstream's build plays. The fork's patches have not been built or run there. |
 | PS5 (jailbroken) | Upstream's build plays at a steady 30 FPS. The fork's patches have not been built or run on a console. |
 
-Everything the fork adds was built and measured on Windows only, on an NVIDIA RTX 5080 and a Ryzen 7 9800X3D (and on the Ryzen's integrated Radeon). It has not been tried on a discrete AMD card, Intel graphics, Linux or the PS5. If you try it on other hardware, please tell us in the [fork's issues](https://github.com/RenanQueiroz/mcla-recomp/issues), whether it works or not. What was tested and the frame times: [docs/status.md](docs/status.md).
+The base fork's PC performance changes were built and measured on Windows, on an NVIDIA RTX 5080 and a Ryzen 7 9800X3D (and on the Ryzen's integrated Radeon). They have not been tried on a discrete AMD card, Intel graphics, Linux or the PS5. Its measurements are in [docs/status.md](docs/status.md). Android observations for this port are in the [handoff](docs/android-handoff.md).
 
 ## Windows
 

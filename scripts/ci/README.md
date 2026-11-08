@@ -1,10 +1,12 @@
 # CI and releases
 
+**Android port repository note:** `.github/workflows/ci.yml` is manual (`workflow_dispatch`) here. It inherited Windows checks from the base fork and does not build or validate the Android APK. The Android-only SDK patches are applied by [the Android build guide](../../docs/android-build.md), not by `make_pc.ps1`; `check_pins.py` recognizes them separately and pins the large base Android patch by SHA-256. The inherited `release.yml` is guarded for `RenanQueiroz/mcla-recomp` and does not publish this repository's Android release. The Android APK was published manually with the evidence in [ANDROID-RELEASE.md](../../ANDROID-RELEASE.md).
+
 Two workflows in `.github/workflows/`, and the scripts in this folder that they run (each also runs
 by hand). No game data is ever involved: the runners have none, and nothing a workflow builds
 contains any.
 
-## `ci.yml`: on every push and pull request
+## `ci.yml`: manual in this Android port
 
 Read-only (`contents: read`), no secrets. Three jobs on `windows-2025`:
 

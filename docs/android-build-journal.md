@@ -2,6 +2,12 @@
 
 Record each candidate here when code changes. Link to the relevant `ANDROID-PORT-NOTES.md` investigation and update [android-handoff.md](android-handoff.md) whenever the current state changes. Building an APK and testing it on the phone are separate milestones. Do not mark a change as fixed merely because it compiles.
 
+## Repository review R1 — 2026-11-08 (no APK build)
+
+- Reviewed the public source snapshot and release manifest. The inherited `check_pins.py` failed because it treated three Android-only SDK patches as missing from the Windows build script and rejected the 20.1 MB Android source patch. The checker now recognizes the Android-only set, checks that all three exist, and pins the large patch to its reviewed SHA-256. It also rejects APKs, signing keys, shader packs, generated game code and build directories in tracked files.
+- Updated the inherited CI description to say the Windows workflow is manual in this repository and does not validate Android. Corrected the shader-pack note inherited from the base fork. Added an original green/graphite README banner and Android-first navigation; no official Xbox logo is used.
+- Verification: `python3 -I scripts/ci/check_pins.py` reported 0 problems after the change. SVG parsed and rendered locally. No C++/Java rebuild or phone test was done, so the release APK and its SHA-256 remain unchanged.
+
 ## Baseline B0 — 2026-11-08, final build before pause
 
 | Field | Record |

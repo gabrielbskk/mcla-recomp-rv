@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">MCLA Recomp RV — Android ARM64</title>
+  <desc id="desc">Original green and graphite banner inspired by the Xbox 360 era, with luminous rings and Android ARM64 port lettering.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1">
+      <stop offset="0" stop-color="#101714"/>
+      <stop offset="0.55" stop-color="#0b100e"/>
+      <stop offset="1" stop-color="#19281a"/>
+    </linearGradient>
+    <linearGradient id="stripe" x2="1" y2="0">
+      <stop offset="0" stop-color="#58b124"/>
+      <stop offset="0.45" stop-color="#a4e444"/>
+      <stop offset="1" stop-color="#356f25"/>
+    </linearGradient>
+    <radialGradient id="orb">
+      <stop offset="0" stop-color="#cafa7e"/>
+      <stop offset="0.42" stop-color="#67c132"/>
+      <stop offset="0.78" stop-color="#234d25"/>
+      <stop offset="1" stop-color="#102419"/>
+    </radialGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <clipPath id="frame"><rect width="1200" height="360" rx="24"/></clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+    <rect width="1200" height="360" fill="url(#background)"/>
+    <g opacity="0.13" stroke="#87c86a" stroke-width="1">
+      <path d="M0 64H1200M0 120H1200M0 176H1200M0 232H1200M0 288H1200"/>
+      <path d="M80 0V360M176 0V360M272 0V360M368 0V360M464 0V360M560 0V360M656 0V360M752 0V360M848 0V360M944 0V360M1040 0V360M1136 0V360"/>
+    </g>
+    <path d="M-35 331C175 210 347 182 582 241S1010 319 1240 187" fill="none" stroke="#63bc33" stroke-width="38" opacity="0.11" filter="url(#glow)"/>
+    <path d="M-35 331C175 210 347 182 582 241S1010 319 1240 187" fill="none" stroke="url(#stripe)" stroke-width="4" opacity="0.65"/>
+    <g transform="translate(1020 178)">
+      <circle r="158" fill="none" stroke="#78c643" stroke-width="1" opacity="0.12"/>
+      <circle r="126" fill="none" stroke="#85d24c" stroke-width="2" opacity="0.22"/>
+      <circle r="105" fill="none" stroke="#9ce35d" stroke-width="9" opacity="0.23" filter="url(#glow)"/>
+      <circle r="105" fill="none" stroke="#9ce35d" stroke-width="2" opacity="0.72" stroke-dasharray="280 380" transform="rotate(-38)"/>
+      <circle r="78" fill="url(#orb)" opacity="0.92"/>
+      <circle r="60" fill="none" stroke="#d8ffab" stroke-width="1.5" opacity="0.42"/>
+      <path d="M-56 34C-15-45 25-55 59-13" fill="none" stroke="#d6ffa6" stroke-width="7" stroke-linecap="round" opacity="0.43"/>
+      <path d="M-32-36C-5-53 18-53 42-39" fill="none" stroke="#efffd0" stroke-width="2" opacity="0.8"/>
+    </g>
+    <path d="M46 42H850" stroke="url(#stripe)" stroke-width="3" opacity="0.9"/>
+    <text x="50" y="91" fill="#9bda67" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="6">COMMUNITY PORT  /  UNOFFICIAL</text>
+    <text x="44" y="205" fill="#f4f8ef" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="900" letter-spacing="-3">MCLA RECOMP</text>
+    <text x="49" y="265" fill="#9fe15e" font-family="Arial, Helvetica, sans-serif" font-size="45" font-weight="800" letter-spacing="11">RV</text>
+    <rect x="172" y="228" width="231" height="45" rx="22" fill="#244a25" stroke="#75ba4c"/>
+    <text x="194" y="257" fill="#e6f8d8" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="2">ANDROID ARM64</text>
+    <rect x="415" y="228" width="194" height="45" rx="22" fill="#1b2e22" stroke="#51835a"/>
+    <text x="442" y="257" fill="#c0dbbf" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="2">VULKAN  /  SDL3</text>
+    <text x="50" y="325" fill="#92aa91" font-family="Arial, Helvetica, sans-serif" font-size="15" letter-spacing="2">STATIC RECOMPILATION  •  EXPERIMENTAL BUILD</text>
+  </g>
+</svg>
