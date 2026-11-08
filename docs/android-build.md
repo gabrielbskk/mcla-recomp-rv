@@ -1,6 +1,6 @@
 # Android ARM64 build handoff
 
-For the current state, evidence, open issues, and the agreed review/build/test cadence, read [android-handoff.md](android-handoff.md) first. Record each candidate in [android-build-journal.md](android-build-journal.md). The final delivered APK was built and statically verified; it has not had a gameplay test after the per-driver cache and log-name changes.
+For the current state, evidence, open issues, and the agreed review/build/test cadence, read [android-status.md](android-status.md) first. The SDK source choices and the combined patch limitation are in [android-sdk-source.md](android-sdk-source.md). Record each candidate in [android-build-journal.md](android-build-journal.md). The final delivered APK was built and statically verified; it has not had a gameplay test after the per-driver cache and log-name changes.
 
 This port is written in **C++23** (plus Java for the Android launcher). The APK contains only ARM64 native libraries and Java launcher code. It does not include the game's files, Turnip binaries, or the local signing key. The current device build is experimental but has reached gameplay on a real Adreno 740 phone.
 
