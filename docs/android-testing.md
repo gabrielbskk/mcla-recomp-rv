@@ -61,7 +61,8 @@ clean-profile picker import remains unverified.
 
 ## Input support
 
-Gamepad is the only supported and validated in-game input method at present.
+Single-gamepad input is the only supported and validated in-game input method
+at present. Two-gamepad/two-player input is not supported at this time.
 Keyboard and mouse input may work through Android/SDL, but this port has not
 verified it. Touch controls are planned for a future update and are not
 available yet.

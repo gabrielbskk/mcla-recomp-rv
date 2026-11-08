@@ -71,7 +71,7 @@ REXCVAR_DEFINE_BOOL(mcla_small_cpu_defaults, true, "MCLA",
                     "output queue after an underrun). A value you set for any "
                     "of them wins. Off leaves only the high-resolution wait on there (v0.2.x). 4 cores without SMT "
                     "are included since v0.3.1. Nothing changes with 6 or more logical processors "
-                    "(archive/fork-base/launcher/dev/small-cpu-2026-10-28.md, small-cpu-audio-2026-10-29.md). Takes effect at the next start")
+                    "(measured during Windows performance testing). Takes effect at the next start")
     .lifecycle(rex::cvar::Lifecycle::kRequiresRestart);
 
 // Read by NVIDIA's Optimus and AMD's PowerXpress drivers when the exe loads: on a laptop with

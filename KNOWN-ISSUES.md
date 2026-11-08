@@ -5,7 +5,8 @@
 - Sustained FPS is low and stutters remain. Thermal throttling prevented a
   controlled performance conclusion.
 - Clean-profile folder import, final log filenames, per-driver cache behavior,
-  gamepads, long sessions and 16 KiB page-device runtime remain unverified.
+  two-gamepad/two-player input, long sessions and 16 KiB page-device runtime
+  remain unverified.
 - The launcher checks file presence and nonzero size, not hashes. A damaged
   extracted file may pass import.
 

@@ -16,11 +16,13 @@ not an x86 emulator or a Linux compatibility layer.
 - The tested phone is a Samsung Galaxy S23 with an Adreno 740 GPU, 8 GB RAM and
   256 GB storage. Older logs show `realme/RMX5070` because device spoofing was
   enabled; that string is not the physical device model.
-- Menus, audio, fullscreen, a 3D road scene and controller-independent touch
-  navigation reached gameplay in earlier installed candidates.
+- Menus, audio, fullscreen and a 3D road scene with HUD reached gameplay in
+  earlier installed candidates. Touch was used only for launcher/menu
+  navigation; it is not an in-game control method.
 - The Android launcher is in English and provides **SELECT TURNIP (.ZIP)**,
   **USE SYSTEM DRIVER** and **PLAY**.
-- Gamepad is the only currently supported and validated in-game input method.
+- Single-gamepad input is the only currently supported and validated in-game
+  input method. Two-gamepad/two-player input is not supported at this time.
   Keyboard and mouse support is possible through Android/SDL but remains
   unverified. Touch controls are planned and are not implemented yet.
 - The system Vulkan driver is the recommended choice on the tested phone.
@@ -56,8 +58,8 @@ The earlier warm-cache test reduced pipeline-storage preparation from about
 15.8 seconds to 0.47 seconds on two runs, but this does not establish higher
 sustained FPS. The tested phone uses 4 KiB pages; a 16 KiB page device has not
 been tested. Clean-profile folder-picker import, final `.txt` log names,
-per-driver cache behavior, gamepads, long sessions and formal FPS comparison
-remain open.
+per-driver cache behavior, two-gamepad/two-player input, long sessions and
+formal FPS comparison remain open.
 
 The rear-light issue is currently isolated to the tested Turnip variants. Keep
 the system driver selected while investigating it. Do not treat the historical
