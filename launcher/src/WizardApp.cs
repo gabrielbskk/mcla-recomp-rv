@@ -1,0 +1,695 @@
+// The setup wizard: the launcher's first run, for a PC with no install. Welcome (the folder), Pick your game,
+// Checking your game, Setting up (six steps, one bar each), Ready. The work is done by SetupEngine
+// (Setup\SetupEngine.cs); this draws it. See DESIGN section 1 and launcher\README.md ("The setup wizard").
+using System.Collections.Immutable;
+using System.Diagnostics;
+using Microsoft.UI.Reactor;
+using Microsoft.UI.Reactor.Core;
+using Microsoft.UI.Reactor.Hooks;
+using Microsoft.UI.Reactor.Input;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Windows.Storage.Pickers;
+using MclaLauncher.Setup;
+using static Microsoft.UI.Reactor.Factories;
+
+namespace MclaLauncher;
+
+enum WizardPage { Welcome, PickGame, Checking, Setup, Ready }
+
+enum RunState { Idle, Running, Failed, Cancelled, Done }
+
+sealed class WizardApp : Component
+{
+    const string Mono = "Cascadia Mono, Consolas";
+    /// Your own space (%LOCALAPPDATA%\MCLA), unless that name has a character the build can't take (an accent in the
+    /// user's name, say): then C:\MCLA (the system drive's root).
+    static readonly string DefaultFolder = ChooseDefaultFolder();
+
+    static string ChooseDefaultFolder()
+    {
+        var own = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MCLA");
+        if (PathBudget.UnsafeCharacter(own) == null && own.Length <= PathBudget.MaxRootLength) return own;
+        return Path.Combine(Path.GetPathRoot(Environment.SystemDirectory) ?? @"C:\", "MCLA");
+    }
+
+    public override Element Render()
+    {
+        var dev = DevOptions.Current;
+        var earlier = UseMemo(() => Paths.InstallRoot is { } root ? InstallRecord.Load(Path.Combine(root, InstallLayout.RecordName)) : null, Array.Empty<object>());
+        var (page, setPage) = UseState(WizardPage.Welcome, threadSafe: true);
+        var (installDir, setInstallDir) = UseState(dev.InstallDir ?? earlier?.InstallRoot ?? DefaultFolder);
+        var (gamePath, setGamePath) = UseState<string?>(dev.GamePath ?? earlier?.GameSource, threadSafe: true);
+        var (inPlace, setInPlace) = UseState(dev.InPlace || earlier?.GameMode == "in-place", threadSafe: true);
+        var (release, setRelease) = UseState<ReleaseInfo?>(null, threadSafe: true);
+        var (releaseSource, setReleaseSource) = UseState<ReleaseSource?>(null, threadSafe: true);
+        var (releaseError, setReleaseError) = UseState<string?>(null, threadSafe: true);
+        // The network details of a failed look-up (Net.cs's report), what the look-up is trying now, and the folder of the
+        // player's own downloads when "Use files I downloaded" is in use.
+        var (releaseDetail, setReleaseDetail) = UseState<string?>(null, threadSafe: true);
+        var (releaseProgress, setReleaseProgress) = UseState("Looking up the latest release…", threadSafe: true);
+        var (offlineFolder, setOfflineFolder) = UseState<string?>(dev.Downloads, threadSafe: true);
+        var (offlineOpen, setOfflineOpen) = UseState(false);
+        var loadRef = UseRef(0);
+        var (check, setCheck) = UseState<GameCheckResult?>(null, threadSafe: true);
+        var (checking, setChecking) = UseState(false, threadSafe: true);
+        var (runState, setRunState) = UseState(RunState.Idle, threadSafe: true);
+        var (tick, bump) = UseReducer(0, threadSafe: true);
+        var (notice, setNotice) = UseState<string?>(null, threadSafe: true);
+        var (confirmExit, setConfirmExit) = UseState(false);
+        var (detailsOpen, setDetailsOpen) = UseState(false);
+        var engineRef = UseRef<SetupEngine?>(null);
+        var ctsRef = UseRef<CancellationTokenSource?>(null);
+        var exitingRef = UseRef(false);
+        var autoRef = UseRef(dev.Auto);
+        // The game of an earlier setup of the chosen folder, found there: the disc image is not asked for again.
+        var adoptedRef = UseRef<AdoptedGame?>(null);
+
+        long needed = release?.Game is { } g ? PathBudget.RequiredBytes(g.Files.Sum(f => f.Size), !inPlace) : 0;
+        // Only the first page looks at the folder (it reads install.json, which the setup rewrites as it goes).
+        bool resumes = false;
+        string? folderProblem = page == WizardPage.Welcome ? PathBudget.Problem(installDir, out resumes) : null;
+        string? folderWarning = folderProblem == null && page == WizardPage.Welcome ? PathBudget.Warning(installDir) : null;
+        long free = page == WizardPage.Welcome ? PathBudget.FreeBytes(installDir) : 0;
+        bool enoughRoom = resumes || free >= needed;
+        // With the player's own downloads as the source, the setup goes on only when every file it needs is in the folder.
+        var offlineFiles = page == WizardPage.Welcome && release != null && releaseSource is { IsOffline: true } ? releaseSource.OfflineFiles() : [];
+        var offlineMissing = offlineFiles.Count(f => !f.Present);
+
+        // ---- the release: GitHub's latest, or the development override ------------------------------
+        async Task LoadReleaseAsync(string? downloads = null)
+        {
+            var mine = ++loadRef.Current;   // only the newest look-up may answer
+            setReleaseError(null);
+            setReleaseDetail(null);
+            setRelease(null);
+            setReleaseProgress(downloads == null ? "Looking up the latest release…" : "Reading the folder…");
+            try
+            {
+                var source = downloads != null ? ReleaseSource.FromDownloads(downloads) : ReleaseSource.FromOverride(dev.ReleaseSource);
+                if (mine == loadRef.Current) setReleaseSource(source);
+                var found = await Task.Run(() => source.LoadAsync(CancellationToken.None, line => { if (mine == loadRef.Current) setReleaseProgress(line); }));
+                if (mine == loadRef.Current) setRelease(found);
+            }
+            catch (SetupException ex)
+            {
+                if (mine != loadRef.Current) return;
+                setReleaseError(ex.Plain);
+                setReleaseDetail(ex.Detail);
+            }
+        }
+        UseEffect(() =>
+        {
+            if (ReactorApp.PrimaryWindow?.AppWindow is { } appWindow)
+                appWindow.TitleBar.PreferredTheme = Microsoft.UI.Windowing.TitleBarTheme.UseDefaultAppMode;
+            _ = LoadReleaseAsync(dev.Downloads);
+        }, Array.Empty<object>());
+
+        // ---- the game ----------------------------------------------------------------------------------
+        void StartCheck(string path)
+        {
+            adoptedRef.Current = null;
+            setGamePath(path);
+            setCheck(null);
+            setChecking(true);
+            setPage(WizardPage.Checking);
+            var fingerprint = release!.Game!.ToFingerprint();
+            var installRoot = Path.GetFullPath(string.IsNullOrWhiteSpace(installDir) ? DefaultFolder : installDir.Trim());
+            _ = Task.Run(() =>
+            {
+                GameCheckResult result;
+                try
+                {
+                    // The install folder and the game's folder must not hold one another: the setup writes (and an
+                    // uninstall deletes) in the first, and only reads the second.
+                    if (PathBudget.IsInside(path, installRoot) || (Directory.Exists(path) && PathBudget.IsInside(installRoot, path)))
+                    {
+                        result = new GameCheckResult(GameVerdict.NotAGame, "The game and the install can't be in each other's folders",
+                            "The install folder is made for the setup's own files, and your game is only read. Choose a game outside the install folder, or another install folder.", []);
+                    }
+                    else
+                    {
+                        result = GameChecker.Inspect(path, fingerprint, out var source);
+                        source?.Dispose();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    result = new GameCheckResult(GameVerdict.NotAGame, "This isn't a Midnight Club: Los Angeles disc or folder", $"That can't be read: {ex.Message}", []);
+                }
+                setCheck(result);
+                setChecking(false);
+            });
+        }
+
+        async void ChooseDisc()
+        {
+            var picking = UseFilePickerAsync(new FilePickerOptions(FileTypeFilter: [".iso"], CommitButtonText: "Choose"));
+            try
+            {
+                var file = await picking;
+                if (file != null) StartCheck(file.Path);
+            }
+            catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException) { setNotice($"Couldn't open the file chooser: {ex.Message}"); }
+        }
+
+        async void ChooseGameFolder()
+        {
+            var picking = UseFolderPickerAsync(new FolderPickerOptions(CommitButtonText: "Choose"));
+            try
+            {
+                var folder = await picking;
+                if (folder != null) StartCheck(folder.Path);
+            }
+            catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException) { setNotice($"Couldn't open the folder chooser: {ex.Message}"); }
+        }
+
+        // "Use files I downloaded": the folder the player saved release.json and the other files into.
+        async void ChooseDownloadsFolder()
+        {
+            var picking = UseFolderPickerAsync(new FolderPickerOptions(CommitButtonText: "Use this folder"));
+            try
+            {
+                var folder = await picking;
+                if (folder == null) return;
+                setOfflineFolder(folder.Path);
+                setNotice(null);
+                _ = LoadReleaseAsync(folder.Path);
+            }
+            catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException) { setNotice($"Couldn't open the folder chooser: {ex.Message}"); }
+        }
+
+        void CopyDetails(string text) =>
+            setNotice(ClipboardText.Copy(text) is { } why ? $"Couldn't copy the details: {why}" : "The details are copied. Paste them into a report on GitHub.");
+
+        async void ChooseInstallFolder()
+        {
+            var picking = UseFolderPickerAsync(new FolderPickerOptions(CommitButtonText: "Choose"));
+            try
+            {
+                var folder = await picking;
+                if (folder != null) setInstallDir(folder.Path);
+            }
+            catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException) { setNotice($"Couldn't open the folder chooser: {ex.Message}"); }
+        }
+
+        async Task DroppedAsync(DragData data)
+        {
+            if (release == null) return;
+            var items = await data.GetFilesAsync();
+            if (items.Count > 0) StartCheck(items[0].Path);
+        }
+
+        // ---- the setup ---------------------------------------------------------------------------------
+        void StartSetup()
+        {
+            var adopted = adoptedRef.Current;
+            var game = adopted?.Path ?? gamePath;
+            if (release == null || releaseSource == null || game == null || runState == RunState.Running) return;
+            var root = Path.GetFullPath(installDir.Trim());
+            var keepInPlace = adopted?.InPlace ?? (inPlace && check?.Ok == true && Directory.Exists(game));
+            var engine = new SetupEngine(new SetupContext(new InstallLayout(root), releaseSource, release,
+                new SetupChoices(root, game, keepInPlace, dev.GameArguments),
+                AppContext.BaseDirectory));
+            engine.Changed += () => bump(t => t + 1);
+            engineRef.Current = engine;
+            var cts = new CancellationTokenSource();
+            ctsRef.Current = cts;
+            setNotice(null);
+            setRunState(RunState.Running);
+            setPage(WizardPage.Setup);
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await engine.RunAsync(cts.Token);
+                    setRunState(RunState.Done);
+                    setPage(WizardPage.Ready);
+                }
+                catch (OperationCanceledException) { setRunState(RunState.Cancelled); }
+                catch (Exception) { setRunState(RunState.Failed); }
+                bump(t => t + 1);
+            });
+        }
+
+        // From the first page: a folder that holds a setup with its game goes straight on (the disc image is not
+        // asked for again); anything else goes on to the game.
+        void NextFromWelcome()
+        {
+            if (release?.Game == null) return;
+            var layout = new InstallLayout(Path.GetFullPath(installDir.Trim()));
+            var fingerprint = release.Game.ToFingerprint();
+            if (!resumes) { adoptedRef.Current = null; setPage(WizardPage.PickGame); return; }
+            // Looks at the folder's game (reads default.xex) off the UI thread.
+            _ = Task.Run(() =>
+            {
+                var adopted = SetupEngine.FindInstalledGame(layout, fingerprint);
+                adoptedRef.Current = adopted;
+                if (adopted == null) { setPage(WizardPage.PickGame); return; }
+                setGamePath(adopted.Path);
+                setInPlace(adopted.InPlace);
+                StartSetup();
+            });
+        }
+
+        void CancelSetup()
+        {
+            ctsRef.Current?.Cancel();
+            engineRef.Current?.Cancel();
+        }
+
+        void OpenLauncher()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(Environment.ProcessPath!) { UseShellExecute = false, WorkingDirectory = AppContext.BaseDirectory });
+                exitingRef.Current = true;
+                ReactorApp.Exit();
+            }
+            catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+            {
+                setNotice($"Couldn't open the launcher: {ex.Message}");
+            }
+        }
+
+        void Open(string target)
+        {
+            try { Process.Start(new ProcessStartInfo(target) { UseShellExecute = true }); }
+            catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException) { setNotice($"Couldn't open {target}: {ex.Message}"); }
+        }
+
+        void CopyLog()
+        {
+            try
+            {
+                var engine = engineRef.Current;
+                var text = new System.Text.StringBuilder();
+                text.AppendLine($"Midnight Club: Los Angeles setup log ({DateTime.Now:yyyy-MM-dd HH:mm:ss})");
+                text.AppendLine($"release {release?.Tag} {release?.Commit}; install {installDir}");
+                if (engine?.Failure != null) text.AppendLine($"FAILED: {engine.Failure}");
+                if (engine?.FailureDetail != null) text.AppendLine(engine.FailureDetail);
+                if (engine?.LogFilePath != null && File.Exists(engine.LogFilePath))
+                {
+                    using var stream = new FileStream(engine.LogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    using var reader = new StreamReader(stream);
+                    var lines = reader.ReadToEnd().Split('\n');
+                    text.AppendLine(string.Join('\n', lines.Skip(Math.Max(0, lines.Length - 400))));
+                }
+                var package = new Windows.ApplicationModel.DataTransfer.DataPackage();
+                package.SetText(text.ToString());
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
+                setNotice("The log is copied. Paste it into a report on GitHub.");
+            }
+            catch (Exception ex) when (ex is IOException or System.Runtime.InteropServices.COMException or UnauthorizedAccessException)
+            {
+                setNotice($"Couldn't copy the log: {ex.Message}");
+            }
+        }
+
+        // ---- effects -----------------------------------------------------------------------------------
+        // Closing the window mid-setup asks first; quitting stops the setup (what is done is kept).
+        UseEffect(() =>
+        {
+            var window = ReactorApp.PrimaryWindow;
+            if (window == null) return () => { };
+            void OnClosing(object? sender, WindowClosingEventArgs e)
+            {
+                if (exitingRef.Current || ctsRef.Current is not { IsCancellationRequested: false } || engineRef.Current == null) return;
+                if (runState != RunState.Running) return;
+                e.Cancel = true;
+                setConfirmExit(true);
+            }
+            window.Closing += OnClosing;
+            return () => window.Closing -= OnClosing;
+        }, runState);
+
+        // The development path through the pages: the release, then the check, then the setup, with no clicks.
+        // With screenshots on, each page stays long enough to be photographed.
+        void AutoStep(Action action)
+        {
+            if (dev.ShotsDir == null) { action(); return; }
+            _ = Task.Delay(2500).ContinueWith(_ => ReactorApp.UIDispatcher.TryEnqueue(() => action()), TaskScheduler.Default);
+        }
+        UseEffect(() =>
+        {
+            if (!autoRef.Current || release == null || page != WizardPage.Welcome) return;
+            if (PathBudget.Problem(installDir, out _) != null) return;
+            autoRef.Current = false;
+            // Without a game given it stops at the page where one is chosen.
+            if (dev.GamePath == null) AutoStep(NextFromWelcome);
+            else AutoStep(() => StartCheck(dev.GamePath));
+        }, release);
+        UseEffect(() =>
+        {
+            if (dev.Auto && check is { Ok: true } && page == WizardPage.Checking && runState == RunState.Idle) AutoStep(StartSetup);
+        }, check);
+
+        // The taskbar button shows the setup's progress.
+        UseEffect(() =>
+        {
+            var progress = ReactorApp.PrimaryWindow?.Progress;
+            if (progress == null) return;
+            var steps = engineRef.Current?.Steps;
+            if (runState == RunState.Running && steps != null)
+            {
+                progress.State = TaskbarProgressState.Normal;
+                progress.Value = Math.Clamp(steps.Sum(s => s.Finished ? 1.0 : s.Fraction ?? 0) / steps.Count, 0, 1);
+            }
+            else if (runState == RunState.Failed) { progress.State = TaskbarProgressState.Error; progress.Value = 1; }
+            else progress.Clear();
+        }, runState, tick);
+
+        // Development: close the window after a while (a run nobody watches).
+        UseEffect(() =>
+        {
+            if (dev.QuitAfterSeconds <= 0) return () => { };
+            var cts = new CancellationTokenSource();
+            _ = Task.Delay(TimeSpan.FromSeconds(dev.QuitAfterSeconds), cts.Token).ContinueWith(t =>
+            {
+                if (t.IsCanceled) return;
+                exitingRef.Current = true;
+                CancelSetup();
+                ReactorApp.UIDispatcher.TryEnqueue(() => ReactorApp.Exit());
+            }, TaskScheduler.Default);
+            return () => cts.Cancel();
+        }, Array.Empty<object>());
+
+        // Development: a PNG of the window at each page and state, and every 20 seconds.
+        UseEffect(() => { _ = WizardShots.TakeAsync($"{page}-{runState}"); }, page, runState, check == null, release == null, checking);
+        UseEffect(() =>
+        {
+            if (dev.ShotsDir == null) return () => { };
+            var cts = new CancellationTokenSource();
+            _ = Task.Run(async () =>
+            {
+                try { while (true) { await Task.Delay(20000, cts.Token); await WizardShots.TakeAsync("tick"); } }
+                catch (OperationCanceledException) { }
+            });
+            return () => cts.Cancel();
+        }, Array.Empty<object>());
+
+        // ---- layout ------------------------------------------------------------------------------------
+        static Element Info(string title, string? message, InfoBarSeverity severity) =>
+            (InfoBar(title, message) with { IsOpen = true, IsClosable = false }).Severity(severity);
+
+        Element DevBanner() => dev.Any
+            ? Info("Development options are in use", dev.Banner(), InfoBarSeverity.Warning).Margin(0, 0, 0, 12)
+            : Empty();
+
+        string ResumeText(InstallLayout layout)
+        {
+            var earlierRecord = InstallRecord.Load(layout.RecordFile);
+            if (release != null && earlierRecord?.ReleaseCommit != null && earlierRecord.ReleaseCommit != release.Commit)
+                return $"This folder was set up from release {earlierRecord.ReleaseTag}. Going on replaces it with {release.Tag}: the game is built again (a few minutes). "
+                     + "Your game settings, the launcher's settings, your saves and the shader cache are kept, and your game is not asked for again.";
+            return "It continues where it stopped; what was done is kept, and a game that is already in it is not asked for again.";
+        }
+
+        Element Welcome()
+        {
+            var layout = new InstallLayout(Path.GetFullPath(string.IsNullOrWhiteSpace(installDir) ? DefaultFolder : installDir.Trim()));
+            return VStack(14,
+                VStack(2, Title("Midnight Club: Los Angeles"), TextBlock("Setting up your PC").Foreground(Theme.SecondaryText)),
+                TextBlock("This sets up Midnight Club: Los Angeles for PC. You need your own copy of the game: the disc image of the Complete Edition (USA, Europe). "
+                          + "The game is translated and built on this PC from your own files, which takes about 5 to 30 minutes, and needs "
+                          + (release == null ? "about 9 GB" : $"about {needed / (double)(1L << 30):0} GB") + " of disk space besides the disc image.")
+                    .TextWrapping(),
+                VStack(6,
+                    BodyStrong("Where to put it"),
+                    Grid(
+                        columns: [GridSize.Star(), GridSize.Auto],
+                        rows: [GridSize.Auto],
+                        TextBox(installDir, setInstallDir).AutomationName("Install folder").Grid(column: 0),
+                        Button("Browse…", ChooseInstallFolder).Margin(8, 0, 0, 0).Grid(column: 1)),
+                    TextBlock(release == null ? "" : $"{GameChecker.FormatSize(free)} free on this drive; the setup needs about {GameChecker.FormatSize(needed)}.")
+                        .Foreground(enoughRoom ? Theme.SecondaryText : Theme.Ref("SystemFillColorCriticalBrush"))),
+                folderProblem != null ? Info("This folder won't do", folderProblem, InfoBarSeverity.Error) : Empty(),
+                folderWarning != null ? Info("A better folder exists", folderWarning, InfoBarSeverity.Warning) : Empty(),
+                resumes ? Info("An earlier setup is in this folder", ResumeText(layout), InfoBarSeverity.Informational) : Empty(),
+                !enoughRoom ? Info("Not enough room", $"There is {GameChecker.FormatSize(free)} free on that drive. Free some space or choose another drive.", InfoBarSeverity.Error) : Empty(),
+                ReleaseArea(),
+                OfflinePanel(),
+                notice != null ? Info("", notice, InfoBarSeverity.Informational) : Empty());
+        }
+
+        // The look-up of the latest release: while it runs, what it is trying; when it fails, the stage that failed in words, the
+        // details to copy, and what to try; when it is done, the release.
+        Element ReleaseArea()
+        {
+            if (releaseError != null)
+            {
+                var downloads = offlineFolder != null;
+                return VStack(8,
+                    (InfoBar(downloads ? "Couldn't use that folder" : "Couldn't find the latest release", releaseError)
+                        with { IsOpen = true, IsClosable = false, ActionButtonContent = "Try again", OnActionButtonClick = () => _ = LoadReleaseAsync(offlineFolder) })
+                        .Severity(InfoBarSeverity.Error),
+                    HStack(8,
+                        releaseDetail != null ? Button("Copy details", () => CopyDetails(releaseDetail)) : Empty(),
+                        downloads
+                            ? Button("Look it up on GitHub again", () => { setOfflineFolder(null); _ = LoadReleaseAsync(null); })
+                            : Button("Try release.json in a browser", () => Open(releaseSource?.ReleaseJsonUrl ?? ReleaseSource.ReleasesPage))),
+                    releaseDetail != null
+                        ? Expander("Details", ScrollViewer(TextBlock(releaseDetail).FontFamily(Mono).FontSize(11).IsTextSelectionEnabled().TextWrapping()).MaxHeight(200),
+                                   isExpanded: false).HAlign(HorizontalAlignment.Stretch)
+                        : Empty());
+            }
+            if (release == null) return HStack(8, ProgressRing().Width(20).Height(20), TextBlock(releaseProgress).Foreground(Theme.SecondaryText));
+            return TextBlock($"Release {release.Tag}" + (releaseSource is { IsOffline: true } ? "  (from the files you downloaded)" : releaseSource?.IsOverride == true ? "  (from a local release source)" : ""))
+                .Foreground(Theme.SecondaryText);
+        }
+
+        // "Use files I downloaded": for a network where the setup can't reach GitHub (or its download servers) but a web browser
+        // can. The files are downloaded by hand into a folder; the setup checks each against release.json's checksums as usual.
+        Element OfflinePanel()
+        {
+            var fromDownloads = releaseSource is { IsOffline: true };
+            return Expander("Use files I downloaded",
+                VStack(10,
+                    TextBlock("If your web browser can open GitHub but this setup can't (a network or provider that blocks it, an antivirus), "
+                              + "download the files in the browser and let the setup use them from a folder. Each file is still checked against the release's checksums.")
+                        .TextWrapping().Foreground(Theme.SecondaryText),
+                    TextBlock("1. Open the release's page, and under Assets download release.json and the file that starts with rexglue-sdk- and ends with -llvm-mingw- and a date, "
+                              + "then .zip (not the one with \"source\" in its name) into one folder.\n"
+                              + "2. Choose that folder here. This page then lists the build tools to download as well (a few hundred MB), each with its link.\n"
+                              + "3. When every file is in the folder, press Next.").TextWrapping(),
+                    HStack(8, Button("Open the release's page", () => Open(ReleaseSource.ReleasesPage)),
+                              Button(fromDownloads ? "Choose another folder…" : "Choose the folder…", ChooseDownloadsFolder).AutomationName("Choose the folder with the downloaded files")),
+                    fromDownloads && release != null ? DownloadsChecklist() : Empty(),
+                    TextBlock("The setup still gets the game's source code from github.com with git; this only replaces the downloads of release.json, the SDK and the build tools.")
+                        .TextWrapping().Foreground(Theme.SecondaryText)),
+                isExpanded: offlineOpen || releaseError != null || fromDownloads, onIsExpandedChanged: setOfflineOpen)
+                .HAlign(HorizontalAlignment.Stretch);
+        }
+
+        Element DownloadsChecklist() =>
+            VStack(6,
+                BodyStrong($"Files in {offlineFolder}"),
+                VStack(4, offlineFiles.Select(f => (Element)Grid(
+                    columns: [GridSize.Px(24), GridSize.Star(), GridSize.Auto, GridSize.Auto],
+                    rows: [GridSize.Auto],
+                    TextBlock(f.Present ? "✓" : "✕").Foreground(f.Present ? Theme.Ref("SystemFillColorSuccessBrush") : Theme.Ref("SystemFillColorCriticalBrush")).VAlign(VerticalAlignment.Center).Grid(column: 0),
+                    TextBlock(f.Name).FontFamily(Mono).FontSize(12).IsTextSelectionEnabled().VAlign(VerticalAlignment.Center).Grid(column: 1),
+                    TextBlock(GameChecker.FormatSize(f.Size)).Foreground(Theme.SecondaryText).Margin(8, 0, 8, 0).VAlign(VerticalAlignment.Center).Grid(column: 2),
+                    (f.Present ? Empty() : Button("Open its link", () => Open(f.Url)).AutomationName($"Open the link to {f.Name}")).Grid(column: 3)).WithKey(f.Name)).ToArray()),
+                offlineMissing == 0
+                    ? Info("All the files are there", "The setup checks each one against the release's checksums when it uses it.", InfoBarSeverity.Success)
+                    : HStack(8, TextBlock($"{offlineMissing} still to download into that folder, with the size shown.").Foreground(Theme.Ref("SystemFillColorCriticalBrush")).VAlign(VerticalAlignment.Center),
+                                Button("Check again", () => bump(t => t + 1))));
+
+        Element GameZone() =>
+            Border(VStack(10,
+                    Icon(Symbol.OpenFile).HAlign(HorizontalAlignment.Center),
+                    TextBlock("Drop the disc image (.iso) or the folder with default.xex here").HAlign(HorizontalAlignment.Center),
+                    HStack(8, Button("Choose the disc image…", ChooseDisc).AccentButton(), Button("Choose a folder…", ChooseGameFolder))
+                        .HAlign(HorizontalAlignment.Center))
+                .Padding(24))
+            .BorderThickness(1).CornerRadius(8)
+            .BorderBrush(Theme.CardStroke).Background(Theme.CardBackground)
+            .OnDragOver(args => { args.AcceptedOperation = DragOperations.Copy; args.UIOverride.Caption = "Use this"; })
+            .OnDrop(args => { _ = DroppedAsync(args.Data); });
+
+        Element PickGame() =>
+            VStack(14,
+                VStack(2, Title("Pick your game"), TextBlock("Your own copy of the game, as a disc image or as extracted files").Foreground(Theme.SecondaryText)),
+                TextBlock("Choose the .iso of your Midnight Club: Los Angeles Complete Edition disc, or the folder its files were extracted into (the one that has default.xex in it). "
+                          + "Nothing is changed in your copy: the setup reads it and copies it into the install.").TextWrapping(),
+                GameZone(),
+                gamePath != null ? TextBlock($"Chosen: {gamePath}").Foreground(Theme.SecondaryText).IsTextSelectionEnabled() : Empty());
+
+        Element Checking()
+        {
+            if (checking || check == null)
+                return VStack(14, Title("Checking your game"),
+                    HStack(10, ProgressRing().Width(24).Height(24), TextBlock($"Reading {gamePath}…")));
+            var result = check;
+            var folder = gamePath != null && Directory.Exists(gamePath);
+            return VStack(14,
+                Title("Checking your game"),
+                Info(result.Headline, result.Detail, result.Ok ? InfoBarSeverity.Success : InfoBarSeverity.Error),
+                result.Files.Count > 0
+                    ? Expander(result.Ok ? $"The {result.Files.Count(f => f.Present)} files" : "The files", VStack(2, result.Files.Select(f =>
+                        TextBlock($"{(f.Ok ? "✓" : "✕")}  {f.Path}   {(f.Present ? GameChecker.FormatSize(f.Found!.Value) : f.Ok ? "not needed" : "missing")}").FontFamily(Mono).FontSize(12)
+                            .Foreground(f.Ok ? Theme.PrimaryText : Theme.Ref("SystemFillColorCriticalBrush")).WithKey(f.Path)).ToArray()), isExpanded: !result.Ok)
+                        .HAlign(HorizontalAlignment.Stretch)
+                    : Empty(),
+                result.Ok && folder
+                    ? VStack(4,
+                        CheckBox(inPlace, setInPlace, "Use the game where it is"),
+                        TextBlock("Nothing is copied: the game stays in that folder (it has to stay there), and the game is told where it is. Only default.xex is copied, for the build.")
+                            .Foreground(Theme.SecondaryText).TextWrapping())
+                    : Empty());
+        }
+
+        Element StepRow(StepStatus step)
+        {
+            var color = step.State switch
+            {
+                StepState.Failed => Theme.Ref("SystemFillColorCriticalBrush"),
+                StepState.Done or StepState.Skipped => Theme.Ref("SystemFillColorSuccessBrush"),
+                StepState.Waiting or StepState.Cancelled => Theme.DisabledText,
+                _ => Theme.PrimaryText,
+            };
+            Element glyph = step.State switch
+            {
+                StepState.Running => ProgressRing().Width(18).Height(18),
+                StepState.Done or StepState.Skipped => TextBlock("✓").Foreground(color).FontSize(16),
+                StepState.Failed => TextBlock("✕").Foreground(color).FontSize(16),
+                _ => TextBlock("○").Foreground(color).FontSize(16),
+            };
+            return VStack(4,
+                Grid(
+                    columns: [GridSize.Px(30), GridSize.Star(), GridSize.Auto],
+                    rows: [GridSize.Auto],
+                    glyph.HAlign(HorizontalAlignment.Left).VAlign(VerticalAlignment.Center).Grid(column: 0),
+                    VStack(1,
+                        BodyStrong(step.Title),
+                        TextBlock(step.Text).Foreground(Theme.SecondaryText).TextTrimming(TextTrimming.CharacterEllipsis).MaxLines(1)).Grid(column: 1),
+                    TextBlock(step.Remaining ?? "").Foreground(Theme.SecondaryText).VAlign(VerticalAlignment.Center).Grid(column: 2)),
+                step.State == StepState.Running
+                    ? (step.Fraction is double f ? Progress(f * 100) : ProgressIndeterminate()).Margin(30, 0, 0, 0)
+                    : Empty()).WithKey(step.Id.ToString());
+        }
+
+        // What the steps logged, in step order: one place to look at when something is slow or has failed.
+        string DetailsText()
+        {
+            var engine = engineRef.Current;
+            if (engine == null) return "";
+            var lines = new List<string>();
+            foreach (var step in engine.Steps)
+            {
+                var log = engine.LogOf(step.Id);
+                if (log.Count == 0) continue;
+                lines.Add($"== {step.Title}");
+                lines.AddRange(log.TakeLast(40));
+            }
+            return string.Join("\n", lines);
+        }
+
+        Element SetupPage()
+        {
+            var engine = engineRef.Current;
+            var steps = engine?.Steps ?? [];
+            return VStack(12,
+                VStack(2, Title("Setting up"),
+                    TextBlock(runState switch
+                    {
+                        RunState.Running => "This takes a few minutes. You can use the PC meanwhile.",
+                        RunState.Failed => "The setup stopped.",
+                        RunState.Cancelled => "The setup was cancelled. What was done is kept.",
+                        _ => "",
+                    }).Foreground(Theme.SecondaryText)),
+                runState == RunState.Failed && engine?.Failure != null ? Info("Something went wrong", engine.Failure, InfoBarSeverity.Error) : Empty(),
+                runState == RunState.Failed && engine?.FailureIsNetwork == true
+                    ? Info("Downloads not getting through?", "If your web browser can open GitHub but the setup can't, go Back to the first page and open \"Use files I downloaded\": "
+                           + "download the files in the browser, and the setup uses them from a folder. \"Copy the log\" has the network details.", InfoBarSeverity.Informational)
+                    : Empty(),
+                notice != null ? Info("", notice, InfoBarSeverity.Informational) : Empty(),
+                VStack(10, steps.Select(StepRow).ToArray()),
+                Expander("Details", ScrollViewer(TextBlock(DetailsText()).FontFamily(Mono).FontSize(11).IsTextSelectionEnabled().TextWrapping()).MaxHeight(220),
+                         isExpanded: detailsOpen || runState == RunState.Failed, onIsExpandedChanged: setDetailsOpen).HAlign(HorizontalAlignment.Stretch));
+        }
+
+        Element ReadyPage() =>
+            VStack(14,
+                Title("Your game is ready"),
+                TextBlock("Midnight Club: Los Angeles is built on this PC. The launcher has Play and the game's settings.").TextWrapping(),
+                Button(HStack(8, Icon(Symbol.Play), TextBlock("Open the launcher")), OpenLauncher).AccentButton().AutomationName("Open the launcher"),
+                engineRef.Current?.PointerSaved == false
+                    ? Info("The launcher can't remember this install",
+                           "The folder this program is in can't be written to, so it can't leave a note of where the install is, and starting it again opens this setup. The install is fine. "
+                           + "Move this program to a folder you can write to (Documents or the Desktop), start it there and choose this install folder: it checks it, writes the note and opens the launcher.", InfoBarSeverity.Warning)
+                    : Empty());
+
+        Element Footer()
+        {
+            var buttons = new List<Element>();
+            switch (page)
+            {
+                case WizardPage.Welcome:
+                    buttons.Add(Button("Next", NextFromWelcome).AccentButton()
+                        .IsEnabled(release != null && folderProblem == null && enoughRoom && offlineMissing == 0));
+                    break;
+                case WizardPage.PickGame:
+                    buttons.Add(Button("Back", () => setPage(WizardPage.Welcome)));
+                    buttons.Add(Button("Next", () => { if (gamePath != null) StartCheck(gamePath); }).AccentButton().IsEnabled(gamePath != null));
+                    break;
+                case WizardPage.Checking:
+                    buttons.Add(Button(check?.Ok == true ? "Back" : "Choose another", () => setPage(WizardPage.PickGame)));
+                    if (check?.Ok == true)
+                        buttons.Add(Button("Start", () => StartSetup()).AccentButton());
+                    break;
+                case WizardPage.Setup:
+                    if (runState == RunState.Running) buttons.Add(Button("Cancel", CancelSetup));
+                    else
+                    {
+                        if (runState == RunState.Failed) buttons.Add(Button("Copy the log", CopyLog));
+                        if (runState == RunState.Failed) buttons.Add(Button("Report it on GitHub", () => Open(Paths.IssuesUrl)));
+                        buttons.Add(Button("Back", () => setPage(check != null ? WizardPage.Checking : WizardPage.Welcome)));
+                        buttons.Add(Button("Try again", () => StartSetup()).AccentButton());
+                    }
+                    break;
+            }
+            // Keyed by page and state: a button of the page before would otherwise be reused, with its look (a plain
+            // button turned into the accent one of the page before).
+            return HStack(8, buttons.Select((b, i) => b.WithKey($"{page}-{runState}-{i}")).ToArray()).HAlign(HorizontalAlignment.Right).Margin(0, 16, 0, 0);
+        }
+
+        Element body = page switch
+        {
+            WizardPage.Welcome => Welcome(),
+            WizardPage.PickGame => PickGame(),
+            WizardPage.Checking => Checking(),
+            WizardPage.Setup => SetupPage(),
+            _ => ReadyPage(),
+        };
+
+        var exitDialog = ContentDialog("Stop the setup?",
+            TextBlock("The setup is running. Quitting stops it; what is done is kept, and the next start continues from there.").TextWrapping(),
+            "Stop and quit") with
+        {
+            IsOpen = confirmExit,
+            CloseButtonText = "Keep going",
+            DefaultButton = ContentDialogButton.Close,
+            OnClosed = result =>
+            {
+                setConfirmExit(false);
+                if (result != ContentDialogResult.Primary) return;
+                exitingRef.Current = true;
+                CancelSetup();
+                ReactorApp.Exit();
+            },
+        };
+
+        // The development banner is above the pages, so that it is never below the fold of a small window.
+        var root = Grid(
+            columns: [GridSize.Star()],
+            rows: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
+            DevBanner().Grid(row: 0),
+            (ScrollViewer(body.Padding(0, 0, 12, 0)) with { HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled }).Grid(row: 1),
+            Footer().Grid(row: 2),
+            exitDialog
+        ).Padding(24);
+        return dev.ShotsDir != null ? root.Background(Theme.Ref("SolidBackgroundFillColorBaseBrush")) : root;
+    }
+}

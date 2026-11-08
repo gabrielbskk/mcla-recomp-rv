@@ -1,0 +1,42 @@
+diff --git a/src/graphics/vulkan/pipeline_cache.cpp b/src/graphics/vulkan/pipeline_cache.cpp
+index e971864..0ca233f 100644
+--- a/src/graphics/vulkan/pipeline_cache.cpp
++++ b/src/graphics/vulkan/pipeline_cache.cpp
+@@ -454,11 +454,35 @@ void VulkanPipelineCache::InitializeShaderStorage(const std::filesystem::path& c
+     auto shader_storage_local_root = shader_storage_root / "local";
+     std::error_code local_root_error;
+     std::filesystem::create_directories(shader_storage_local_root, local_root_error);
+-    vk_pipeline_cache_path_ =
++    std::filesystem::path legacy_vk_pipeline_cache_path =
+         shader_storage_local_root / fmt::format("{:08X}.vk.bin", title_id);
++#if REX_PLATFORM_ANDROID
++    // Vulkan cache blobs are driver-specific. Keep one file per driver so
++    // switching between the system driver and Turnip doesn't discard either.
++    const ui::vulkan::VulkanDevice* const cache_device = command_processor_.GetVulkanDevice();
++    VkPhysicalDeviceProperties cache_device_properties;
++    cache_device->vulkan_instance()->functions().vkGetPhysicalDeviceProperties(
++        cache_device->physical_device(), &cache_device_properties);
++    std::string cache_file_name = fmt::format("{:08X}-{:08X}-{:08X}-{:08X}-", title_id,
++        cache_device_properties.vendorID, cache_device_properties.deviceID,
++        cache_device_properties.driverVersion);
++    for (uint8_t byte : cache_device_properties.pipelineCacheUUID) {
++      cache_file_name += fmt::format("{:02X}", byte);
++    }
++    vk_pipeline_cache_path_ = shader_storage_local_root / (cache_file_name + ".vk.bin");
++#else
++    vk_pipeline_cache_path_ = legacy_vk_pipeline_cache_path;
++#endif
+     if (vk_pipeline_cache_ == VK_NULL_HANDLE) {
+       std::vector<uint8_t> pipeline_cache_data;
+-      if (FILE* pipeline_cache_file = rex::filesystem::OpenFile(vk_pipeline_cache_path_, "rb")) {
++      // Read the old single-file cache on the first launch after upgrading.
++      // Its Vulkan header is validated below before any bytes reach the driver.
++      std::error_code cache_path_error;
++      std::filesystem::path read_path = vk_pipeline_cache_path_;
++      if (!std::filesystem::exists(read_path, cache_path_error)) {
++        read_path = legacy_vk_pipeline_cache_path;
++      }
++      if (FILE* pipeline_cache_file = rex::filesystem::OpenFile(read_path, "rb")) {
+         rex::filesystem::Seek(pipeline_cache_file, 0, SEEK_END);
+         int64_t pipeline_cache_file_size = rex::filesystem::Tell(pipeline_cache_file);
+         if (pipeline_cache_file_size > 0) {

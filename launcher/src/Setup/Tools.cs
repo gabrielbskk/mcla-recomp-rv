@@ -1,0 +1,382 @@
+// Getting a file from the release and trusting it only once its SHA-256 and size are the release's; unpacking
+// the tool archives into the install's tools\ folder. Nothing downloaded is used before it is checked, and
+// a file that doesn't match is deleted.
+using System.IO.Compression;
+using System.Security.Cryptography;
+
+namespace MclaLauncher.Setup;
+
+static class Verified
+{
+    public static async Task<string> Sha256Async(string file, CancellationToken ct)
+    {
+        using var sha = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        await using var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 16, FileOptions.SequentialScan);
+        var buffer = new byte[1 << 20];
+        int read;
+        while ((read = await stream.ReadAsync(buffer, ct)) > 0) sha.AppendData(buffer, 0, read);
+        return Convert.ToHexStringLower(sha.GetHashAndReset());
+    }
+
+    /// The same, without async: for a caller that has a UI thread to keep free of nothing but the 9 MB it reads.
+    public static bool Is(string file, long size, string sha256)
+    {
+        if (!File.Exists(file) || new FileInfo(file).Length != size) return false;
+        using var sha = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        using var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 16, FileOptions.SequentialScan);
+        var buffer = new byte[1 << 20];
+        int read;
+        while ((read = stream.Read(buffer, 0, buffer.Length)) > 0) sha.AppendData(buffer, 0, read);
+        return Convert.ToHexStringLower(sha.GetHashAndReset()) == sha256.ToLowerInvariant();
+    }
+
+    /// True when the file is there with exactly this size and SHA-256.
+    public static async Task<bool> IsAsync(string file, long size, string sha256, CancellationToken ct) =>
+        File.Exists(file) && new FileInfo(file).Length == size && await Sha256Async(file, ct) == sha256.ToLowerInvariant();
+
+    /// Gets `name` from `fetch` into `destination` (through a .part file), checks size and SHA-256 and moves it in place.
+    /// A download that doesn't match is deleted and reported; up to three tries for a failed transfer.
+    public static async Task FetchAsync(string name, string destination, long size, string sha256,
+                                        Func<string, IProgress<long>, CancellationToken, Task> fetch,
+                                        IProgress<long> progress, Action<string> log, CancellationToken ct)
+    {
+        if (await IsAsync(destination, size, sha256, ct))
+        {
+            log($"{name}: already downloaded and checked");
+            progress.Report(size);
+            return;
+        }
+        var partial = destination + ".part";
+        for (int attempt = 1; ; attempt++)
+        {
+            try
+            {
+                await fetch(partial, progress, ct);
+                var length = new FileInfo(partial).Length;
+                if (length != size)
+                    throw new TransferException($"{name} came to {length} bytes, not the {size} the release says");
+                var actual = await Sha256Async(partial, ct);
+                if (actual != sha256.ToLowerInvariant())
+                {
+                    File.Delete(partial);
+                    throw new SetupException($"{name} doesn't match the release's checksum, so it was thrown away and not used. Try again; if it keeps happening, the download is being altered on the way.",
+                                             $"expected sha256 {sha256}, got {actual}");
+                }
+                Retry.Io(() => File.Move(partial, destination, overwrite: true));
+                log($"{name}: downloaded and checked ({size:N0} bytes)");
+                return;
+            }
+            catch (Exception ex) when (ex is TransferException or SetupException { InnerException: HttpRequestException and not NetworkFailure { Retriable: false } } or IOException && attempt < 3 && !ct.IsCancellationRequested)
+            {
+                log($"{name}: attempt {attempt} failed ({ex.Message}); trying again");
+                await Task.Delay(TimeSpan.FromSeconds(2 * attempt), ct);
+            }
+        }
+    }
+
+    sealed class TransferException(string message) : Exception(message);
+}
+
+static class ToolInstaller
+{
+    const string Marker = ".mcla-checked";
+    /// tools\.mcla-tools.json's neighbour: one line per unpacked tool, "name<TAB>folder<TAB>sha256 of its zip".
+    const string RecordName = ".mcla-tools.txt";
+    /// Where an update unpacks the tools it is going to switch to: a folder the build scripts do not look in (env.ps1 takes the
+    /// newest folder of tools\ that matches a tool's name), so that no build uses a new tool before the update has moved the
+    /// checkout. Activate moves a tool from here into tools\.
+    public const string StagingFolder = ".staged";
+    /// What an archive may hold: more is not a tool of this size (llvm-mingw is about 5,500 files and 900 MB unpacked).
+    const long MaxUnpackedBytes = 4L << 30;
+    const int MaxEntries = 100_000;
+
+    /// The tool was unpacked from the zip with this SHA-256 and is still there (its marker says so): nothing to
+    /// download or unpack for it again.
+    public static bool IsInstalled(string tools, string name, string sha256)
+    {
+        try
+        {
+            var file = Path.Combine(tools, RecordName);
+            if (!File.Exists(file)) return false;
+            foreach (var line in File.ReadAllLines(file))
+            {
+                var parts = line.Split('\t');
+                if (parts.Length != 3 || parts[0] != name || !string.Equals(parts[2], sha256, StringComparison.OrdinalIgnoreCase)) continue;
+                var marker = Path.Combine(tools, parts[1], Marker);
+                return File.Exists(marker) && File.ReadAllText(marker).Trim() == parts[2];
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException) { }
+        return false;
+    }
+
+    /// The tool was unpacked into tools\<folder> from the zip with this SHA-256 (its marker says so), whether or not the record names it.
+    public static bool IsUnpacked(string tools, string folder, string sha256)
+    {
+        try
+        {
+            var marker = Path.Combine(tools, folder, Marker);
+            return File.Exists(marker) && string.Equals(File.ReadAllText(marker).Trim(), sha256, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException) { return false; }
+    }
+
+    /// The tool was unpacked (by an update, not yet in use) into tools\.staged\<folder> from the zip with this SHA-256.
+    public static bool IsStaged(string tools, string folder, string sha256) => IsUnpacked(Path.Combine(tools, StagingFolder), folder, sha256);
+
+    /// Makes an unpacked tool the one the record names (the one builds use): a staged one is moved into tools\ first (a rename
+    /// within the folder; a folder of the same name that was there is set aside as a temporary one), then the record is written.
+    public static void Activate(string tools, string name, string folder, string sha256)
+    {
+        if (!IsPlainName(folder)) throw new SetupException("The record of the update names a folder that is not a plain name; it was not used.", folder);
+        var staged = Path.Combine(tools, StagingFolder, folder);
+        var final = Path.Combine(tools, folder);
+        string? aside = null;
+        if (Directory.Exists(staged))
+        {
+            if (Directory.Exists(final))
+            {
+                if (IsUnpacked(tools, folder, sha256)) SafeFolder.Delete(staged);   // already there (a record that was lost)
+                else
+                {
+                    aside = Path.Combine(tools, AsidePrefix + folder);
+                    SafeFolder.Delete(aside);
+                    Retry.Io(() => Directory.Move(final, aside));
+                }
+            }
+            try
+            {
+                if (Directory.Exists(staged)) Retry.Io(() => Directory.Move(staged, final));
+            }
+            catch
+            {
+                // The folder that was in use goes back (it may be the only copy of the tool); the new one stays staged for another try.
+                try { if (aside != null && !Directory.Exists(final) && Directory.Exists(aside)) Directory.Move(aside, final); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+                throw;
+            }
+        }
+        Record(tools, name, folder, sha256);
+    }
+
+    const string AsidePrefix = ".u-old-";
+
+    /// A tool folder that was set aside by Activate (.u-old-<folder>) and whose place is empty while the record names it: the
+    /// activation was cut short between its two renames, and the set-aside folder is the only copy. It goes back to its place.
+    public static void RestoreAside(string tools)
+    {
+        if (!Directory.Exists(tools) || ReadRecord(tools) is not { } recorded) return;
+        foreach (var dir in new DirectoryInfo(tools).EnumerateDirectories(AsidePrefix + "*"))
+        {
+            var folder = dir.Name[AsidePrefix.Length..];
+            var final = Path.Combine(tools, folder);
+            if (folder.Length > 0 && !dir.Attributes.HasFlag(FileAttributes.ReparsePoint) && !Directory.Exists(final)
+                && recorded.Values.Any(v => string.Equals(v.Folder, folder, StringComparison.OrdinalIgnoreCase)))
+            {
+                try { Retry.Io(() => Directory.Move(dir.FullName, final)); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+            }
+        }
+    }
+
+    /// A name that is one folder or file name, nothing more: what install.json may name inside tools\ and downloads\.
+    public static bool IsPlainName(string? name) =>
+        !string.IsNullOrEmpty(name) && name != "." && name != ".." && name.IndexOfAny(Path.GetInvalidFileNameChars()) < 0 && Path.GetFileName(name) == name;
+
+    /// Removes what is left in tools\.staged (tools an update unpacked and did not switch to).
+    public static void RemoveStaged(string tools) => SafeFolder.Delete(Path.Combine(tools, StagingFolder));
+
+    /// The folder the record names for each tool; null when there is no record (or it can't be read). A line that is cut short
+    /// or damaged names nothing.
+    static Dictionary<string, (string Folder, string Sha256)>? ReadRecord(string tools)
+    {
+        try
+        {
+            var file = Path.Combine(tools, RecordName);
+            if (!File.Exists(file)) return null;
+            var named = new Dictionary<string, (string, string)>(StringComparer.Ordinal);
+            foreach (var line in File.ReadAllLines(file))
+            {
+                var parts = line.Split('\t');
+                if (parts.Length == 3 && parts[0].Length > 0 && IsPlainName(parts[1]) && parts[2].Length > 0) named[parts[0]] = (parts[1], parts[2]);
+            }
+            return named.Count == 0 ? null : named;   // a file with no whole line in it is as good as none
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException) { return null; }
+    }
+
+    /// Folders in tools\ that this program unpacked (they carry the marker) and that the record replaced with another folder of the
+    /// same tool (told by the folder's name: llvm-mingw-*, cmake-*, ninja-*, mingit-*), and the temporary folders of an unpacking
+    /// that was cut short. The record is what says which folder is in use: where it is missing or damaged, or does not name the tool
+    /// at all, or names a folder that is not there whole (missing, no marker, another archive's marker), nothing of that tool is
+    /// superseded, so the tools in use are never deleted on account of a record that is lost or wrong. A set-aside folder that is
+    /// the only copy of a recorded tool is not listed either (RestoreAside puts it back).
+    public static List<string> Superseded(string tools)
+    {
+        var result = new List<string>();
+        if (!Directory.Exists(tools)) return result;
+        var recorded = ReadRecord(tools);
+        foreach (var dir in new DirectoryInfo(tools).EnumerateDirectories())
+        {
+            if (dir.Attributes.HasFlag(FileAttributes.ReparsePoint)) continue;
+            if (dir.Name.StartsWith(AsidePrefix, StringComparison.Ordinal))
+            {
+                // A folder set aside by an activation can be the only copy of a tool: with no record to say it is not, it stays.
+                if (recorded == null) continue;
+                var original = dir.Name[AsidePrefix.Length..];
+                var onlyCopy = !Directory.Exists(Path.Combine(tools, original))
+                               && recorded.Values.Any(v => string.Equals(v.Folder, original, StringComparison.OrdinalIgnoreCase));
+                if (!onlyCopy) result.Add(dir.FullName);
+                continue;
+            }
+            // The temporary folder of an unpacking (.u-<tool>) is never in use.
+            if (dir.Name.StartsWith(".u-", StringComparison.Ordinal))
+            {
+                if (ReleaseInfo.RequiredTools.Contains(dir.Name[3..], StringComparer.Ordinal)) result.Add(dir.FullName);
+                continue;
+            }
+            if (recorded == null || !File.Exists(Path.Combine(dir.FullName, Marker))) continue;
+            foreach (var tool in ReleaseInfo.RequiredTools)
+                if (dir.Name.StartsWith(tool + "-", StringComparison.OrdinalIgnoreCase)
+                    && recorded.TryGetValue(tool, out var inUse) && !string.Equals(inUse.Folder, dir.Name, StringComparison.OrdinalIgnoreCase)
+                    && IsUnpacked(tools, inUse.Folder, inUse.Sha256))
+                    result.Add(dir.FullName);
+        }
+        return result;
+    }
+
+    /// The folder a tool was unpacked into, from the record (null when there is none).
+    public static string? FolderOf(string tools, string name)
+    {
+        try
+        {
+            var file = Path.Combine(tools, RecordName);
+            if (!File.Exists(file)) return null;
+            foreach (var line in File.ReadAllLines(file))
+            {
+                var parts = line.Split('\t');
+                if (parts.Length == 3 && parts[0] == name) return Path.Combine(tools, parts[1]);
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException) { }
+        return null;
+    }
+
+    static void Record(string tools, string name, string folder, string sha256)
+    {
+        var file = Path.Combine(tools, RecordName);
+        var lines = File.Exists(file)
+            ? File.ReadAllLines(file).Where(l => l.Split('\t').Length == 3 && !l.StartsWith(name + "\t", StringComparison.Ordinal)).ToList()
+            : [];
+        lines.Add($"{name}\t{folder}\t{sha256}");
+        // Written beside and renamed over, so that a stop in the middle leaves the old record whole.
+        var temp = file + ".tmp";
+        Retry.Io(() =>
+        {
+            File.WriteAllLines(temp, lines);
+            File.Move(temp, file, overwrite: true);
+        });
+    }
+
+    static readonly HashSet<string> DeviceNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$",
+        "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+        "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+    };
+
+    /// A name in an archive that Windows would treat as something other than a plain file or folder: an alternate
+    /// data stream (a colon), a device (CON, NUL, COM1...), a trailing dot or space (dropped by Windows, so two names
+    /// could become one), or a control character.
+    internal static bool IsOddName(string entryName)
+    {
+        if (entryName.Contains(':') || entryName.Any(c => c < ' ' || c is '<' or '>' or '"' or '|' or '?' or '*')) return true;
+        foreach (var segment in entryName.Replace('\\', '/').Split('/'))
+        {
+            if (segment.Length == 0) continue;
+            if (segment.EndsWith('.') && segment != "." && segment != ".." || segment.EndsWith(' ')) return true;
+            var stem = segment.Contains('.') ? segment[..segment.IndexOf('.')] : segment;
+            if (DeviceNames.Contains(stem.TrimEnd())) return true;
+        }
+        return false;
+    }
+
+    /// Unpacks a tool's zip into tools\, next to its final place and moved there only when complete, so that an
+    /// interrupted run leaves no half-unpacked tool that looks installed. A zip with one top folder (llvm-mingw,
+    /// CMake) keeps its name; one without (Ninja, MinGit) goes in tools\<name>-<version>. The marker holds the zip's
+    /// SHA-256: a tool already unpacked from this zip is left alone. Returns the folder.
+    public static async Task<string> InstallAsync(string tools, string name, string version, string zipFile, string sha256,
+                                                  Action<string> log, IProgress<(int Done, int Total)> progress, CancellationToken ct, bool record = true)
+    {
+        Directory.CreateDirectory(tools);
+        string topFolder;
+        bool singleTop;
+        int total;
+        using (var zip = ZipFile.OpenRead(zipFile))
+        {
+            var top = zip.Entries.Select(e => e.FullName.Replace('\\', '/').Split('/')[0]).Distinct().ToList();
+            var hasLoose = zip.Entries.Any(e => !e.FullName.Replace('\\', '/').Contains('/') && e.Name.Length > 0);
+            singleTop = top.Count == 1 && !hasLoose;
+            topFolder = singleTop ? top[0] : $"{name}-{version}";
+            total = zip.Entries.Count;
+            if (total > MaxEntries || zip.Entries.Sum(e => e.Length) > MaxUnpackedBytes)
+                throw new SetupException($"{name}'s archive is far bigger than a tool should be; it was not unpacked.", $"{total} entries, {zip.Entries.Sum(e => e.Length)} bytes");
+        }
+        if (topFolder.Contains("..") || Path.IsPathRooted(topFolder) || topFolder.Length == 0)
+            throw new SetupException($"{name}'s archive has a name that can't be used.");
+        // An update's tools are unpacked into tools\.staged and moved into place by Activate; a setup's go straight into tools\.
+        var final = record ? Path.Combine(tools, topFolder) : Path.Combine(tools, StagingFolder, topFolder);
+        Directory.CreateDirectory(Path.GetDirectoryName(final)!);
+        var marker = Path.Combine(final, Marker);
+        if (File.Exists(marker) && File.ReadAllText(marker).Trim() == sha256)
+        {
+            log($"{name}: already unpacked");
+            progress.Report((total, total));
+            if (record) Record(tools, name, topFolder, sha256);
+            return final;
+        }
+
+        var temp = Path.Combine(tools, $".u-{name}");
+        SafeFolder.Delete(temp);
+        Directory.CreateDirectory(temp);
+        var wrapped = !singleTop;
+        var target = wrapped ? Path.Combine(temp, topFolder) : temp;
+        Directory.CreateDirectory(target);
+        var fullTarget = Path.GetFullPath(target).TrimEnd('\\') + "\\";
+        int done = 0;
+        await Task.Run(() =>
+        {
+            using var zip = ZipFile.OpenRead(zipFile);
+            foreach (var entry in zip.Entries)
+            {
+                ct.ThrowIfCancellationRequested();
+                if (IsOddName(entry.FullName))
+                    throw new SetupException($"{name}'s archive has a file name Windows would treat as something else ({entry.FullName}); it was not unpacked.");
+                var destination = Path.GetFullPath(Path.Combine(target, entry.FullName.Replace('/', '\\')));
+                // Nothing leaves the folder it is unpacked into.
+                if (!destination.StartsWith(fullTarget, StringComparison.OrdinalIgnoreCase) && destination.TrimEnd('\\') != fullTarget.TrimEnd('\\'))
+                    throw new SetupException($"{name}'s archive tries to write outside its folder ({entry.FullName}); it was not unpacked.");
+                if (entry.Name.Length == 0)
+                {
+                    Directory.CreateDirectory(destination);
+                }
+                else
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                    entry.ExtractToFile(destination, overwrite: true);
+                }
+                if (++done % 200 == 0) progress.Report((done, total));
+            }
+        }, ct);
+        progress.Report((total, total));
+
+        var unpacked = wrapped ? target : Path.Combine(temp, topFolder);
+        File.WriteAllText(Path.Combine(unpacked, Marker), sha256 + "\n");
+        SafeFolder.Delete(final);
+        Retry.Io(() => Directory.Move(unpacked, final));
+        SafeFolder.Delete(temp);
+        if (record) Record(tools, name, topFolder, sha256);
+        log($"{name}: unpacked into {final}");
+        return final;
+    }
+}

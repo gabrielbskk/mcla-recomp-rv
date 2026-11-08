@@ -1,0 +1,106 @@
+diff --git a/include/rex/platform/dynlib.h b/include/rex/platform/dynlib.h
+index 9349d42..323273c 100644
+--- a/include/rex/platform/dynlib.h
++++ b/include/rex/platform/dynlib.h
+@@ -36,6 +36,11 @@ class DynamicLibrary {
+   // loads it; returns false if it is not loaded. The handle is released by
+   // Close(), like one from Load().
+   bool Attach(const std::filesystem::path& path, SymbolResolution mode = SymbolResolution::kLazy);
++  // Takes ownership of a handle opened by a platform-specific loader.
++  void Adopt(void* handle) {
++    Close();
++    handle_ = handle;
++  }
+   void Close();
+   explicit operator bool() const { return handle_ != nullptr; }
+ 
+diff --git a/src/ui/vulkan/vulkan_instance.cpp b/src/ui/vulkan/vulkan_instance.cpp
+index bb00582..dda8542 100644
+--- a/src/ui/vulkan/vulkan_instance.cpp
++++ b/src/ui/vulkan/vulkan_instance.cpp
+@@ -16,11 +16,16 @@
+ #include <vector>
+ 
+ #include <rex/cvar.h>
++#include <rex/filesystem.h>
+ #include <rex/logging.h>
+ #include <rex/platform.h>
+ #include <rex/ui/vulkan/instance.h>
+ #include <rex/ui/vulkan/presenter.h>
+ 
++#if REX_PLATFORM_ANDROID
++#include <dlfcn.h>
++#endif
++
+ #if REX_PLATFORM_MAC
+ #include "vulkan_moltenvk.h"
+ #endif
+@@ -40,6 +45,50 @@ namespace rex {
+ namespace ui {
+ namespace vulkan {
+ 
++#if REX_PLATFORM_ANDROID
++static void* OpenSelectedAndroidDriver() {
++  const std::filesystem::path driver_dir = rex::filesystem::GetUserFolder() / "gpu-drivers";
++  if (!std::filesystem::exists(driver_dir / "selected.txt")) {
++    return nullptr;
++  }
++  const std::filesystem::path driver = driver_dir / "libvulkan_freedreno.so";
++  if (!std::filesystem::is_regular_file(driver)) {
++    REXLOG_WARN("Selected Turnip driver is missing; using system Vulkan");
++    return nullptr;
++  }
++  Dl_info self_info{};
++  if (!dladdr(reinterpret_cast<void*>(&OpenSelectedAndroidDriver), &self_info) ||
++      !self_info.dli_fname) {
++    REXLOG_WARN("Cannot locate Android Vulkan hook libraries; using system Vulkan");
++    return nullptr;
++  }
++  const std::filesystem::path hook_dir = std::filesystem::path(self_info.dli_fname).parent_path();
++  void* tools_lib = dlopen("libadrenotools.so", RTLD_NOW | RTLD_LOCAL);
++  if (!tools_lib) {
++    REXLOG_WARN("Cannot load AdrenoTools: {}; using system Vulkan", dlerror());
++    return nullptr;
++  }
++  using OpenFn = void* (*)(int, int, const char*, const char*, const char*, const char*,
++                            const char*, void**);
++  auto open = reinterpret_cast<OpenFn>(dlsym(tools_lib, "adrenotools_open_libvulkan"));
++  if (!open) {
++    REXLOG_WARN("AdrenoTools Vulkan entry point missing; using system Vulkan");
++    return nullptr;
++  }
++  constexpr int kCustomDriver = 1;
++  const std::string hook_path = hook_dir.string();
++  const std::string driver_path = driver_dir.string() + "/";
++  void* handle = open(RTLD_NOW, kCustomDriver, nullptr, hook_path.c_str(),
++                      driver_path.c_str(), "libvulkan_freedreno.so", nullptr, nullptr);
++  if (handle) {
++    REXLOG_INFO("AdrenoTools opened Vulkan for selected Turnip from {}; verify GPU name", driver.string());
++  } else {
++    REXLOG_WARN("AdrenoTools rejected selected driver; using system Vulkan");
++  }
++  return handle;
++}
++#endif
++
+ std::unique_ptr<VulkanInstance> VulkanInstance::Create(const bool with_surface,
+                                                        const bool try_enable_validation) {
+   std::unique_ptr<VulkanInstance> vulkan_instance(new VulkanInstance());
+@@ -98,6 +147,17 @@ std::unique_ptr<VulkanInstance> VulkanInstance::Create(const bool with_surface,
+   // one exists.
+   ifn.vkDestroyInstance =
+       PFN_vkDestroyInstance(ifn.vkGetInstanceProcAddr(nullptr, "vkDestroyInstance"));
++#elif REX_PLATFORM_ANDROID
++  if (void* custom_loader = OpenSelectedAndroidDriver()) {
++    vulkan_instance->loader_.Adopt(custom_loader);
++    loader_loaded = true;
++  } else {
++    loader_loaded = vulkan_instance->loader_.Load(platform::lib_names::kVulkanLoader);
++  }
++  if (!loader_loaded) {
++    REXLOG_ERROR("Failed to load Android Vulkan");
++    return nullptr;
++  }
+ #else
+   loader_loaded = vulkan_instance->loader_.Load(platform::lib_names::kVulkanLoader);
+   if (!loader_loaded) {

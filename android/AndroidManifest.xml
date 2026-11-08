@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.mcla.recomp"
+    android:versionCode="1"
+    android:versionName="0.1.0"
+    android:installLocation="auto">
+    <uses-feature android:glEsVersion="0x00020000" android:required="false" />
+    <uses-feature android:name="android.hardware.gamepad" android:required="false" />
+    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <application
+        android:label="MCLA Recomp"
+        android:appCategory="game"
+        android:allowBackup="false"
+        android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen"
+        android:hardwareAccelerated="true">
+        <activity
+            android:name="org.mcla.recomp.MclaActivity"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation|uiMode"
+            android:exported="false" />
+        <activity
+            android:name="org.mcla.recomp.MclaLauncherActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

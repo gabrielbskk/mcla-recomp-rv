@@ -1,0 +1,105 @@
+# Template (coverage.py soak expands it; the plain dev pad can't): boot -> the city -> pause menu,
+# Modes, Arcade -> a race of a kind, with the options set -> its loading, intro and RACEFRAMES
+# frames of the race. Segments: title, map_zoom, menu, race_intro, race, race_end.
+#
+# Variables (--var NAME=VALUE): the menu positions are counted in presses from the defaults.
+#@default KIND=0        # race type: 0 Ordered, 1 Circuit, 2 Landmark (presses of down)
+#@default RACE=0        # race of the list (presses of down; the first is Sunset and Vine)
+#@default OPP=0         # Number of opponents 3 -> presses of right (up to 7 or so)
+#@default DIFF=0        # Difficulty: presses of right (Medium -> Hard); DIFFEASY=1 presses left
+#@default DIFFEASY=0
+#@default POWER=0       # Power ups: presses of right (Off -> On)
+#@default TRAFFIC=0     # Traffic: presses of right: Normal, None, Low (Normal again after three)
+#@default WEATHER=0     # Weather: presses of right: Dynamic, Clear, Partly cloudy, Cloudy, Rainy
+#@default TIME=0        # Time of day: presses of right: Dynamic, Midnight, Dawn, Noon, Dusk
+#@default ROUTE=none    # a route for follow (file name beside the script), or none
+#@default SPEED=0.85    # follow's speed against the route's (the leader's): slower, fewer crashes
+#@default WATCH=0       # watch <every updates>: every car's position in the log, for route.py
+#@default RACEFRAMES=1800   # frames of the race in all, from its start (with a route: its length)
+#@default LBSPAM=0      # presses of LB (special ability) 5 s apart, from the race's start
+#@default MAP=0         # 1: the overhead map (d-pad up) for 4 s, then back
+#@default AUTOCONT=1    # 0: no autocontinue (to look at a dialog)
+#@default PAUSESHOT=0   # 1: the pause menu in the race, its items (development)
+#@default FINDTEST=0    # 1: with the world frozen, where else the player's position and velocity are in memory (development)
+#@default PAUSETEST=0   # 1: open the pause menu 5 s into the race: the world stops, and A (autocontinue) must close it
+#@default DUMPS=0       # 1: two dumps of the player's vehicle object 30 frames apart, 600 frames in (development)
+#@default PEEKN=0       # PEEKN lines in the log, PEEKEVERY frames apart: the race timer, the game state, the cars
+#@default PEEKEVERY=300
+#@default SHOTN=0       # SHOTN screenshots of the race, SHOTEVERY frames apart (before RACEFRAMES)
+#@default SHOTEVERY=300
+#@default TOUR=0        # 1: press the car's buttons in the first 25 s of the race (nitro, camera view,
+#                         headlights, special ability, handbrake, weight transfer, horn)
+#
+# The menus move in real time and animate per update: each wait is a time and a number of
+# updates (see boot-to-race.pad).
+wait 8s
+mark title
+press_until start left_title every=2s timeout=90s
+mark map_zoom
+wait_until roam 180s
+mark menu
+wait 1s 60f
+press start 4f
+wait 1500ms 90f
+press rb 4f
+wait 1000ms 60f
+press a 4f
+wait 2500ms 150f
+@repeat {KIND}: press down 4f ; wait 600ms 36f
+press a 4f
+wait 1500ms 90f
+@repeat {RACE}: press down 4f ; wait 600ms 36f
+press a 4f
+wait 1500ms 90f
+# The race options: opponents, difficulty, power ups, traffic, weather, time of day.
+@repeat {OPP}: press right 4f ; wait 300ms 18f
+press down 4f
+wait 300ms 18f
+@repeat {DIFF}: press right 4f ; wait 300ms 18f
+@repeat {DIFFEASY}: press left 4f ; wait 300ms 18f
+press down 4f
+wait 300ms 18f
+@repeat {POWER}: press right 4f ; wait 300ms 18f
+# Power ups on: "You will not earn REP or money with power ups enabled" (OK).
+@if {POWER}: wait 1000ms 60f ; press a 4f ; wait 1000ms 60f
+press down 4f
+wait 300ms 18f
+@repeat {TRAFFIC}: press right 4f ; wait 300ms 18f
+press down 4f
+wait 300ms 18f
+@repeat {WEATHER}: press right 4f ; wait 300ms 18f
+press down 4f
+wait 300ms 18f
+@repeat {TIME}: press right 4f ; wait 300ms 18f
+wait 800ms 48f
+shot {SHOTS}/options.png 0.5
+# Start race: the game state is 3 (loading) until the race is ready.
+press a 4f
+wait_until roam 90s
+mark race_intro
+shot {SHOTS}/intro.png 0.5
+@if {ROUTE}: follow {ROUTE} speed={SPEED}
+@if {WATCH}: watch {WATCH}
+# A tip over the race ("SLIP STREAM TURBO ... CONTINUE (A)") stops the whole world: press A for it.
+# (follow does the same itself)
+@if {AUTOCONT}: autocontinue on
+trigger rt 1
+# The race's own timer runs from its loading; its start is about 9.3 s on it.
+wait_until f32 0x827D7510 >= 9.3 300s
+mark race
+shot {SHOTS}/race-start.png 0.5
+@if {TOUR}: wait 240f ; down x ; wait 150f ; up x ; wait 60f ; press rb 8f ; wait 150f ; press rb 8f ; wait 150f ; press rb 8f ; wait 150f ; press rb 8f ; wait 150f ; press y 8f ; wait 120f ; press y 8f ; wait 60f ; press lb 8f ; wait 200f ; press a 120f ; wait 120f ; press b 120f ; wait 120f ; press rs 60f ; wait 120f ; down x ; wait 200f ; up x
+@if {MAP}: wait 300f ; press up 10f ; wait 240f ; press up 10f ; wait 120f
+@repeat {LBSPAM}: press lb 10f ; wait 290f
+@if {PAUSESHOT}: wait 600f ; press start 4f ; wait 120f ; shot {SHOTS}/pause1.png 0.5 ; press down 4f ; wait 40f ; shot {SHOTS}/pause2.png 0.5 ; press down 4f ; wait 40f ; shot {SHOTS}/pause3.png 0.5 ; press down 4f ; wait 40f ; shot {SHOTS}/pause4.png 0.5 ; press b 4f ; wait 60f
+@if {FINDTEST}: wait 600f ; set mcla_freeze true ; wait 30f ; findvec [0x8288DCF8]+0x2A0 3 0.05 ; findvec [0x8288DCF8]+0x80 3 0.05 ; set mcla_freeze false
+@if {PAUSETEST}: wait 300f ; press start 4f ; wait 400f ; shot {SHOTS}/after-pause.png 0.5 ; wait 300f ; shot {SHOTS}/after-pause2.png 0.5
+@if {DUMPS}: wait 600f ; dump [0x8288DCF8] 4096 {SHOTS}/veh1.bin ; wait 30f ; dump [0x8288DCF8] 4096 {SHOTS}/veh2.bin ; wait 300f ; dump [0x8288DCF8] 4096 {SHOTS}/veh3.bin
+@repeat {PEEKN}: wait {PEEKEVERY}f ; peekf 0x827D7510 ; peeku 0x8288D000 ; cars
+@repeat {SHOTN}: wait {SHOTEVERY}f ; shot {SHOTS}/race{I}.png 0.4
+wait {REMAINING}f
+shot {SHOTS}/race-end.png 0.5
+mark race_end
+@if {ROUTE}: follow status ; follow stop
+@if {WATCH}: watch stop
+autocontinue off

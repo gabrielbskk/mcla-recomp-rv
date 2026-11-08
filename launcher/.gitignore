@@ -1,0 +1,13 @@
+# built output and per-machine state
+app/
+logs/
+src/bin/
+src/obj/
+settings.json
+built-commit.txt
+build-options.json
+__pycache__/
+dev/**/bin/
+dev/**/obj/
+installer/bin/
+installer/obj/
