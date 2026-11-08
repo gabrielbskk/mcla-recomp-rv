@@ -11,7 +11,7 @@ Esta build experimental usa os arquivos extraídos de uma cópia própria de *Mi
 
 O próprio seletor do Android concede ao app leitura da pasta escolhida; não é preciso autorizar acesso geral ao armazenamento. Confirme a seleção quando o Android pedir. Se o acesso for negado, o launcher mostrará uma mensagem e permitirá escolher a pasta novamente. Em Android 11 ou superior, escolha a subpasta `MCLA-extraido`, pois o seletor não permite conceder a raiz `Download`.
 
-Os 13 arquivos precisam estar **diretamente** dentro da pasta selecionada, sem uma subpasta intermediária: `default.xex`, os quatro `xarchive_*.rpf`, os seis vídeos `.bik`, `nxeart` e `root_directory_padding.pad`. O launcher confere todos eles antes de iniciar o jogo, inclusive após uma cópia interrompida. Um `.zip` ou `.iso` fechado não serve no seletor.
+Os 13 arquivos precisam estar **diretamente** dentro da pasta selecionada, sem uma subpasta intermediária: `default.xex`, os quatro `xarchive_*.rpf`, os seis vídeos `.bik`, `nxeart` e `root_directory_padding.pad`. O launcher confere a presença e o tamanho não nulo de cada arquivo, inclusive após uma cópia interrompida. **Ele ainda não confere hashes**: um arquivo danificado pode passar nessa checagem e causar erro depois. Um `.zip` ou `.iso` fechado não serve no seletor.
 
 ## Cópia direta com root
 
@@ -32,6 +32,8 @@ Neste aparelho de desenvolvimento, a pasta pronta está em `/storage/emulated/0/
 ## Driver Vulkan opcional
 
 O padrão é o driver Vulkan do sistema. No launcher, toque em **Select Turnip (.zip)**, escolha um pacote para ARM64 que contenha `libvulkan_freedreno.so` e espere a mensagem de importação; depois toque em **Play**. O seletor Android concede acesso apenas ao ZIP escolhido, e o driver é copiado para `files/gpu-drivers/` antes de ser carregado. **Use system driver** desativa a seleção Turnip sem apagar o ZIP original. O launcher aparece em toda abertura, inclusive se o jogo falhar ao carregar um driver experimental.
+
+O ZIP selecionado contém uma biblioteca nativa que será executada dentro do aplicativo. O importador confere o formato ELF ARM64 e limita o tamanho, mas isso não prova que o código do driver seja confiável. Importe somente pacotes de origem em que você confia.
 
 O Turnip depende da GPU Adreno, da versão do Android, do kernel e da versão do pacote. Uma combinação incompatível pode causar tela preta, erro Vulkan ou pior desempenho. O carregador tenta voltar ao driver do sistema quando o AdrenoTools não consegue abrir o Turnip; caso a falha ocorra depois disso, reabra o app e selecione **Use system driver**. Confira em `files/logs/mcla_*.log` a linha `AdrenoTools opened Vulkan for selected Turnip` e, sobretudo, a linha `Vulkan device` com o nome da GPU/driver realmente usado. `AdrenoTools rejected selected driver` indica que houve fallback.
 
