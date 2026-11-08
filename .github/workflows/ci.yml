@@ -1,144 +1,86 @@
-name: CI
-
-# In this Android port repository, the inherited Windows checks run only when
-# requested manually. They do not validate the Android APK. The SDK build is
-# cached for the next manual run. See scripts/ci/README.md for coverage.
+name: Android CI
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
-# Read-only, and no secrets are used by any job: a pull request from a fork runs the same.
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: android-ci-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  DOTNET_NOLOGO: "1"
-  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
-
 jobs:
-  checks:
-    name: Scripts, pins and patches
-    runs-on: windows-2025
-    timeout-minutes: 15
+  repository:
+    name: Repository checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: The pins agree, every patch is applied, no game data is tracked
-        run: python -I scripts/ci/check_pins.py
+      - name: Check pins, patches, links to game data, and Python syntax
+        run: python3 -I scripts/ci/check_pins.py
 
-      - name: The PowerShell scripts parse (Windows PowerShell 5.1)
-        shell: powershell
-        run: .\scripts\ci\check-powershell.ps1
+      - name: Check shell syntax
+        run: sh -n scripts/ci/host_compile_android.sh scripts/build_android_apk.sh scripts/build_adrenotools_android.sh
 
-  host:
-    name: Host code against the SDK (llvm-mingw)
-    runs-on: windows-2025
-    timeout-minutes: 60
+  android-sdk-and-host:
+    name: Android SDK and host stub
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      ANDROID_NDK_VERSION: 27.2.12479018
+      ANDROID_PLATFORM: android-35
+      SDK_COMMIT: f5337cdc947ff6d4c4196737e2c807a48f2a1fc2
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      # The SDK build is the long part (patched ReXGlue SDK, built with the pinned llvm-mingw). It
-      # depends on nothing but the patches and the scripts that apply and build them, so it is
-      # cached under their hash. A restored one is still checked against the patches
-      # (mcla-sdk-bundle.json) before it is used.
-      - name: Restore the SDK build
-        id: sdk-cache
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: third_party/rexglue-sdk/out/install/win-amd64-mingw
-          key: sdk-mingw-1-${{ hashFiles('patches/**', 'scripts/make_pc.ps1', 'scripts/mcla-lib.ps1', 'scripts/env.ps1') }}
-
-      - name: Build the SDK (llvm-mingw, no game needed)
-        if: steps.sdk-cache.outputs.cache-hit != 'true'
-        shell: powershell
-        run: .\scripts\make_pc.ps1 -Toolchain mingw -InstallTools -Until sdk
-
-      - name: Check the cached SDK against the patches
-        if: steps.sdk-cache.outputs.cache-hit == 'true'
-        shell: powershell
-        run: .\scripts\make_pc.ps1 -Toolchain mingw -InstallTools -SdkBundle third_party\rexglue-sdk\out\install\win-amd64-mingw -Until sdk
-
-      - name: Save the SDK build
-        if: steps.sdk-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: third_party/rexglue-sdk/out/install/win-amd64-mingw
-          key: ${{ steps.sdk-cache.outputs.cache-primary-key }}
-
-      # The host sources (src/*.cpp) are compiled with the project's own flags (CMakeLists.txt), against
-      # the SDK just built, with stand-ins for the headers `rexglue codegen` writes from the game
-      # (scripts/ci/host_stub.py). Syntax and types only (-fsyntax-only): the game's recompiled code,
-      # linking and running need the player's game.
-      - name: Compile the host sources
-        shell: powershell
-        run: .\scripts\ci\host-compile.ps1 -SdkDir third_party\rexglue-sdk\out\install\win-amd64-mingw
-
-      # The MXCSR options of the code generator (patches/rexglue-codegen-csr-lazy.patch): each instruction that
-      # stops asking for a flush mode is run in both modes and all four rounding modes and must give the same bits;
-      # the instructions that keep asking must differ (so the test can tell); the cheap switch is compared with the
-      # old calls. Compiled with the SDK just built, run on the runner's CPU (about half a minute).
-      - name: MXCSR exactness test
-        shell: powershell
-        run: .\scripts\ci\csr-exact.ps1 -SdkDir third_party\rexglue-sdk\out\install\win-amd64-mingw -Threads 4
-
-  launcher:
-    name: Launcher (self-contained publish)
-    runs-on: windows-2025
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          # The launcher's source commit is the last one that touched it.
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Publish the launcher, with its notices
-        shell: powershell
-        run: .\scripts\ci\publish-launcher.ps1 -Out "$env:RUNNER_TEMP\launcher"
-
-      # MCLA-Setup.exe as a release makes it (the NativeAOT installer program with the launcher folder as its
-      # payload, unpacked again and compared, its header read back from the file by the release's own reader,
-      # scripts/ci/check-installer.py), then used as a player's PC would, on scratch folders.
-      - name: Build MCLA-Setup.exe
-        shell: powershell
-        env:
-          COMMIT: ${{ github.sha }}
-        run: .\scripts\ci\build-installer.ps1 -LauncherDir "$env:RUNNER_TEMP\launcher" -Out "$env:RUNNER_TEMP\setup" -StubOut "$env:RUNNER_TEMP\stub\MCLA-Setup.exe" -Tag draft-ci -Commit $env:COMMIT
-
-      - name: Try MCLA-Setup.exe
-        shell: powershell
-        run: .\scripts\ci\smoke-installer.ps1 -Exe "$env:RUNNER_TEMP\setup\MCLA-Setup.exe"
-
-      # The network code the launcher and the setup wizard share (launcher\src\Net.cs): the connect logic (IPv6
-      # black-holed, IPv4 working: IPv4 wins after 250 ms), the messages that name the stage that failed, and the
-      # routes for release.json (the direct address, one more try, GitHub's API). Local servers only.
-      - name: Network checks
-        shell: powershell
+      - name: Install Android SDK components
+        shell: bash
         run: |
-          dotnet run --project launcher\dev\net-check -c Release
-          if ($LASTEXITCODE -ne 0) { exit 1 }
+          set -euo pipefail
+          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$sdkmanager" ]; then
+            sdkmanager="$(command -v sdkmanager)"
+          fi
+          yes | "$sdkmanager" --licenses >/dev/null || true
+          "$sdkmanager" "platforms;$ANDROID_PLATFORM" "ndk;$ANDROID_NDK_VERSION"
 
-      # The self-update pieces: the folder swap, the verified download, and the real installer with fake
-      # launchers (update that waits for the old one, the way back, a damaged file, a held file, ...).
-      - name: Self-update checks
-        shell: powershell
+      - name: Clone the pinned ReXGlue SDK and apply Android patches
+        shell: bash
         run: |
-          dotnet run --project launcher\dev\update-check -c Release -- all "$env:RUNNER_TEMP\stub\MCLA-Setup.exe"
-          if ($LASTEXITCODE -ne 0) { exit 1 }
+          set -euo pipefail
+          sdk="$RUNNER_TEMP/rexglue-sdk"
+          git clone --recursive https://github.com/rexglue/rexglue-sdk.git "$sdk"
+          git -C "$sdk" checkout "$SDK_COMMIT"
+          git -C "$sdk" submodule update --init --recursive
+          for patch in rexglue-android-arm64.patch rexglue-turnip-loader.patch rexglue-driver-cache-path.patch; do
+            git -C "$sdk" apply "$GITHUB_WORKSPACE/patches/$patch"
+          done
 
-      # What the launcher and the setup say when Windows refuses to start mcla.exe (Smart App Control or an
-      # administrator's policy, Win32 error 4551 or 1260; launcher\src\AppControl.cs): the codes are made up,
-      # the real block can't be made on a runner. Also that a start that fails for another reason isn't taken for it.
-      - name: Game start error checks
-        shell: powershell
+      - name: Build and install the patched SDK for arm64-v8a
+        shell: bash
         run: |
-          dotnet run --project launcher\dev\wizard-check -c Release -- app-control "$env:RUNNER_TEMP\app-control"
-          if ($LASTEXITCODE -ne 0) { exit 1 }
+          set -euo pipefail
+          sdk="$RUNNER_TEMP/rexglue-sdk"
+          ndk="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
+          cmake -S "$sdk" -B "$sdk/out/build/android-arm64" -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="$ndk/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI=arm64-v8a \
+            -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DREXGLUE_USE_VULKAN=ON \
+            -DREXGLUE_USE_D3D12=OFF \
+            -DREXGLUE_ENABLE_FSR=OFF \
+            -DCMAKE_INSTALL_PREFIX="$sdk/out/install/android-arm64"
+          cmake --build "$sdk/out/build/android-arm64" --parallel
+          cmake --install "$sdk/out/build/android-arm64"
+
+      - name: Compile host sources with generated-header stand-ins
+        run: scripts/ci/host_compile_android.sh "$RUNNER_TEMP/rexglue-sdk/out/install/android-arm64"
