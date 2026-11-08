@@ -2,7 +2,7 @@
 
 # MCLA Recomp RV
 
-**Port comunitário experimental para Android ARM64.** Código C++23 recompilado, janela e áudio via SDL3, gráficos Vulkan. O jogo chegou à rua com HUD em um realme RMX5070 / Adreno 740. Ainda faltam testes e otimização de desempenho.
+**Port comunitário experimental para Android ARM64.** Código C++23 recompilado, janela e áudio via SDL3, gráficos Vulkan. O jogo chegou à rua com HUD em um Samsung Galaxy S23, 8 GB de RAM e 256 GB de armazenamento. Ainda faltam testes e otimização de desempenho.
 
 | Comece aqui | O que encontrar |
 | --- | --- |
