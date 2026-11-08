@@ -23,6 +23,12 @@ scripts/build_android_apk.sh
 
 The packager takes `libmain.so` from `out/build/mcla-android-arm64/` and `librexgpu-xenos.so`, `librexruntime.so`, and `libSDL3.so` from the installed SDK. Reinstall the SDK after changing its source so the APK cannot silently use an older GPU plugin copied into the main build directory.
 
+## Signing and versioning
+
+The packaging script keeps the debug signing key outside the repository by default at `$PREFIX/share/mcla-recomp/android-debug.keystore` in Termux. Set `MCLA_KEYSTORE_PATH` to choose another fixed path. For compatibility with the first local APK, an existing `out/android-arm64/debug.keystore` is used when no external key exists and `MCLA_KEYSTORE_PATH` is unset; future builds should migrate to the external path. Set `MCLA_KEY_ALIAS`, `MCLA_KEYSTORE_PASSWORD`, and `MCLA_KEY_PASSWORD` when using a non-default key.
+
+Without `MCLA_VERSION_CODE`, the script increments a counter outside the repository at `$PREFIX/share/mcla-recomp/version-code`. The default version name is `0.1.<versionCode>`. `MCLA_VERSION_CODE`, `MCLA_VERSION_NAME`, and `MCLA_VERSION_STATE_FILE` override this behavior for a reproducible or release build. The counter is written only after packaging, signature verification and ZIP alignment succeed. This task changes the script and documentation only; no APK was generated.
+
 ## Recreate the native build directories
 
 Use the exact SDK commit above. Clone the SDK and its submodules if the checkout does not exist. Apply these patches in order to a clean SDK checkout:
