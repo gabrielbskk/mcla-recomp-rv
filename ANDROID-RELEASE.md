@@ -4,7 +4,7 @@ This release contains the **same APK** delivered locally on 2026-11-08, not a ne
 
 Expected asset name: `MCLA-Recomp-arm64.apk` (about 105 MiB). SHA-256: `94b5fc1ac47556efa790b858099ed96226fff9f15c5826de44133854a519de3e`.
 
-The package contains `libmain.so`, which is generated from the game's executable. Unlike the source repository, the APK therefore contains generated game code. The APK can be downloaded, extracted, copied and redistributed by anyone with access to a public release; its checksum and signature identify this exact build but do not prevent copying or impersonation elsewhere. It contains no ISO, extracted game assets, save files, Turnip driver ZIP, personal credentials, or private debug signing key.
+The package contains `libmain.so`, which is generated from the game's executable. Unlike the source repository, the APK therefore contains generated game code. It contains no ISO, extracted game assets, save files, Turnip driver ZIP, personal credentials, or private debug signing key. The proposed source-only publication would remove this APK asset and keep the repository with its code, notices and reproducible build recipe; that release change requires explicit approval before the current asset is removed.
 
 The last installed candidates reached gameplay on a realme RMX5070 / Adreno 740. The **exact release APK was not installed or played** after the final per-driver Vulkan cache and log-export name changes. It passed build, ELF64 AArch64 and 16 KiB LOAD-alignment checks, ZIP alignment and APK signature checks. A device with 16 KiB memory pages has not been tested.
 

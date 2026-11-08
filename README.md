@@ -24,7 +24,7 @@ O repositório parte de [holdmysocks/mcla-recomp](https://github.com/holdmysocks
 | Desempenho | FPS baixo e alguns engasgos; a GPU sofreu limitação térmica. |
 | Último APK publicado | Compilado e verificado; **essa versão exata não passou por novo teste de gameplay**. |
 
-Cada pessoa precisa fornecer sua própria cópia de *Midnight Club: Los Angeles Complete Edition* para Xbox 360. O código fonte não inclui ISO, assets, saves, chaves, driver Turnip nem código recompilado gerado localmente. O shader pack pré-gerado do fork base foi removido desta publicação por conter dados derivados do jogo. O APK da release não inclui os 13 arquivos do disco, mas contém `libmain.so` gerada a partir do executável; qualquer pessoa pode copiá-lo.
+Cada pessoa precisa fornecer sua própria cópia de *Midnight Club: Los Angeles Complete Edition* para Xbox 360. O código fonte não inclui ISO, assets, saves, chaves, driver Turnip nem código recompilado gerado localmente. O shader pack pré-gerado do fork base foi removido desta publicação por conter dados derivados do jogo. A release Android atual ainda contém um APK experimental com `libmain.so` gerada a partir do executável do jogo. A proposta para a publicação definitiva é deixar somente este código e a receita de build, depois de uma confirmação explícita antes de remover o asset atual.
 
 Os workflows herdados do fork base verificam principalmente o build Windows. O CI deste port é manual e não valida o APK Android. A verificação Android registrada está no [diário de builds](docs/android-build-journal.md).
 
