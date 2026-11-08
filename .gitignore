@@ -36,17 +36,12 @@ keys.*
 /out/
 *.log
 
-# The play shortcut scripts/make_pc.ps1 makes
+# The archived Windows play shortcut makes
 *.lnk
 
 # Working notes and developer tools: kept on the maintainer's machine, not
 # published. The README and docs/ are the public documentation.
 /REFLECTION_FIX.md
-/ps5/probes/
-/ps5/results/
-/ps5/symdump.py
-/ps5/profile_report.py
-/ps5/title_log_client.py
 /scripts/analyze_perf.py
 /scripts/fps_sweep.ps1
 /scripts/play_loop.ps1

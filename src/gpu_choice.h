@@ -1,7 +1,7 @@
 // Which GPU the game uses on a PC with more than one, apart from Windows and the SDK so that
-// launcher/dev/api-rule/gpu_choice_test.cpp can run it with made-up adapters. src/mcla_app.cpp
+// archive/fork-base/launcher/dev/api-rule/gpu_choice_test.cpp can run it with made-up adapters. src/mcla_app.cpp
 // (ChooseGpu) lists the adapters, asks Windows for their order and applies the answer; the
-// launcher's DisplayDrivers.ChooseAdapter (launcher/src/ShaderStamp.cs) repeats it, and the two
+// launcher's DisplayDrivers.ChooseAdapter (archive/fork-base/launcher/src/ShaderStamp.cs) repeats it, and the two
 // must agree. Windows only: Linux and the PS5 do not use it.
 //
 // Why: the SDK's Direct3D 12 provider takes the FIRST adapter DXGI lists that isn't software

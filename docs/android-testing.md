@@ -1,44 +1,100 @@
-# Testar a build Android ARM64
+# Testing the Android ARM64 build
 
-Esta build experimental usa os arquivos extraídos de uma cópia própria de *Midnight Club: Los Angeles Complete Edition* para Xbox 360 (Title ID `545407F8`). O APK contém o programa ARM64; os dados do jogo ficam fora dele.
+This experimental build uses the extracted files from the user's own copy of
+*Midnight Club: Los Angeles Complete Edition* for Xbox 360 (Title ID
+`545407F8`). The APK contains the ARM64 program; game data remains outside it.
 
-## Instalação sem root
+## Installation without root
 
-1. Instale o APK ARM64 criado por `scripts/build_android_apk.sh`.
-2. Extraia os arquivos do disco em uma pasta acessível pelo seletor de documentos do Android, por exemplo `Download/MCLA-extraido/`. Não selecione a raiz `Download`: em algumas versões do Android ela não pode ser concedida a um app.
-3. Abra **MCLA Recomp**, toque em **Select game folder** e escolha `MCLA-extraido`. Aguarde a cópia terminar; são aproximadamente 6,2 GB. Deixe espaço livre para a pasta de origem e a cópia privada.
-4. Depois da importação, toque em **Play**. Nas próximas aberturas, o launcher mostra os botões de driver e **Play**.
+1. Install the ARM64 APK produced by `scripts/build_android_apk.sh`.
+2. Extract the game files into a folder accessible to Android's document
+   picker, such as `Download/MCLA-extracted/`. Select that subfolder rather
+   than the `Download` root, which cannot be granted to an app on some Android
+   versions.
+3. Open **MCLA Recomp**, tap **Select game folder**, and choose the extracted
+   folder. Wait for the copy to finish; it needs about 6.2 GB plus free space
+   for the source and private copy.
+4. After import, tap **Play**. Later launches show the driver controls and
+   **Play** before starting the game.
 
-O próprio seletor do Android concede ao app leitura da pasta escolhida; não é preciso autorizar acesso geral ao armazenamento. Confirme a seleção quando o Android pedir. Se o acesso for negado, o launcher mostrará uma mensagem e permitirá escolher a pasta novamente. Em Android 11 ou superior, escolha a subpasta `MCLA-extraido`, pois o seletor não permite conceder a raiz `Download`.
+The document picker grants access only to the selected folder; broad storage
+permission is not required. Confirm the selection when Android asks. If access
+is denied, choose the folder again. On Android 11 or newer, select the
+`MCLA-extracted` subfolder instead of the `Download` root.
 
-Os 13 arquivos precisam estar **diretamente** dentro da pasta selecionada, sem uma subpasta intermediária: `default.xex`, os quatro `xarchive_*.rpf`, os seis vídeos `.bik`, `nxeart` e `root_directory_padding.pad`. O launcher confere a presença e o tamanho não nulo de cada arquivo, inclusive após uma cópia interrompida. **Ele ainda não confere hashes**: um arquivo danificado pode passar nessa checagem e causar erro depois. Um `.zip` ou `.iso` fechado não serve no seletor.
+The 13 files must be directly inside the selected folder: `default.xex`, four
+`xarchive_*.rpf` files, six `.bik` videos, `nxeart` and
+`root_directory_padding.pad`. The launcher checks presence and nonzero size,
+including after an interrupted copy, but does not verify hashes. A closed `.zip`
+or `.iso` is not accepted by the picker.
 
-## Cópia direta com root
+## Direct copy with root
 
-O destino final é:
+The private destination is:
 
 ```text
 /data/user/0/org.mcla.recomp/files/game/
 ```
 
-`/data/data/org.mcla.recomp/files/game/` aponta para o mesmo local neste aparelho. Assim, o caminho de um arquivo é `/data/user/0/org.mcla.recomp/files/game/default.xex`. Instale e abra o APK uma vez para criar o diretório privado, depois copie **o conteúdo** da pasta extraída para `game/` com permissões de leitura para o UID do app. Um gerenciador de arquivos comum não acessa `/data/user/0` sem root; use o importador acima nesse caso.
+`/data/data/org.mcla.recomp/files/game/` points to the same location on the
+tested device. Install and open the APK once, then copy the **contents** of the
+extracted folder into `game/` with read permission for the app UID. A normal
+file manager cannot access `/data/user/0` without root, so use the document
+picker instead when root is unavailable.
 
-Não limpe os dados do aplicativo se quiser preservar essa cópia, as configurações e os saves. Atualizar o APK com `pm install -r` preserva os dados do app. Os logs ficam em `files/logs/` e o cache de shaders em `files/mcla/cache/shaders/`.
+Do not clear app data if you want to keep the imported game, settings and
+saves. Updating with `pm install -r` preserves app data. Private logs are in
+`files/logs/`; shader caches are under `files/mcla/cache/shaders/`.
 
-Em Android 10 ou mais recente, o app também exporta automaticamente os logs de texto para `Documents/MCLA/logs/` pela MediaStore. A exportação ocorre ao abrir o launcher, aos 30 segundos de jogo e depois a cada 60 segundos, além de pausar ou encerrar o jogo. Os arquivos compartilhados têm extensão `.txt` (por exemplo, `mcla_017.txt`); os originais privados continuam em `files/logs/mcla_017.log`. A pasta é criada pelo Android sem permissão ampla de armazenamento. Se o jogo travar antes da próxima exportação, reabrir o launcher copia o log que ficou na pasta privada. A exportação anterior foi verificada; a mudança final de nome de `.log.txt` para `.txt` ainda não foi testada em execução. [Armazenamento compartilhado no Android](https://developer.android.com/training/data-storage/shared/media).
+On Android 10 and newer, logs are also exported to
+`Documents/MCLA/logs/` through MediaStore when the launcher opens, during
+gameplay, and when the game pauses or closes. Shared copies use `.txt` names,
+while private originals retain `.log` names. The folder is created by Android
+without broad storage permission. If the game closes before an export, reopen
+the launcher to export the private log. The final filename migration still
+needs runtime validation. See [Android shared storage](https://developer.android.com/training/data-storage/shared/media).
 
-Neste aparelho de desenvolvimento, a pasta pronta está em `/storage/emulated/0/Download/MCLA-extraido/`: os 13 arquivos foram comparados byte a byte com a extração local. O importador foi recompilado e instalado; a detecção de uma cópia privada já completa foi testada. A seleção e cópia pelo seletor Android ainda precisam de um teste ponta a ponta em uma instalação sem dados anteriores.
+The development device had a prepared folder under
+`/storage/emulated/0/Download/MCLA-extracted/`; the files matched the local
+extraction byte for byte. Existing private-copy detection was tested, but a
+clean-profile picker import remains unverified.
 
-## Driver Vulkan opcional
+## Input support
 
-O padrão é o driver Vulkan do sistema. No launcher, toque em **Select Turnip (.zip)**, escolha um pacote para ARM64 que contenha `libvulkan_freedreno.so` e espere a mensagem de importação; depois toque em **Play**. O seletor Android concede acesso apenas ao ZIP escolhido, e o driver é copiado para `files/gpu-drivers/` antes de ser carregado. **Use system driver** desativa a seleção Turnip sem apagar o ZIP original. O launcher aparece em toda abertura, inclusive se o jogo falhar ao carregar um driver experimental.
+Gamepad is the only supported and validated in-game input method at present.
+Keyboard and mouse input may work through Android/SDL, but this port has not
+verified it. Touch controls are planned for a future update and are not
+available yet.
 
-O ZIP selecionado contém uma biblioteca nativa que será executada dentro do aplicativo. O importador confere o formato ELF ARM64 e limita o tamanho, mas isso não prova que o código do driver seja confiável. Importe somente pacotes de origem em que você confia.
+## Optional Vulkan driver
 
-O Turnip depende da GPU Adreno, da versão do Android, do kernel e da versão do pacote. Uma combinação incompatível pode causar tela preta, erro Vulkan ou pior desempenho. O carregador tenta voltar ao driver do sistema quando o AdrenoTools não consegue abrir o Turnip; caso a falha ocorra depois disso, reabra o app e selecione **Use system driver**. Confira em `files/logs/mcla_*.log` a linha `AdrenoTools opened Vulkan for selected Turnip` e, sobretudo, a linha `Vulkan device` com o nome da GPU/driver realmente usado. `AdrenoTools rejected selected driver` indica que houve fallback.
+The default is the system Vulkan driver. In the launcher, tap **SELECT TURNIP
+(.ZIP)**, choose a trusted ARM64 package containing
+`libvulkan_freedreno.so`, wait for the import message, and tap **PLAY**. The
+driver is copied to `files/gpu-drivers/`. **USE SYSTEM DRIVER** disables the
+selected Turnip path without deleting the original ZIP.
 
-Para reconstruir o APK, execute `scripts/build_adrenotools_android.sh`. Ele fixa `bylaws/libadrenotools` em `8fae8ce254dfc1344527e05301e43f37dea2df80` e o submódulo `liblinkernsbypass` em `aa3975893d83ef1bc84c321ec60c65fbf1287887`, compilando para ARM64 em `out/build/adrenotools-arm64`. No SDK ReXGlue limpo, aplique nesta ordem `patches/rexglue-android-arm64.patch`, `patches/rexglue-turnip-loader.patch` e `patches/rexglue-driver-cache-path.patch`; recompile e instale o SDK, recompile `mcla` e execute `scripts/build_android_apk.sh`. O APK inclui AdrenoTools e seus hooks, mas nenhum driver Turnip fornecido por terceiros. O script também copia o APK verificado para `Download/MCLA-Recomp-arm64.apk` no Termux; `MCLA_DOWNLOADS_DIR` muda a pasta de destino.
+The selected ZIP contains native code that runs inside the app. The importer
+checks ELF ARM64 format and size limits, but that does not make an untrusted
+driver safe. Import packages only from sources you trust.
 
-O código do cache binário Vulkan usa um arquivo distinto para cada driver/UUID em `files/mcla/cache/shaders/local/`. Ao alternar entre Turnip e sistema, o cache anterior de cada um deve ser preservado. Na primeira abertura após esta atualização, o arquivo antigo `545407F8.vk.bin` só é aceito se o cabeçalho Vulkan corresponder ao driver ativo. O log `mcla_020.log` da comparação anterior registrou `Loaded 0 bytes` porque a troca de Turnip para sistema invalidou o cache único antigo; isso pode causar engasgos na primeira abertura. A nova separação de arquivos compilou, mas ainda não foi verificada em execução.
+Turnip compatibility depends on the Adreno GPU, Android version, kernel and
+package version. An incompatible combination can cause a black screen, Vulkan
+failure or worse performance. If the custom driver fails to open, the loader
+falls back to the system driver. Check `files/logs/mcla_*.log` for
+`AdrenoTools opened Vulkan for selected Turnip`, the actual `Vulkan device`
+line, or `AdrenoTools rejected selected driver`.
 
-No Samsung Galaxy S23 usado nos testes, os faróis traseiros piscaram em branco tanto com Turnip 8G2-OneUI quanto com Turnip Standard v27.0.0-20261107. Os logs mostravam `realme/RMX5070` porque o spoof estava ativo; esse nome não identifica o aparelho físico. O usuário confirmou que o driver Vulkan do sistema eliminou essa piscada. Até investigar a causa no driver/SDK, selecione **USE SYSTEM DRIVER** no launcher para jogar sem o artefato; a opção Turnip continua experimental. O desempenho do sistema pode ser ligeiramente menor segundo o usuário. A GPU foi observada limitada termicamente a 295 MHz durante testes, então uma comparação formal de FPS requer temperatura inicial semelhante.
+The system driver is recommended on the tested Samsung Galaxy S23. Turnip
+8G2-OneUI and Standard v27.0.0-20261107 both produced rear-light flashes in
+the user's tests; system Vulkan removed the artifact, with somewhat lower
+performance. The spoofed `realme/RMX5070` string in old logs is not the phone
+model. Thermal throttling was observed, so FPS comparisons require similar
+temperature and cache conditions.
+
+## Rebuilding the APK
+
+No build is performed by this documentation page. The source recipe is in
+[android-build.md](android-build.md), and CI builds the patched SDK and host
+stub without game data. The APK includes AdrenoTools and its hooks, but no
+third-party Turnip driver.

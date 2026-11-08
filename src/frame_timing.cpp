@@ -331,7 +331,7 @@ bool MclaGraphicsIsVulkan();
 // rule of DXVK's latency sleep, which sleeps and then spins its last 4 timer granularities plus a
 // sixth of the wait: about 3.8 ms at 60 FPS and 6.6 ms at 30). The first measurement (fixed
 // 1.5 ms, without the frame-cap timer) cut the process's CPU at the caps by 19 to 44 percent and
-// paced a little less evenly. The sweep of launcher/dev/reflex-assist-margin-2026-10-28.md (on
+// paced a little less evenly. The sweep of archive/fork-base/launcher/dev/reflex-assist-margin-2026-10-28.md (on
 // top of the frame-cap timer) found 20 percent within the noise of the assist's absence for the
 // pacing at 4 and 16 logical processors and caps of 60 and 30, at the same CPU saving (26 to 51
 // percent less per swap). The check below widens whatever margin the settings give.
@@ -1006,7 +1006,7 @@ REXCVAR_DEFINE_INT32(mcla_ui_menu_rate, 30, "MCLA",
 // direction at most 5 extra advances a second. Not the HUD (its own rate), and not an update that
 // follows another input advance of the same screen by less than 100 ms. On by default (v0.3.1):
 // measured with a scripted pad, the median wait from a key press to the menu's next advance went
-// from 8.5 to 0.2 ms at a 120 FPS cap and from 16.9 to 0.2 ms uncapped (launcher/dev/menu-lag-2026-10-29.md).
+// from 8.5 to 0.2 ms at a 120 FPS cap and from 16.9 to 0.2 ms uncapped (archive/fork-base/launcher/dev/menu-lag-2026-10-29.md).
 REXCVAR_DEFINE_BOOL(mcla_ui_advance_on_input, true, "MCLA",
                     "Advance the UI's menus, pop-ups and map screens on the update a menu key event "
                     "(a press or a repeat) is delivered in, instead of waiting for their next slot "
@@ -1015,7 +1015,7 @@ REXCVAR_DEFINE_BOOL(mcla_ui_advance_log, false, "MCLA",
                     "Development: log every advance of a UI screen (its name, the time, and whether a "
                     "key event caused it), for measuring how soon the menus answer a press");
 
-// Interpolated UI (launcher/dev/ui-interpolation-2026-10-29.md; on by default since v0.3.1, the
+// Interpolated UI (archive/fork-base/launcher/dev/ui-interpolation-2026-10-29.md; on by default since v0.3.1, the
 // pause menu's DISPLAY > SMOOTH UI). Every movie steps 30 times a second, the console's rate (the
 // two rate options above count only while this is off); on every drawn
 // frame each display-list element is drawn between what it looked like one step ago and what it looks
@@ -1061,12 +1061,12 @@ REXCVAR_DEFINE_BOOL(mcla_ui_interp_camera, true, "MCLA",
                     "steps: the camera that swings in when the menu opens, between its pages and out "
                     "again, and the place, size and turn of the 3D panels. Off leaves them in 30 Hz steps");
 
-// Race finish check (launcher/dev/race-finish-2026-10-29.md). LARecomp (mzzvxm/LARecomp, commit 7b9726e) reports
+// Race finish check (archive/fork-base/launcher/dev/race-finish-2026-10-29.md). LARecomp (mzzvxm/LARecomp, commit 7b9726e) reports
 // that with the 30 Hz pacing of the UI movies the race finish screens, the podium and the results run in slow
 // motion, and exempts movies with HUD, RACE, POST, RESULT, PODIUM, CINE or END in their names from it. Whether
 // that happens in this build, and with which movie, is for the measurement (mcla_ui_pace_log). Until it is known
 // these two options change nothing by default.
-// Race start check (launcher/dev/race-start-2026-10-29.md). The owner sees the race start while the "2" (cap 120, HUD
+// Race start check (archive/fork-base/launcher/dev/race-start-2026-10-29.md). The owner sees the race start while the "2" (cap 120, HUD
 // stepped 60 a second) or the "3" (Smooth UI, every movie 30 a second) of the countdown is still on screen. The rule
 // below is the tool for it: a rate for the movies it names, kept by a schedule that catches up (several movie frames
 // in one update when it is behind) and, if asked, counted in the game's own seconds.
@@ -1098,7 +1098,7 @@ REXCVAR_DEFINE_INT32(mcla_ui_pace_log_ms, 1000, "MCLA",
 // countdown clock on every movie STEP. On the console (30 updates, 30 steps a second) each step added 1/30 s; with the movie
 // paced below the update rate a step saw only the last update's value, so the clock ran at steps/updates of the game's speed:
 // every number lasted 2 s with the HUD at 60 steps a second at a 120 FPS cap and 4 s with Smooth UI's 30 (measured,
-// launcher/dev/race-countdown-2026-10-29.md). The fix gives each step the time of all the updates since the movie's last step.
+// archive/fork-base/launcher/dev/race-countdown-2026-10-29.md). The fix gives each step the time of all the updates since the movie's last step.
 REXCVAR_DEFINE_BOOL(mcla_ui_countdown_fix, true, "MCLA",
                     "Keep the race-start countdown (3, 2, 1, GO) in time with the race at any frame rate: the HUD "
                     "movie's countdown clock gets the game time of all the updates since its last step, not of the "
@@ -2110,7 +2110,7 @@ void mcla_ui_interp_draw(PPCRegister& r30, PPCRegister& r31) {
   }
 }
 
-// Interpolated UI, the 3D side (mcla_ui_interp_camera; launcher/dev/ui-camera-2026-10-29.md). Besides the
+// Interpolated UI, the 3D side (mcla_ui_interp_camera; archive/fork-base/launcher/dev/ui-camera-2026-10-29.md). Besides the
 // display list the pause menu moves a camera and 3D panels. Read from the recompiled game and the movie's
 // script (not run before the check chain):
 //  - The camera. The player context of every UI movie is of one class (vtable 0x820CACB8) whose advance,
@@ -2440,7 +2440,7 @@ void mcla_ui_cam_done(PPCRegister& r31) {
 // repeat) have passed, less a quarter of a 30 Hz update; otherwise the count is put back by one so
 // that the next update asks again, and the compare is made to fail. At 30 FPS and below nothing
 // changes (the count is what is slower). The defaults are the console's: 7/30 s and 6/30 s.
-// On by default: measured 2026-10-29 (launcher/dev/menu-input-2026-10-29.md), every tap one
+// On by default: measured 2026-10-29 (archive/fork-base/launcher/dev/menu-input-2026-10-29.md), every tap one
 // key event at 30, 60, 120 FPS and uncapped, at 3x and with frame generation.
 REXCVAR_DEFINE_BOOL(mcla_ui_repeat_fix, true, "MCLA",
                     "Repeat a held menu button or direction after mcla_ui_repeat_delay_ms and then "

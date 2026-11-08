@@ -981,7 +981,7 @@ struct Folders {
 };
 
 // ---------------------------------------------------------------------------------------------
-// The pack (shaderpack/545407F8.shaderpack, made by launcher/dev/shaderpack/build_pack.py).
+// The pack (shaderpack/545407F8.shaderpack, made by archive/fork-base/launcher/dev/shaderpack/build_pack.py).
 
 struct PackShader {
   uint64_t hash;
@@ -1914,7 +1914,7 @@ void RunImport(rex::Runtime* runtime) {
   REXLOG_INFO("shader pack: {} of {} shaders rebuilt in {} ms", results.size() - failed,
               results.size(), g_state.rebuild_ms);
 
-  // Development: the reachability check of a new pack (launcher/dev/shaderpack).
+  // Development: the reachability check of a new pack (archive/fork-base/launcher/dev/shaderpack).
   if (check_only) {
     std::ofstream out(rex::cvar::GetFlagByName("mcla_prepare_shaders_check"), std::ios::trunc);
     for (auto [hash, ok] : results) out << fmt::format("{:016X} {}\n", hash, ok ? "ok" : "failed");

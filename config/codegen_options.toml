@@ -4,7 +4,7 @@
 #
 # The game switches the CPU's flush mode (MXCSR: denormals kept for the scalar floating-point instructions,
 # flushed to zero for the vector ones, as the console's two units do) with `ldmxcsr`, which costs the render
-# thread 5 to 7% of its CPU time (upper bound, launcher/dev/profiling-2026-10-26.md: a build with the
+# thread 5 to 7% of its CPU time (upper bound, archive/fork-base/launcher/dev/profiling-2026-10-26.md: a build with the
 # instruction left out). These two options make fewer and cheaper switches without changing a result.
 
 # fmr, fabs, fnabs, fneg, lfd*, stfd*, stfiwx, fctidz, fctiwz and fcfid never read the flush bits (they move

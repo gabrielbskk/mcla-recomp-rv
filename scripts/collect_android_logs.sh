@@ -8,7 +8,7 @@ mkdir -p "$DEST"
 LATEST=$(su -c 'ls -t /data/user/0/org.mcla.recomp/files/logs/mcla_*.log' | head -1)
 case "$LATEST" in
     /data/user/0/org.mcla.recomp/files/logs/mcla_*.log) ;;
-    *) echo "Log do MCLA não encontrado" >&2; exit 1 ;;
+    *) echo "MCLA log not found" >&2; exit 1 ;;
 esac
 su -c "cat '$LATEST'" > "$DEST/mcla.log"
 

@@ -71,7 +71,7 @@ REXCVAR_DEFINE_BOOL(mcla_small_cpu_defaults, true, "MCLA",
                     "output queue after an underrun). A value you set for any "
                     "of them wins. Off leaves only the high-resolution wait on there (v0.2.x). 4 cores without SMT "
                     "are included since v0.3.1. Nothing changes with 6 or more logical processors "
-                    "(launcher/dev/small-cpu-2026-10-28.md, small-cpu-audio-2026-10-29.md). Takes effect at the next start")
+                    "(archive/fork-base/launcher/dev/small-cpu-2026-10-28.md, small-cpu-audio-2026-10-29.md). Takes effect at the next start")
     .lifecycle(rex::cvar::Lifecycle::kRequiresRestart);
 
 // Read by NVIDIA's Optimus and AMD's PowerXpress drivers when the exe loads: on a laptop with
@@ -255,7 +255,7 @@ std::filesystem::path GameDataRootFromConfig(const std::filesystem::path& config
 }
 
 // What the game needs from its folder: the program and the archives. Names of the
-// 13 files of the one supported release (scripts/ci/game-files.json); the others
+// 13 files of the one supported release (archive/fork-base/ci/game-files.json); the others
 // (videos, art) are not checked.
 constexpr const char* kRequiredGameFiles[] = {
     "default.xex", "xarchive_audio.rpf", "xarchive_audlo.rpf", "xarchive_cache.rpf", "xarchive_music.rpf"};
@@ -339,7 +339,7 @@ bool MclaApp::ConstructRuntime(const rex::PathConfig& paths) {
 // answers the same for all of these).
 //  - AMD integrated, RDNA, measured on a Ryzen 7 9800X3D's Radeon (RDNA 2): Vulkan 6 to 10%
 //    faster at the game's own resolution, GPU time per frame 6 to 9% less
-//    (launcher/dev/gpu-weak-2026-10-27.md). Integrated is Direct3D 12's own answer,
+//    (archive/fork-base/launcher/dev/gpu-weak-2026-10-27.md). Integrated is Direct3D 12's own answer,
 //    D3D12_FEATURE_DATA_ARCHITECTURE.UMA, which holds for an APU however much memory its BIOS
 //    sets aside for it (a size would not); RDNA is told by D3D12_FEATURE_DATA_D3D12_OPTIONS1's
 //    WaveLaneCountMin, 32 (GCN reports 64).
@@ -352,7 +352,7 @@ bool MclaApp::ConstructRuntime(const rex::PathConfig& paths) {
 //    Direct3D 12 and Vulkan uses ordinary framebuffer ones. Not measured: no Intel GPU.
 //  - NVIDIA: Vulkan is no faster in races (the RTX 5080).
 // The launcher's Graphics API setting repeats the rule and the choice of the GPU
-// (launcher/src/ShaderStamp.cs) so that it can mark the API recommended for the player's GPU;
+// (archive/fork-base/launcher/src/ShaderStamp.cs) so that it can mark the API recommended for the player's GPU;
 // this and that must agree. Vulkan
 // needs vulkan-1.dll and, for Automatic, a Vulkan device that is the same GPU (matched by
 // LUID, else by vendor and device id): the SDK takes Vulkan's first device otherwise.
@@ -931,7 +931,7 @@ static uint32_t PhysicalCoresAvailable() {
 }
 
 // The two CPU options whose best setting depends on how many logical processors there are
-// (docs/off-switches.md; launcher/dev/profiling-2026-10-26.md, "Wake on demand"
+// (docs/fork-base/windows/off-switches.md; archive/fork-base/launcher/dev/profiling-2026-10-26.md, "Wake on demand"
 // and "The timer queue and the frame-pacing thread by processor count"; A/B of 3 runs a side
 // at 16, 8, 6 and 4 logical processors, uncapped and at caps of 120, 60 and 30):
 // - 6 or more: mcla_pump_wake_on_demand. It lifts the 145 FPS the game's own Sleep holds the
@@ -951,11 +951,11 @@ static uint32_t PhysicalCoresAvailable() {
 // mcla_pump_wake_on_demand and mcla_poll_wait: at 4 logical processors the update thread loses 47% of
 // the frame to the pump's 7 ms Sleep, and the main thread's ring wait spins a core. Measured at 4
 // logical (2 cores with SMT) and 5 logical (5 cores) processors: uncapped frame -31 to -40%, caps
-// unchanged (launcher/dev/small-cpu-2026-10-28.md). v0.3.0 left out 4 logical processors on 4 cores
+// unchanged (archive/fork-base/launcher/dev/small-cpu-2026-10-28.md). v0.3.0 left out 4 logical processors on 4 cores
 // (no SMT): in the first test 3 of 5 runs gained 40%, but one of them had a tail of long frames
 // (p99 21.7 and 29.5 ms) with 77 late audio wake-ups and 2 of 5 had a short audio dropout. Since
 // v0.3.1 that CPU gets them too, and so does every CPU of 5 or fewer processors whose cores cannot
-// be told (the new tests: launcher/dev/small-cpu-audio-2026-10-29.md).
+// be told (the new tests: archive/fork-base/launcher/dev/small-cpu-audio-2026-10-29.md).
 // The same switch sets two audio options on there, audio_thread_priority = 3 (the audio worker and
 // the XMA decoder thread in the Windows multimedia scheduler) and audio_adaptive_queue (the mixer's
 // output queue grows after an underrun): with other processes taking the cores, the audio ran dry
@@ -963,7 +963,7 @@ static uint32_t PhysicalCoresAvailable() {
 // rexglue-xma-decoder-fixes.patch; a value the player sets for either wins, as for the rest).
 // And audio_mixer_priority = 3 (src/audio_mixer.cpp): the game's own mixer thread, which the audio worker
 // waits for, gets the same treatment; the audio worker's round was 0.74 ms alone and 3.8 ms with the cores
-// taken, because that thread waited to run (launcher/dev/audio-mixer-2026-10-30.md).
+// taken, because that thread waited to run (archive/fork-base/launcher/dev/audio-mixer-2026-10-30.md).
 static void ApplyCpuDefaults() {
   constexpr uint32_t kWakeOnDemandFrom = 6;
   const uint32_t logical = LogicalProcessorsAvailable();
@@ -1022,7 +1022,7 @@ static void ApplyCpuDefaults() {
 }
 #endif
 
-// SDK settings measured to suit this game on PC (docs/off-switches.md; the
+// SDK settings measured to suit this game on PC (docs/fork-base/windows/off-switches.md; the
 // PS5 host sets its own). They become the options' defaults
 // (rex::cvar::SetDefaultValue): used unless the command line, an environment
 // variable or mcla.toml sets them, and never saved as if the user had chosen
@@ -1039,7 +1039,7 @@ void MclaApp::ApplyPcDefaults() {
   //   every fault;
   // - an EDRAM of 4,096 tiles, so that the scene fits in one tile with 2x MSAA
   //   (mcla_single_tile, src/render_perf.cpp);
-  // - video memory above native resolution (fork issue #19, launcher/dev/
+  // - video memory above native resolution (fork issue #19, archive/fork-base/launcher/dev/
   //   vram-2026-10-28.md): no host render target taller than 1,024 rows (the
   //   game's tallest surface is 736; the SDK makes each as tall as the
   //   console's whole EDRAM, 4 to 16 times that for small ones), those that
@@ -1048,13 +1048,13 @@ void MclaApp::ApplyPcDefaults() {
   //   the texture cache's limits halved;
   // - on Windows, D3D12 uploads into the shared memory recorded at the start of
   //   the run of draws that needs them (d3d12_hoist_shared_memory_uploads,
-  //   patches/README.md, launcher/dev/d3d12-upload-hoisting-2026-10-28.md):
+  //   docs/fork-base/patches/README.md, archive/fork-base/launcher/dev/d3d12-upload-hoisting-2026-10-28.md):
   //   no pixel difference beyond the world's own flicker in the checks made,
   //   the GPU frame shorter. The SDK's own default stays off; Vulkan has its own;
   // - anisotropic filtering at 16x instead of the SDK's 4x: the only level
   //   never below what the game asks for (it asks 16x for the road in a race),
   //   at no measurable cost on an RTX 5080 and 1.5% on an integrated Radeon
-  //   (launcher/dev/aniso-2026-10-27.md);
+  //   (archive/fork-base/launcher/dev/aniso-2026-10-27.md);
   // - on Windows, HDR output whenever the display is in HDR mode (the SDK's
   //   own default stays off, for other titles). Not on Linux, where the
   //   display's HDR state isn't read yet, so auto would never turn it on

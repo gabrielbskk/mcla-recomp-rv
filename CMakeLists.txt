@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(generated/rexglue.cmake)
 
 if(MINGW)
-    # llvm-mingw (scripts/make_pc.ps1 -Toolchain mingw). The SDK is built the same
+    # llvm-mingw (archive/fork-base/scripts/make_pc.ps1 -Toolchain mingw). The SDK is built the same
     # way (patches/rexglue-mingw.patch); here, not in the SDK's template of
     # generated/rexglue.cmake, so that every platform's codegen writes that file
     # as it is in the repository.

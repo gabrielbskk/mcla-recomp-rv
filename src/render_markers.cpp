@@ -9,7 +9,7 @@
 // 0x100000 its translucent effects, 0x04000000 its full-screen composites (the
 // fog), 0x08000000 is post-processing, 0x10000000 the tone map (then the night
 // light glows), 0x20000000 the HUD and menus
-// (launcher/dev/frame-structure-2026-10-16.md). Temporal anti-aliasing
+// (archive/fork-base/launcher/dev/frame-structure-2026-10-16.md). Temporal anti-aliasing
 // (rexglue-temporal-aa.patch) jitters the scene's draws between the first and
 // post-processing. At those calls a marker is
 // written into Direct3D's command buffer: a PM4 type-3 NOP of 3 words, 'REXM',

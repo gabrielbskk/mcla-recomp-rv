@@ -1,11 +1,11 @@
 // Scripted controller input for unattended runs (fork-only development tool;
-// see launcher/README.md). Off unless one of the mcla_pad_* options is set.
+// see archive/fork-base/launcher/README.md). Off unless one of the mcla_pad_* options is set.
 //
 // A synthetic input device ("ScriptPad") is added to the SDK's input system
 // next to the real pads. Synthetic devices always feed guest user 0 and merge
 // with whatever else feeds it, so the real controller keeps working. Commands
 // come from a script file (mcla_pad_script) and/or a named pipe
-// (mcla_pad_pipe, driven by launcher/dev/pad.py), one per line:
+// (mcla_pad_pipe, driven by archive/fork-base/launcher/dev/pad.py), one per line:
 //
 //   press a [150ms]   hold rt 2s   down x   up x   release [all|name]
 //   trigger rt 0.8 [2s]   stick lx -0.5 [1s]
@@ -1179,7 +1179,7 @@ std::vector<uint32_t> FindFloats(const float* want, size_t count, float toleranc
 
 // follow <route> drives the player's car along a route, a file of "x,z,speed" lines (metres on
 // the ground, m/s; a fourth column, the ground's height, is read and not used) made by
-// launcher/dev/route.py: the stick steers at a point ahead on the route (pure pursuit), the
+// archive/fork-base/launcher/dev/route.py: the stick steers at a point ahead on the route (pure pursuit), the
 // triggers hold the route's speed (the buttons a script holds are left as they are). It runs in the
 // frame hook, on the game's update thread, so with mcla_fixed_dt the same game state gives the same
 // inputs.

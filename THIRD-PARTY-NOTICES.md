@@ -26,7 +26,7 @@ Ported from it:
 - `src/achievement_toast.h`: the achievement toast wrapper, which
   ForzaHorizon1-ReImagined has from RecompiledHaloReach (below); the file
   carries both notices.
-- `launcher/dev/dropped-patches/unchanged-fetch-constants-keep-bindings.patch`:
+- `archive/fork-base/launcher/dev/dropped-patches/unchanged-fetch-constants-keep-bindings.patch`:
   the approach of its patch 0032, measured and not used.
 - `patches/rexglue-xma-decoder-fixes.patch`: the idea of its patch 0105
   (`0105-xma-unreadable-input-and-locked-contexts.patch`): `Work()` looks at the
@@ -153,7 +153,7 @@ generation (`patches/rexglue-frame-generation.patch`, in development):
 - compiled shaders of FSR 3's upscaler and, since frame generation, of frame
   interpolation and optical flow (SPIR-V, in the headers FidelityFX's
   shader compiler generates, made from that commit's source by
-  `launcher/dev/fsr/fsr_vk_shaders.py`), in the second patch as
+  `archive/fork-base/launcher/dev/fsr/fsr_vk_shaders.py`), in the second patch as
   `thirdparty/fidelityfx-shaders-vk` of the SDK, with this notice beside them
   (`LICENSE.txt` there): the only FidelityFX binaries in this repository, for
   builds where that compiler (a Windows program) can't run;

@@ -27,7 +27,7 @@
 # changes. The hook also keeps a frame in two tiles between
 # one-tile frames in different MSAA modes, and leaves the tile surface cache's
 # last free slots alone (src/render_perf.cpp).
-# (launcher/dev/single-tile-2026-10-16.md and
+# (archive/fork-base/launcher/dev/single-tile-2026-10-16.md and
 # single-tile-edram-2026-10-16.md; the old condition, a null render target in
 # r17, never held.)
 [[midasm_hook]]

@@ -1,6 +1,6 @@
 # Android ARM64 build handoff
 
-For the current state, evidence, open issues, and the agreed review/build/test cadence, read [android-status.md](android-status.md) first. The SDK source choices and the combined patch limitation are in [android-sdk-source.md](android-sdk-source.md). Record each candidate in [android-build-journal.md](android-build-journal.md). The final delivered APK was built and statically verified; it has not had a gameplay test after the per-driver cache and log-name changes.
+For current evidence, open issues and verification boundaries, read [android-status.md](android-status.md) first. The SDK source choices and combined patch limitation are in [android-sdk-source.md](android-sdk-source.md). Record future candidates in [android-build-journal.md](android-build-journal.md). This page is a source recipe; it does not generate a build during documentation review.
 
 This port is written in **C++23** (plus Java for the Android launcher). The APK contains only ARM64 native libraries and Java launcher code. It does not include the game's files, Turnip binaries, or the local signing key. The current device build is experimental but has reached gameplay on a real Adreno 740 phone.
 
@@ -74,7 +74,7 @@ The first C++ build can take a long time because codegen produces many large tra
 
 ## Runtime and known limits
 
-- The launcher text is English. **SELECT TURNIP (.ZIP)** imports an AdrenoTools-compatible ARM64 driver package into app-private storage; **USE SYSTEM DRIVER** returns to Android Vulkan; **PLAY** starts the game. The system driver is the safe default. The Turnip 8G2-OneUI and Standard v27.0.0-20261107 packages both produced white rear-light flashes on the Samsung Galaxy S23 used for testing, while the system driver did not. Older runtime logs report `realme/RMX5070` because device spoofing was enabled. See `ANDROID-PORT-NOTES.md` for captures and logs.
+- The launcher text is English. **SELECT TURNIP (.ZIP)** imports an AdrenoTools-compatible ARM64 driver package into app-private storage; **USE SYSTEM DRIVER** returns to Android Vulkan; **PLAY** starts the game. The system driver is the safe default. The Turnip 8G2-OneUI and Standard v27.0.0-20261107 packages both produced white rear-light flashes on the Samsung Galaxy S23 used for testing, while the system driver did not. Older runtime logs report `realme/RMX5070` because device spoofing was enabled. See [android-history.md](android-history.md) for the historical findings.
 - The launcher imports the 13 extracted game files through Android's folder picker into `files/game/`. The exact user steps are in `docs/android-testing.md`. The full clean-install import has not been verified end to end on a separate empty app profile.
 - Logs remain privately in `files/logs/*.log` and are exported to `Documents/MCLA/logs/*.txt` through MediaStore on Android 10+. The export runs on launcher open, during gameplay, and when the game pauses or closes. The Vulkan pipeline cache is under `files/mcla/cache/shaders/local/` and now has a separate file for each driver identity.
 - The APK's libraries are built for 16 KiB page alignment, but runtime behavior on an actual 16 KiB page device has not been tested. The current test phone uses 4 KiB pages.

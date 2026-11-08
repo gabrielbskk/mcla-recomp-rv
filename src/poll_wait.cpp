@@ -7,7 +7,7 @@
 // full (sub_82148A10): for up to 1,000 microseconds on the engine's microsecond clock it calls
 // sub_821C91B8(0), which is Sleep(0) (a SwitchToThread), reads the word at +4 and the clock, and
 // goes round again. In the city that loop is 2.8 of the main thread's 6.4 ms of CPU a frame
-// (cpu-profile, launcher/dev/profiling-2026-10-26.md), 30% of it in the kernel.
+// (cpu-profile, archive/fork-base/launcher/dev/profiling-2026-10-26.md), 30% of it in the kernel.
 //
 // With mcla_poll_wait the loop's Sleep(0) is replaced by a wait that gives the core up: a spin on
 // the word with the processor's pause hint for mcla_poll_spin_us, then a sleep on a
@@ -37,7 +37,7 @@
 // event and the thread keeps its 7 ms. The audio watchdog takes it back to the game's own Sleep when the audio
 // output runs dry while the thread was coming round early (the SDK's steady underrun counter): the first time for
 // mcla_pump_wake_pause_s seconds (a stall while the game starts or loads is not the option's doing: runs with it off
-// had such silences too, launcher/dev/pump-watchdog-2026-10-28.md), the second time for the rest of the session.
+// had such silences too, archive/fork-base/launcher/dev/pump-watchdog-2026-10-28.md), the second time for the rest of the session.
 // The silence of the game's own shutdown (the audio threads stop first) is not counted at all.
 
 #include "generated/default/mcla_init.h"

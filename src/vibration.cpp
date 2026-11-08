@@ -24,7 +24,7 @@
 // dev pad's synthetic device gets and every send of MclaVibrationFrame; mcla_vibration_probe = "user,left,right"
 // (for example 0,32768,49152) makes the game's own function (sub_8275CB88) run with those values on the game
 // loop's thread, as if the game had set them, so that a script can check the switch without a car crashing
-// (launcher/dev/scripts/vibration.pad, launcher/dev/vibration_check.py).
+// (archive/fork-base/launcher/dev/scripts/vibration.pad, archive/fork-base/launcher/dev/vibration_check.py).
 
 #include "generated/default/mcla_init.h"
 

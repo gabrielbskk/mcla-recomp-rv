@@ -11,7 +11,7 @@
 // parked), and these dead zones come on top of that: a small one is enough for a stick that drifts past it.
 //
 // Development: mcla_stick_deadzone_log logs what goes in and out when it changes, up to 200 lines
-// (launcher/dev/scripts/deadzone.pad, launcher/dev/deadzone_check.py).
+// (archive/fork-base/launcher/dev/scripts/deadzone.pad, archive/fork-base/launcher/dev/deadzone_check.py).
 #include "generated/default/mcla_init.h"
 
 #include <algorithm>

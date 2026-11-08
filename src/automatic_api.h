@@ -1,7 +1,7 @@
 // The rule of the Automatic graphics API, apart from Windows and the SDK so that
-// launcher/dev/api-rule/api_rule_test.cpp can run it with made-up values. src/mcla_app.cpp
+// archive/fork-base/launcher/dev/api-rule/api_rule_test.cpp can run it with made-up values. src/mcla_app.cpp
 // (DecideAutomaticBackend) asks Direct3D 12 for the facts and applies it; the launcher's
-// DisplayDrivers.AutomaticApiFor (launcher/src/ShaderStamp.cs) repeats it, and the two must
+// DisplayDrivers.AutomaticApiFor (archive/fork-base/launcher/src/ShaderStamp.cs) repeats it, and the two must
 // agree.
 //
 // Vulkan on Intel graphics and on AMD's integrated graphics of the RDNA generation; Direct3D 12

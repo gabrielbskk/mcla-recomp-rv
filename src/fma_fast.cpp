@@ -17,7 +17,7 @@
 // file is empty elsewhere. Takes effect at the next start.
 //
 // MCLA_FMA_STANDALONE builds the file without the SDK (the lab's microbenchmark and the equality test).
-// (launcher/dev/fma-without-fma3-2026-10-31.md)
+// (archive/fork-base/launcher/dev/fma-without-fma3-2026-10-31.md)
 
 #if defined(__MINGW32__) && defined(__x86_64__)
 

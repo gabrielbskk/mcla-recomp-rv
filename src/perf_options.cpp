@@ -102,7 +102,7 @@ REXCVAR_DEFINE_DOUBLE(mcla_pedestrians, 1.0, "MCLA", "Pedestrian density scale")
 REXCVAR_DEFINE_DOUBLE(mcla_parked_cars, 1.0, "MCLA", "Parked car density scale").range(0.0, 1.0);
 // Off-screen render passes that are drawn only every few frames, the picture of the
 // last one kept in between (0 or 1: every frame, as shipped). After the scene itself
-// they are what a weak GPU pays most for (launcher/dev/gpu-weak-2026-10-27.md).
+// they are what a weak GPU pays most for (archive/fork-base/launcher/dev/gpu-weak-2026-10-27.md).
 REXCVAR_DEFINE_INT32(mcla_far_shadow_interval, 0, "MCLA",
                      "The two farthest sun-shadow cascades are drawn only every this many frames "
                      "(0: every frame, as shipped; above 1 the far shadows flicker in motion)")
@@ -244,7 +244,7 @@ void ApplyShadowPhases(uint8_t* base) {
 
 // --- Off-screen passes drawn every few frames ----------------------------------------
 
-// Render phase bits (launcher/dev/frame-structure-2026-10-16.md): the sun-shadow
+// Render phase bits (archive/fork-base/launcher/dev/frame-structure-2026-10-16.md): the sun-shadow
 // cascades are 0x20, 0x40, 0x80 and 0x100 (the 0x100 phase also redraws the foliage
 // impostors), the environment map 0x4 and 0x8, the reflection view 0x2.
 constexpr uint32_t kPhaseReflection = 0x2;
@@ -562,14 +562,14 @@ uint32_t MclaRenderPhasesToSkip() {
 // mcla_preset: the options a preset stands for take its values as their defaults, so
 // that one chosen by hand (the command line, the environment, mcla.toml) still wins,
 // and none is saved as if the player had chosen it. Low is what was worth its look on the
-// integrated Radeon (launcher/dev/gpu-weak-2026-10-27.md): anti-aliasing off (6.5% of the
+// integrated Radeon (archive/fork-base/launcher/dev/gpu-weak-2026-10-27.md): anti-aliasing off (6.5% of the
 // frame at native resolution, 29% at 2x), the environment map every 4th frame on desktop
 // (about 1 ms at native), the full-screen blur (0.5 ms). On Android, the environment map
 // stays every frame because skipping it caused black flashes on vehicle paint. The far
 // shadows every 2nd frame (0.3 to 1.1 ms) were taken out on 2026-10-28: they flicker.
 // The reflection view stays every frame: every 2nd saved about 0.3 ms, too little for a
 // reflection that lags. Lowest is Low and the real-time shadows off, by far the largest
-// saving left (launcher/dev/aniso-2026-10-27.md: 16 to 17% of the frame on every GPU
+// saving left (archive/fork-base/launcher/dev/aniso-2026-10-27.md: 16 to 17% of the frame on every GPU
 // measured; Low 12.3% and Lowest 26.9% on the integrated Radeon), at the price of every
 // sun shadow.
 void MclaApplyPreset() {
@@ -616,7 +616,7 @@ void MclaMigrateAntiAliasing() {
 
 // The readback rules of the custom-vinyl texture: the game bakes a car's vinyls into a 512x512 8_8_8_8
 // render target (guest address 0x050A0000, 1 MB) with its mip chain (256x256 at 0x051A0000 down to 32x4 at
-// 0x051F7000), resolved in the UI phase 113 times while a race of 8 cars loads (launcher/dev/vinyls-2026-10-27.md).
+// 0x051F7000), resolved in the UI phase 113 times while a race of 8 cars loads (archive/fork-base/launcher/dev/vinyls-2026-10-27.md).
 // Nothing else in the city, the menus or a race has that size. The class rule finds the base level if the
 // address moves; the address rule adds the chain.
 static const char* const kVinylReadbackRules = "len=1048576,pitch=512,height=512,fmt=6;addr=0x051A0000-0x051F7FFF";
@@ -625,7 +625,7 @@ static const char* const kVinylReadbackRules = "len=1048576,pitch=512,height=512
 // position and the velocity of 16,384 drops in four 128x128 k_32_32_FLOAT render targets, updated by one draw
 // of four colour targets in the first render phase and resolved to four 128 KB textures (guest 0x0561F000,
 // 0x0563F000, 0x0565F000, 0x0567F000 in the frame logs), the same memory that the rain's vertex shader fetches
-// as four vertex buffers (launcher/dev/rain-unscaled-copy-2026-10-28.md). No other resolve has that size, pitch,
+// as four vertex buffers (archive/fork-base/launcher/dev/rain-unscaled-copy-2026-10-28.md). No other resolve has that size, pitch,
 // height and format.
 static const char* const kRainUnscaledCopyRule = "len=131072,pitch=128,height=128,fmt=37";
 

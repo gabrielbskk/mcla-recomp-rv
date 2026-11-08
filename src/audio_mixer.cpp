@@ -23,7 +23,7 @@
 // much longer than its CPU time is a thread that waits to run, or on something that is not a CPU), and the delay
 // from the pump's signal (0x823ECA90, just before its call) to the wake-up. The hooks are in config/audio_mixer.toml;
 // without audio_stats each costs one relaxed load.
-// (launcher/dev/audio-mixer-2026-10-30.md)
+// (archive/fork-base/launcher/dev/audio-mixer-2026-10-30.md)
 
 #include "generated/default/mcla_init.h"
 
