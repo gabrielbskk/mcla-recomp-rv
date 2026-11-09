@@ -71,6 +71,40 @@ about five minutes, 288/215/173 per minute right after loading. The GPU was held
 at 475-550 MHz of 719 MHz by thermal levels 3-4. Tracked in
 [issue 1](https://github.com/gabrielbskk/mcla-recomp-rv/issues/1).
 
+The same day, after switching to the system Adreno driver, the first run
+started with 0 bytes of driver pipeline cache and created 782 pipelines in
+13.6 s (`Presenter: no guest frame for 15744 ms`); the next run loaded a
+15,170,901-byte cache and created 808 pipelines in 0.5 s. The loading screen
+then held 30.03 FPS at 615 MHz with the GPU 15% busy, but gameplay measured
+13.39 FPS with the GPU 96% busy at 348 MHz: the GPU was thermally limited
+(`max_clock_mhz` 295, `thermal_pwrlevel` 6, 81.2 C), so the driver comparison
+is not clean. The system-driver runs also locked the aspect ratio from a
+transient 1080x2340 surface, choosing a 1280x720 pillarboxed image instead of
+1560x720; tracked in
+[issue 4](https://github.com/gabrielbskk/mcla-recomp-rv/issues/4).
+
+The car-load burst was captured in the warm system-driver run: between
+02:15:15 and 02:15:24 the GPU thread created 76 pipelines and loaded about
+20 textures, the log skipped presenting a frame at 02:15:17, and the driver
+pipeline-cache file grew to 18,417,450 bytes in the same window. Two source
+changes now target that burst, not yet measured on the device:
+
+- `vulkan_async_skip_incomplete_frames_max_ms` defaults to 40 ms on Android
+  (`src/mcla_app.cpp`), so a frame that used a pipeline still being created
+  holds the last picture for at most about one 30 FPS interval instead of
+  100 ms.
+- The new `patches/rexglue-vulkan-pipeline-background-work.patch` sets the
+  pipeline creation and storage-writing threads to a lower priority on
+  Android, and defers the driver pipeline-cache save until the creation queue
+  has drained and no pipeline was created for 2 seconds, so a save of tens of
+  megabytes does not compete with a loading car.
+
+The remaining candidate, not changed: a pipeline first needed by a draw inside
+an occlusion query is still created on the GPU command thread (the SDK
+documented up to 400 ms for one such frame), and one queued by an earlier draw
+is waited for up to 500 ms. Both paths should be timed on the device before
+changing query behavior.
+
 The rear-light issue is currently isolated to the tested Turnip variants. Keep
 the system driver selected while investigating it. A wheel flicker was also
 reported on the same Turnip run and has not yet been reproduced on the system
