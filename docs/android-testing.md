@@ -93,6 +93,20 @@ performance. The spoofed `realme/RMX5070` string in old logs is not the phone
 model. Thermal throttling was observed, so FPS comparisons require similar
 temperature and cache conditions.
 
+## Optional shader pack
+
+The Android build does not ship the precompiled shader pack. If you have
+`545407F8.shaderpack` from the same graphics-code version, tap **SELECT SHADER
+PACK (.SHADERPACK)** in the launcher and choose the file. It is copied to
+`files/shaderpack/545407F8.shaderpack`; the game adds the shaders and pipelines
+it lacks at the next start. The pack holds no game data, only fingerprints and
+pipeline descriptions, and is optional. A pack made for another game or
+version is rejected with a `shader pack:` line in `files/logs/mcla_*.log`.
+
+This import path has not yet been measured on the device. Compare the pipeline
+creation burst and the car-load hold with and without the pack, one change at a
+time.
+
 ## Rebuilding the APK
 
 No build is performed by this documentation page. The source recipe is in

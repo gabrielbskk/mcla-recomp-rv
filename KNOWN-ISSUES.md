@@ -6,9 +6,11 @@
   [issue 2](https://github.com/gabrielbskk/mcla-recomp-rv/issues/2).
 - Sustained FPS is low and stutters remain. The first seconds after the city
   loads are the worst: the Android build ships without the precompiled shader
-  pack, so pipelines are translated on demand. Thermal throttling (GPU held at
-  475-550 MHz of 719 MHz in the Turnip run, 295-348 MHz in the later system
-  driver run) also limits the result. Tracked in
+  pack, so pipelines are translated on demand. The launcher can now import a
+  user-provided `545407F8.shaderpack` into `files/shaderpack/`, but that path
+  is not yet measured on the device. Thermal throttling (GPU held at 475-550 MHz
+  of 719 MHz in the Turnip run, 295-348 MHz in the later system driver run)
+  also limits the result. Tracked in
   [issue 1](https://github.com/gabrielbskk/mcla-recomp-rv/issues/1). Two
   mitigations are in the source but not yet measured on the device: the hold of
   the last picture while a pipeline is created is capped at 40 ms (about one
@@ -17,8 +19,10 @@
   the driver pipeline-cache save waits for a break in pipeline creation
   instead of writing tens of megabytes during a burst. The guest render height
   also defaults to 644 lines on Android (1396x644 on a 19.5:9 display, the
-  width following the aspect ratio) instead of 720, cutting the scene's fill
-  rate.
+  width following the aspect ratio) instead of 720, but this changes the
+  reported video mode and front-buffer copy; the game's own 3D passes are
+  created at a fixed 1280x720, so whether 644 reduces the scene's fill rate is
+  not yet measured.
 - The system driver removes the rear-light artifact but keeps a pipeline cache
   per driver: the first run after a switch started with 0 bytes of cache and
   created 782 pipelines in 13.6 s; the next run loaded a 15 MB cache and

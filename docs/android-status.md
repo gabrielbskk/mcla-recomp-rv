@@ -1,6 +1,6 @@
 # Android ARM64 status
 
-Last reviewed: 2026-11-08. This is the canonical handoff for the Android port.
+Last reviewed: 2026-11-09. This is the canonical handoff for the Android port.
 The important historical decisions are summarized in
 [android-history.md](android-history.md); the detailed build recipe is in
 [android-build.md](android-build.md).
@@ -20,7 +20,7 @@ not an x86 emulator or a Linux compatibility layer.
   earlier installed candidates. Touch was used only for launcher/menu
   navigation; it is not an in-game control method.
 - The Android launcher is in English and provides **SELECT TURNIP (.ZIP)**,
-  **USE SYSTEM DRIVER** and **PLAY**.
+  **USE SYSTEM DRIVER**, **SELECT SHADER PACK (.SHADERPACK)** and **PLAY**.
 - Single-gamepad input is the only currently supported and validated in-game
   input method. Two-gamepad/two-player input is not supported at this time.
   Keyboard and mouse support is possible through Android/SDL but remains
@@ -41,16 +41,18 @@ The SDK source is ReXGlue v0.10.0 at commit
 1. `patches/rexglue-android-arm64.patch`
 2. `patches/rexglue-turnip-loader.patch`
 3. `patches/rexglue-driver-cache-path.patch`
+4. `patches/rexglue-vulkan-pipeline-background-work.patch`
 
 The first patch is a reviewed combined SDK/fork delta, not an Android-only
 patch. The source strategy and future dedicated-fork option are documented in
 [android-sdk-source.md](android-sdk-source.md).
 
 The Java launcher imports the 13 extracted game files into app-private storage,
-loads an optional user-selected ARM64 Vulkan driver through AdrenoTools, and
-exports private logs to `Documents/MCLA/logs/` through MediaStore. Vulkan cache
-files are separated by driver identity and cache UUID. These final cache and
-log-name changes compiled but still require focused runtime validation.
+loads an optional user-selected ARM64 Vulkan driver through AdrenoTools, imports
+an optional `545407F8.shaderpack` into `files/shaderpack/`, and exports private
+logs to `Documents/MCLA/logs/` through MediaStore. Vulkan cache files are
+separated by driver identity and cache UUID. These final cache and log-name
+changes compiled but still require focused runtime validation.
 
 ## Evidence and limits
 
@@ -66,9 +68,11 @@ anti-aliasing off, LOD 0.5, traffic distance 250, no pedestrians or parked
 cars), SurfaceFlinger frame times were p50 33.4 ms (the 30 FPS cap), p95
 83-92 ms and max 133-225 ms, for 22-24 FPS. The log warned that no shader pack
 was present: `545407F8.shaderpack` exists in the desktop tree but is not in the
-APK assets and the launcher does not import it. 782 pipelines were created in
-about five minutes, 288/215/173 per minute right after loading. The GPU was held
-at 475-550 MHz of 719 MHz by thermal levels 3-4. Tracked in
+APK assets. The launcher now imports a user-provided pack into
+`files/shaderpack/`, where the native importer finds it; that path is not yet
+measured on the device. 782 pipelines were created in about five minutes,
+288/215/173 per minute right after loading. The GPU was held at 475-550 MHz of
+719 MHz by thermal levels 3-4. Tracked in
 [issue 1](https://github.com/gabrielbskk/mcla-recomp-rv/issues/1).
 
 The same day, after switching to the system Adreno driver, the first run
@@ -104,12 +108,15 @@ changes now target that burst, not yet measured on the device:
 - `mcla_render_height` defaults to 644 on Android (`src/aspect_ratio.cpp`,
   `src/mcla_app.cpp`): the guest video mode becomes 1396x644 on a 19.5:9
   display instead of 1560x720, with the width following the display aspect
-  ratio. The 3D scene and the HUD are drawn at that size and the presenter
-  scales the picture to the phone's screen. On a display whose aspect would
-  take the width below 1280 pixels (16:9 gives 1145), 720 is kept because the
-  SDK reports a mode below 1280x720/720 lines as standard definition to the
-  game. This is a fill-rate reduction, not a picture-quality option: it is
-  still 644 lines of real geometry, upscaled by the presenter.
+  ratio. This changes the mode reported to the game and the front-buffer copy.
+  It does not necessarily change the game's own 3D render targets: the
+  recompiled code creates textures at a fixed 1280x720 (`sub_8263D2A8`), and
+  the early logs show a 1280x720 MSAA pass even with a 1560x720 video mode.
+  Whether 644 lines reduce the scene's fill rate is not yet measured; the next
+  device log should show whether `larger tiles: ...` reports 1280x644 or
+  1280x720. On a display whose aspect would take the width below 1280 pixels
+  (16:9 gives 1145), 720 is kept because the SDK reports a mode below
+  1280x720/720 lines as standard definition to the game.
 
 The remaining candidate, not changed: a pipeline first needed by a draw inside
 an occlusion query is still created on the GPU command thread (the SDK

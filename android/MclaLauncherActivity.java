@@ -30,7 +30,10 @@ public final class MclaLauncherActivity extends Activity {
     private static final String TAG = "MCLA Import";
     private static final int PICK_GAME_FOLDER = 1;
     private static final int PICK_TURNIP_ZIP = 2;
+    private static final int PICK_SHADER_PACK = 3;
     private static final long MAX_DRIVER_BYTES = 128L * 1024 * 1024;
+    private static final long MAX_SHADER_PACK_BYTES = 64L * 1024 * 1024;
+    private static final String SHADER_PACK_NAME = "545407F8.shaderpack";
     private static final String[] REQUIRED = {
         "default.xex", "xarchive_audio.rpf", "xarchive_audlo.rpf",
         "xarchive_cache.rpf", "xarchive_music.rpf",
@@ -45,7 +48,9 @@ public final class MclaLauncherActivity extends Activity {
     private Button playButton;
     private Button driverButton;
     private Button systemButton;
+    private Button shaderButton;
     private TextView driverStatus;
+    private TextView shaderStatus;
     private ProgressBar progress;
 
     @Override
@@ -107,6 +112,21 @@ public final class MclaLauncherActivity extends Activity {
         });
         layout.addView(systemButton);
 
+        shaderStatus = new TextView(this);
+        layout.addView(shaderStatus);
+        updateShaderPackStatus();
+
+        shaderButton = new Button(this);
+        shaderButton.setText("Select shader pack (.shaderpack)");
+        shaderButton.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivityForResult(intent, PICK_SHADER_PACK);
+        });
+        layout.addView(shaderButton);
+
         playButton = new Button(this);
         playButton.setText("Play");
         playButton.setEnabled(hasGameFiles());
@@ -127,6 +147,20 @@ public final class MclaLauncherActivity extends Activity {
         driverStatus.setText(custom ? "Selected driver: Turnip (experimental)" :
                 "Selected driver: system");
         if (systemButton != null) systemButton.setEnabled(custom);
+    }
+
+    private File shaderPackFolder() {
+        return new File(getFilesDir(), "shaderpack");
+    }
+
+    private File shaderPackFile() {
+        return new File(shaderPackFolder(), SHADER_PACK_NAME);
+    }
+
+    private void updateShaderPackStatus() {
+        shaderStatus.setText(shaderPackFile().isFile()
+                ? "Shader pack: installed (optional)"
+                : "Shader pack: not installed (optional)");
     }
 
     private boolean hasGameFiles() {
@@ -154,6 +188,14 @@ public final class MclaLauncherActivity extends Activity {
             playButton.setEnabled(false);
             status.setText("Importing Turnip driver...");
             new Thread(() -> importDriver(uri), "MCLA Turnip import").start();
+            return;
+        }
+        if (requestCode == PICK_SHADER_PACK) {
+            Uri uri = data.getData();
+            if (uri == null) return;
+            shaderButton.setEnabled(false);
+            status.setText("Importing shader pack...");
+            new Thread(() -> importShaderPack(uri), "MCLA shader pack import").start();
             return;
         }
         if (requestCode != PICK_GAME_FOLDER) return;
@@ -318,6 +360,57 @@ public final class MclaLauncherActivity extends Activity {
                 driverButton.setEnabled(true);
                 playButton.setEnabled(hasGameFiles());
             });
+        }
+    }
+
+    private void importShaderPack(Uri uri) {
+        File folder = shaderPackFolder();
+        File part = new File(folder, SHADER_PACK_NAME + ".partial");
+        File target = shaderPackFile();
+        try {
+            if (!folder.isDirectory() && !folder.mkdirs())
+                throw new Exception("Could not create the shader pack folder.");
+            byte[] header = new byte[16];
+            int headerRead = 0;
+            long copied = 0;
+            try (InputStream input = getContentResolver().openInputStream(uri);
+                 FileOutputStream output = new FileOutputStream(part)) {
+                if (input == null) throw new Exception("Could not open the shader pack.");
+                byte[] buffer = new byte[64 * 1024];
+                int count;
+                while ((count = input.read(buffer)) != -1) {
+                    if (headerRead < header.length) {
+                        int take = Math.min(count, header.length - headerRead);
+                        System.arraycopy(buffer, 0, header, headerRead, take);
+                        headerRead += take;
+                    }
+                    copied += count;
+                    if (copied > MAX_SHADER_PACK_BYTES)
+                        throw new Exception("Shader pack exceeds 64 MiB.");
+                    output.write(buffer, 0, count);
+                }
+                output.getFD().sync();
+            }
+            if (headerRead < header.length || header[0] != 'M' || header[1] != 'C' ||
+                    header[2] != 'L' || header[3] != 'A' || header[4] != 'S' ||
+                    header[5] != 'P' || header[6] != 'K' || header[7] != '1')
+                throw new Exception("Not an MCLA shader pack.");
+            int title = (header[12] & 0xff) | ((header[13] & 0xff) << 8)
+                    | ((header[14] & 0xff) << 16) | ((header[15] & 0xff) << 24);
+            if (title != 0x545407F8)
+                throw new Exception("The shader pack is for another game.");
+            if (!part.renameTo(target))
+                throw new Exception("Could not save the shader pack.");
+            mainHandler.post(() -> {
+                updateShaderPackStatus();
+                status.setText("Shader pack imported. It will be added on the next start.");
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Shader pack import failed", e);
+            mainHandler.post(() -> status.setText("Shader pack import failed: " + e.getMessage()));
+        } finally {
+            part.delete();
+            mainHandler.post(() -> shaderButton.setEnabled(true));
         }
     }
 
