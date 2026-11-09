@@ -61,10 +61,23 @@ been tested. Clean-profile folder-picker import, final `.txt` log names,
 per-driver cache behavior, two-gamepad/two-player input, long sessions and
 formal FPS comparison remain open.
 
+On the 2026-11-09 run (Turnip Mesa 27.0.0-devel git-79cb04951e, shadows and
+anti-aliasing off, LOD 0.5, traffic distance 250, no pedestrians or parked
+cars), SurfaceFlinger frame times were p50 33.4 ms (the 30 FPS cap), p95
+83-92 ms and max 133-225 ms, for 22-24 FPS. The log warned that no shader pack
+was present: `545407F8.shaderpack` exists in the desktop tree but is not in the
+APK assets and the launcher does not import it. 782 pipelines were created in
+about five minutes, 288/215/173 per minute right after loading. The GPU was held
+at 475-550 MHz of 719 MHz by thermal levels 3-4. Tracked in
+[issue 1](https://github.com/gabrielbskk/mcla-recomp-rv/issues/1).
+
 The rear-light issue is currently isolated to the tested Turnip variants. Keep
-the system driver selected while investigating it. Do not treat the historical
-spoofed model string or a single screenshot as evidence about the physical
-device or a transient artifact.
+the system driver selected while investigating it. A wheel flicker was also
+reported on the same Turnip run and has not yet been reproduced on the system
+driver. Do not treat the historical spoofed model string or a single screenshot
+as evidence about the physical device or a transient artifact. Tracked in
+[issue 2](https://github.com/gabrielbskk/mcla-recomp-rv/issues/2) and
+[issue 3](https://github.com/gabrielbskk/mcla-recomp-rv/issues/3).
 
 ## Verification policy
 
