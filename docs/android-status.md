@@ -142,6 +142,13 @@ changes now target that burst, not yet measured on the device:
   the 10 ms logging threshold appeared in six short startup logs. These logs
   do not cover a controlled driving session or the car-load stutter; changing
   the pipeline wait defaults on this evidence would be premature.
+- A later short `0.1.6` run without the pack (`mcla_016.log`) prepared 516
+  pipelines from Vulkan storage at startup and created only three later;
+  there were no logged occlusion-query waits. A prior run with the pack
+  (`mcla_009.log`) created 410 pipelines over the run and logged one 13 ms
+  occlusion-query creation. The two runs differ in scene and cache state, so
+  they cannot establish the pack's effect on FPS. Use
+  `scripts/analyze_android_pipeline_log.py` on a matched driving comparison.
 
 The remaining candidate, now instrumented but not yet changed: a pipeline
 first needed by a draw inside an occlusion query is still created on the GPU

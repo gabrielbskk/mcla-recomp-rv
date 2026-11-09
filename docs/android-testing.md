@@ -133,6 +133,22 @@ Compare the frame times with and without the filter: a full-screen pass at
 
 ## Measuring the occlusion-query pipeline wait
 
+From Termux on the tested S23, summarize a private native log without copying
+game data or logs into Git:
+
+```sh
+su -c 'cat /data/user/0/org.mcla.recomp/files/logs/mcla_016.log' | \
+  python3 -I scripts/analyze_android_pipeline_log.py -
+```
+
+Replace the log number with the run being examined. The script counts pipeline
+creations and direct texture loads per second, and prints logged occlusion
+waits. A burst when Vulkan storage is first loaded is startup preparation;
+the useful driving comparison is the later burst in the same scene. Keep the
+driver, shader-pack state, game scene and thermal limit recorded for each run.
+The script does not measure frame times or prove that a pipeline caused an FPS
+drop.
+
 A draw inside an occlusion query waits for the pipeline it needs: one created
 right away can take a long time in the driver, and one queued by an earlier
 draw is waited for up to 500 ms. The build logs both times when they reach
