@@ -4,6 +4,7 @@
 #include "generated/default/mcla_init.h"
 
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <string>
 #include <thread>
@@ -27,6 +28,10 @@ REXCVAR_DEFINE_BOOL(mcla_larger_tiles, true, "MCLA",
                     "edram_tiles = 4096");
 REXCVAR_DEFINE_BOOL(mcla_fence_yield, true, "MCLA",
                     "Yield the CPU while the game waits on the GPU instead of spinning");
+REXCVAR_DEFINE_INT32(mcla_fence_sleep_us, 0, "MCLA",
+                     "Experimental: sleep this many microseconds after every 64 GPU fence "
+                     "polls, instead of only yielding; 0 preserves the tested behavior")
+    .range(0, 1000);
 
 namespace {
 
@@ -297,7 +302,12 @@ bool mcla_fence_spin() {
   // wake-up latency low; every so often give the core away entirely.
   static thread_local uint32_t spins = 0;
   if ((++spins & 0x3F) == 0) {
-    std::this_thread::yield();
+    const int sleep_us = REXCVAR_GET(mcla_fence_sleep_us);
+    if (sleep_us > 0) {
+      std::this_thread::sleep_for(std::chrono::microseconds(sleep_us));
+    } else {
+      std::this_thread::yield();
+    }
   } else {
 #if defined(_M_X64) || defined(__x86_64__)
     _mm_pause();

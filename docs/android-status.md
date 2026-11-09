@@ -149,6 +149,24 @@ changes now target that burst, not yet measured on the device:
   occlusion-query creation. The two runs differ in scene and cache state, so
   they cannot establish the pack's effect on FPS. Use
   `scripts/analyze_android_pipeline_log.py` on a matched driving comparison.
+- A 150-second driving session on `0.1.6`, system driver, no shader pack,
+  confirmed the reported stutter. SurfaceFlinger reported 2,873 presented
+  frames at 14.223 average FPS; its present-to-present histogram had p50 66 ms,
+  p95 110 ms, 437 intervals over 100 ms and 46 at least 200 ms. Of 150 GPU
+  samples, the maximum frequency was capped at 220 MHz for 44 and 295 MHz for
+  75; the remaining samples were 348 or 615 MHz. The native log prepared 520
+  pipelines from storage at startup, created 20 afterward, and reported no
+  occlusion-query wait above its 10 ms threshold. One thread of the host and
+  one guest thread each used roughly a CPU core in a point-in-time `top`
+  snapshot. These data show that pipeline creation alone does not explain the
+  driving stutter; thermal limits and CPU-side work are stronger candidates.
+  The raw GPU samples, SurfaceFlinger dump and native log are kept locally in
+  ignored `out/profiles/2026-11-09-stutter/`.
+- `mcla_fence_sleep_us` is an experimental CPU-side option for the guest's GPU
+  fence polling hook. The default 0 preserves the tested yield-only behavior;
+  a small value such as 50 sleeps that many microseconds after every 64 polls.
+  It compiles but has not been installed or measured. Check both frame times
+  and rendering correctness before considering a new default.
 
 The remaining candidate, now instrumented but not yet changed: a pipeline
 first needed by a draw inside an occlusion query is still created on the GPU

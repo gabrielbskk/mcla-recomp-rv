@@ -133,6 +133,18 @@ Compare the frame times with and without the filter: a full-screen pass at
 
 ## Measuring the occlusion-query pipeline wait
 
+The 2026-11-09 driving profile without a shader pack showed 14.223 average
+presented FPS and a 110 ms p95 frame interval while the GPU was usually
+limited to 220–295 MHz. It created only 20 pipelines after startup and logged
+no slow occlusion-query wait. Focus the next comparison on CPU time, thermal
+limit and frame intervals rather than assuming pipeline creation is the cause.
+
+An experimental build can set `mcla_fence_sleep_us = 50` in `files/mcla.toml`
+to sleep for up to 50 microseconds after every 64 GPU fence polls. The default
+is 0, which preserves the tested behavior. This is a CPU/heat hypothesis, not
+a verified speedup; compare with 0 in the same scene and stop if it introduces
+new visual artifacts or longer stalls.
+
 From Termux on the tested S23, summarize a private native log without copying
 game data or logs into Git:
 
