@@ -43,6 +43,7 @@ The SDK source is ReXGlue v0.10.0 at commit
 3. `patches/rexglue-driver-cache-path.patch`
 4. `patches/rexglue-vulkan-pipeline-background-work.patch`
 5. `patches/rexglue-vulkan-occlusion-query-pipeline-wait.patch`
+6. `patches/rexglue-android-present-filters.patch`
 
 The first patch is a reviewed combined SDK/fork delta, not an Android-only
 patch. The source strategy and future dedicated-fork option are documented in
@@ -139,6 +140,17 @@ driver. Do not treat the historical spoofed model string or a single screenshot
 as evidence about the physical device or a transient artifact. Tracked in
 [issue 2](https://github.com/gabrielbskk/mcla-recomp-rv/issues/2) and
 [issue 3](https://github.com/gabrielbskk/mcla-recomp-rv/issues/3).
+
+The picture itself is the guest image scaled to the screen by the presenter,
+with a bilinear filter. The new `patches/rexglue-android-present-filters.patch`
+compiles the presenter's spatial scaling filters (FidelityFX's Contrast
+Adaptive Sharpening and FSR 1, whose shaders are in the SDK tree and need
+neither its source nor its runtime) into the Android build, so
+`present_effect = "cas"` or `"fsr"` can be tried in `files/mcla.toml`. They
+are off by default: each is another pass over the whole picture, and the GPU
+is the limit on the tested phone. The temporal upscaler (`fsr2`, `fsr3`) still
+needs FidelityFX's runtime, which this build does not have, and is not
+offered. Not yet measured on the device.
 
 ## Verification policy
 

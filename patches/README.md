@@ -16,6 +16,11 @@ clean checkout:
    let both be bounded by a cvar (`vulkan_occlusion_query_pipeline_wait_ms`,
    `vulkan_occlusion_query_async_pipelines`) so their cost can be measured on
    the device before the behavior is changed.
+6. `rexglue-android-present-filters.patch` — compile the presenter's spatial
+   scaling filters (FidelityFX's Contrast Adaptive Sharpening and FSR 1, whose
+   shaders are in the SDK tree and need neither its source nor its runtime)
+   into the Android build, so `present_effect = cas` or `fsr` can be tried
+   there. The temporal upscaler still needs the runtime and is not offered.
 
 The first patch is a combined source delta and is intentionally pinned by
 SHA-256 in `scripts/ci/check_pins.py`; it is not described as Android-only.

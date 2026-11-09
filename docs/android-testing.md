@@ -107,6 +107,28 @@ This import path has not yet been measured on the device. Compare the pipeline
 creation burst and the car-load hold with and without the pack, one change at a
 time.
 
+## Sharper picture with the present filter
+
+The guest image is drawn at the guest video mode (1396x644 on a 19.5:9 display
+with the Android default) and scaled to the phone's screen by the presenter,
+which uses a bilinear filter. The build also carries FidelityFX's Contrast
+Adaptive Sharpening and FSR 1 as pixel shaders: they need neither
+FidelityFX's source nor its runtime, and they are compiled into the Android
+build. They are off by default because each is another pass over the whole
+picture, and the GPU is the limit on this phone. To try them, add a line to
+`files/mcla.toml`:
+
+```toml
+present_effect = "cas"
+```
+
+The options are `bilinear` (the default), `cas` and `fsr`. `cas` sharpens the
+upscaled image, `fsr` upscales it with EASU and sharpens it with RCAS (more
+passes, more GPU time). The temporal upscaler (`fsr2`, `fsr3`) needs
+FidelityFX's runtime, which this build does not have, so it is not offered.
+Compare the frame times with and without the filter: a full-screen pass at
+2340x1080 is not free on a thermally limited GPU.
+
 ## Measuring the occlusion-query pipeline wait
 
 A draw inside an occlusion query waits for the pipeline it needs: one created
