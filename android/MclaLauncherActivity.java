@@ -1,7 +1,9 @@
 package org.mcla.recomp;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -52,6 +54,7 @@ public final class MclaLauncherActivity extends Activity {
     private TextView driverStatus;
     private TextView shaderStatus;
     private ProgressBar progress;
+    private boolean playPending;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -173,6 +176,25 @@ public final class MclaLauncherActivity extends Activity {
     }
 
     private void startGame() {
+        if (playPending) return;
+        playPending = true;
+        playButton.setEnabled(false);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            openGame();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+        if (playPending && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            openGame();
+        }
+    }
+
+    private void openGame() {
+        playPending = false;
         startActivity(new Intent(this, MclaActivity.class));
         finish();
     }

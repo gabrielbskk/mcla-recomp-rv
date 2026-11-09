@@ -35,6 +35,12 @@ not an x86 emulator or a Linux compatibility layer.
   on the S23 with the system Vulkan driver and no shader pack. The log confirmed
   the default without a user override and a screenshot showed the 3D city
   intro. Driving and sustained FPS in this exact build are not yet verified.
+- APK `0.1.6` (code 6) fixes the launch rotation: SDL requested `FULL_USER`
+  after Android requested landscape, so the game could return to portrait when
+  device rotation was locked. The game activity now keeps landscape while SDL
+  initializes. The user confirmed that rotation works on the S23. This build
+  uses the same native game library as `0.1.4`; its Android launcher/activity
+  code changed.
 
 ## Android implementation
 
@@ -130,6 +136,12 @@ changes now target that burst, not yet measured on the device:
   (`thermal_pwrlevel = 7`); sampled GPU load was roughly 33–40% at that cap.
   This is an intro measurement, not a driving benchmark. Avoid comparing FPS
   across runs with different thermal limits.
+- In an `0.1.6` startup log without the shader pack, Vulkan loaded about
+  19.7 MB of driver pipeline-cache data and created 512 cached graphics
+  pipelines in roughly 0.35 seconds. No occlusion-query pipeline wait over
+  the 10 ms logging threshold appeared in six short startup logs. These logs
+  do not cover a controlled driving session or the car-load stutter; changing
+  the pipeline wait defaults on this evidence would be premature.
 
 The remaining candidate, now instrumented but not yet changed: a pipeline
 first needed by a draw inside an occlusion query is still created on the GPU

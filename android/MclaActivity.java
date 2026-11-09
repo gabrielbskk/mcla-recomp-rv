@@ -6,6 +6,7 @@ import android.os.PowerManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
@@ -25,6 +26,13 @@ public final class MclaActivity extends SDLActivity {
             logHandler.postDelayed(this, 60_000);
         }
     };
+
+    @Override
+    public void setRequestedOrientation(int orientation) {
+        // SDL can request FULL_USER for a resizable window, which returns this
+        // game to portrait when system auto-rotation is locked.
+        super.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+    }
 
     @Override
     protected void onCreate(Bundle state) {
