@@ -9,8 +9,10 @@ The private S23 and netbook handoffs stay outside Git because they contain
 local paths, game data, signing keys and infrastructure details. On the
 maintainer's Termux installation, read the latest
 `~/MCLA-2026-11-09-SESSION-HANDOFF.md`, then `~/MCLA-TERMUX-S23-HANDOFF.md`,
-`~/MCLA-PROJECT-LEDGER.md` and `~/MCLA-NETBOOK-OPERATIONS.md`. The private
-netbook copy keeps the same documents under the dated backup root.
+`~/MCLA-PROJECT-LEDGER.md` and `~/MCLA-NETBOOK-OPERATIONS.md`. Older private
+archive copies may exist; verify their dates and contents before relying on
+them for recovery. The latest local session handoff is not assumed to be
+synced elsewhere.
 
 ## Verified baseline
 
