@@ -18,10 +18,11 @@ synced elsewhere.
 
 The target is Android ARM64 on a Samsung Galaxy S23 with an Adreno 740. Inspect
 Git for the current commit instead of relying on a frozen hash here. The
-installed working reference is the `0.1.6` APK: 720-line default, system
+measured working reference is the `0.1.6` APK: 720-line default, system
 Vulkan driver, no shader pack in the long driving profile, and landscape
-rotation confirmed by the user. The `0.1.7` APK is an uninstalled experiment
-with an optional GPU fence sleep (off by default). The earlier pre-FPS `0.1.2`
+rotation confirmed by the user. The `0.1.7` APK was installed on 2026-11-09
+but has no gameplay or performance result yet. It has an optional GPU fence
+sleep, off by default. The earlier pre-FPS `0.1.2`
 APK remains backed up; the FPS overlay was reverted after it appeared to
 reduce performance. One generic wireless gamepad works. Two-player/two-gamepad
 support is not verified. Touch is planned.

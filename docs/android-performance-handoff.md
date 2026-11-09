@@ -23,10 +23,13 @@ fix. It is the installed build and the working reference for performance
 experiments. Version numbers in the APK are now correct; an earlier manifest
 hardcoded `0.1.0` despite the packaging script's higher version output.
 
-`0.1.7` is an **uninstalled experimental APK**. It adds
+`0.1.7` is an **installed experimental APK** as of 2026-11-09. It adds
 `mcla_fence_sleep_us`, default 0, so its new CPU-wait behavior is off until
-selected in `files/mcla.toml`. It compiled and packaged; no device result
-exists for it. Keep the installed and backed-up `0.1.6` as the reference.
+selected in `files/mcla.toml`. It compiled, packaged and installed with the
+compatible signature; no gameplay or performance result exists for it yet.
+Keep the backed-up and measured `0.1.6` as the reference. The installed
+`mcla.toml` did not contain `mcla_fence_sleep_us` at installation, so the
+experimental sleep was off.
 
 ## Long driving profile on `0.1.6`
 
