@@ -81,7 +81,10 @@ then held 30.03 FPS at 615 MHz with the GPU 15% busy, but gameplay measured
 is not clean. The system-driver runs also locked the aspect ratio from a
 transient 1080x2340 surface, choosing a 1280x720 pillarboxed image instead of
 1560x720; tracked in
-[issue 4](https://github.com/gabrielbskk/mcla-recomp-rv/issues/4).
+[issue 4](https://github.com/gabrielbskk/mcla-recomp-rv/issues/4). The source
+now takes the landscape orientation from that transient surface before using
+it, and the guest video mode width follows the same aspect ratio; not yet
+measured on the device.
 
 The car-load burst was captured in the warm system-driver run: between
 02:15:15 and 02:15:24 the GPU thread created 76 pipelines and loaded about
@@ -98,6 +101,15 @@ changes now target that burst, not yet measured on the device:
   Android, and defers the driver pipeline-cache save until the creation queue
   has drained and no pipeline was created for 2 seconds, so a save of tens of
   megabytes does not compete with a loading car.
+- `mcla_render_height` defaults to 644 on Android (`src/aspect_ratio.cpp`,
+  `src/mcla_app.cpp`): the guest video mode becomes 1396x644 on a 19.5:9
+  display instead of 1560x720, with the width following the display aspect
+  ratio. The 3D scene and the HUD are drawn at that size and the presenter
+  scales the picture to the phone's screen. On a display whose aspect would
+  take the width below 1280 pixels (16:9 gives 1145), 720 is kept because the
+  SDK reports a mode below 1280x720/720 lines as standard definition to the
+  game. This is a fill-rate reduction, not a picture-quality option: it is
+  still 644 lines of real geometry, upscaled by the presenter.
 
 The remaining candidate, not changed: a pipeline first needed by a draw inside
 an occlusion query is still created on the GPU command thread (the SDK

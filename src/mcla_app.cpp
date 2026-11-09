@@ -1081,6 +1081,12 @@ void MclaApp::ApplyPcDefaults() {
       // pipelines are compiled. One interval plus a little keeps the hold to a
       // single frame; the object appears as soon as its pipeline is ready.
       {"vulkan_async_skip_incomplete_frames_max_ms", "40"},
+      // The guest video mode (src/aspect_ratio.cpp, mcla_render_height): 644
+      // lines instead of the console's 720, the width following the display
+      // aspect ratio (1396x644 for 19.5:9). The 3D scene is drawn at this size
+      // and the presenter scales it to the phone's screen, which cuts the
+      // scene's fill rate on a GPU that is otherwise at its limit.
+      {"mcla_render_height", "644"},
 #endif
 #if REX_PLATFORM_WIN32
       {"d3d12_hoist_shared_memory_uploads", "true"},

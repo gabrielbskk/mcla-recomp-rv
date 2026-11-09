@@ -42,6 +42,12 @@ REXCVAR_DEFINE_BOOL(mcla_garage_aspect, true, "MCLA",
                     "Preserve garage movie proportions in ultrawide");
 REXCVAR_DEFINE_BOOL(mcla_gps_icon_aspect, true, "MCLA",
                     "Render the GPS native icon batch and cursor without HUD compression");
+REXCVAR_DEFINE_INT32(mcla_render_height, 720, "MCLA",
+                     "Guest video mode height in lines; the width follows the display aspect ratio. "
+                     "The scene and the HUD are drawn at this size and the presenter scales them to "
+                     "the screen. 720 on PC; 644 on Android, where the phone GPU is the limit")
+    .range(480, 1080)
+    .lifecycle(rex::cvar::Lifecycle::kRequiresRestart);
 
 namespace {
 
@@ -222,7 +228,20 @@ DisplaySize DetectAspectDisplay(rex::ui::Window* window) {
   }
 #endif
   if (window && window->GetActualPhysicalWidth() && window->GetActualPhysicalHeight()) {
-    return {window->GetActualPhysicalWidth(), window->GetActualPhysicalHeight(), "window surface"};
+    uint32_t width = window->GetActualPhysicalWidth();
+    uint32_t height = window->GetActualPhysicalHeight();
+    // On Android the surface can still report the portrait size (for example
+    // 1080x2340) for a moment while the activity is rotated to landscape. The
+    // game is always presented in landscape, so a taller-than-wide surface is
+    // that transient orientation: take the landscape orientation instead, or
+    // the guest width would be clamped to 1280 (16:9) and pillarboxed on a
+    // wider display (issue 4).
+    if (height > width) {
+      const uint32_t portrait_width = width;
+      width = height;
+      height = portrait_width;
+    }
+    return {width, height, "window surface"};
   }
   return {};
 }
@@ -299,12 +318,35 @@ void MclaApplyAspectRatio(rex::ui::Window* window) {
   }
   g_wide = guest_width > 1280;
   g_hud_correction = 1280.0 / guest_width;
-  rex::cvar::SetFlagFromCommandLine("video_mode_width", std::to_string(guest_width));
-  rex::cvar::SetFlagFromCommandLine("video_mode_height", "720");
+  // The guest video mode: the display aspect ratio's width and the render
+  // height chosen for the host. The game sizes its front buffer from this mode
+  // (XGetVideoMode), and it is set before the guest starts
+  // (OnPostLaunchModule), so the scene and the HUD are drawn at this size and
+  // the presenter scales them to the display.
+  uint32_t render_height = uint32_t(REXCVAR_GET(mcla_render_height));
+  uint32_t video_mode_width = uint32_t(
+      std::lround(double(guest_width) * double(render_height) / double(guest_height)));
+  if (rex::cvar::GetFlagSource("mcla_render_height") == rex::cvar::Source::kDefault &&
+      video_mode_width < 1280) {
+    // The SDK reports the mode to the game as high definition when the width is
+    // 1280 or more or the height is 720 or more. On a display whose aspect
+    // takes 644 lines below 1280 pixels wide (16:9 gives 1145), the game would
+    // switch to standard definition; keep 720 there. 644 is for wide displays
+    // (19.5:9 gives 1396x644, 21:9 gives 1539x644).
+    render_height = guest_height;
+    video_mode_width = guest_width;
+  }
+  // Render targets and the driver's tiled layouts are made in pairs of pixels
+  // at least; keep the width even.
+  video_mode_width = (video_mode_width + 1) & ~uint32_t(1);
+  rex::cvar::SetFlagFromCommandLine("video_mode_width", std::to_string(video_mode_width));
+  rex::cvar::SetFlagFromCommandLine("video_mode_height", std::to_string(render_height));
   rex::cvar::SetFlagFromCommandLine("present_letterbox", "true");
   REXLOG_INFO("aspect ratio: selection={} detected={}x{} source={} guest={}x{} ratio={:.6f} HUD={:.6f}",
               selection, detected.width, detected.height, detected.source,
               guest_width, guest_height, ratio, g_hud_correction);
+  REXLOG_INFO("render size: guest {}x{}; the presenter scales it to the display", video_mode_width,
+              render_height);
 }
 
 void MclaAspectPhase(uint8_t* base, uint32_t phase) {

@@ -12,10 +12,13 @@
   [issue 1](https://github.com/gabrielbskk/mcla-recomp-rv/issues/1). Two
   mitigations are in the source but not yet measured on the device: the hold of
   the last picture while a pipeline is created is capped at 40 ms (about one
-  30 FPS frame) instead of 100 ms, and pipeline compilation and driver
-  pipeline-cache writes run below the game and render threads on Android. The
-  driver pipeline-cache save also waits for a break in pipeline creation
-  instead of writing tens of megabytes during a burst.
+  30 FPS frame) instead of 100 ms, pipeline compilation and driver
+  pipeline-cache writes run below the game and render threads on Android, and
+  the driver pipeline-cache save waits for a break in pipeline creation
+  instead of writing tens of megabytes during a burst. The guest render height
+  also defaults to 644 lines on Android (1396x644 on a 19.5:9 display, the
+  width following the aspect ratio) instead of 720, cutting the scene's fill
+  rate.
 - The system driver removes the rear-light artifact but keeps a pipeline cache
   per driver: the first run after a switch started with 0 bytes of cache and
   created 782 pipelines in 13.6 s; the next run loaded a 15 MB cache and
@@ -24,8 +27,11 @@
   so this is not a clean comparison against Turnip's 22-24 FPS.
 - The aspect ratio can be taken from a transient portrait surface at startup
   (1080x2340), choosing a 1280x720 guest image that is pillarboxed on the
-  19.5:9 display; another run detects 2340x1080 and chooses 1560x720. Tracked
-  in [issue 4](https://github.com/gabrielbskk/mcla-recomp-rv/issues/4).
+  19.5:9 display; another run detects 2340x1080 and chooses 1560x720. The
+  source now takes the landscape orientation from that transient surface and
+  derives the guest video mode width from the aspect ratio; not yet measured.
+  Tracked in
+  [issue 4](https://github.com/gabrielbskk/mcla-recomp-rv/issues/4).
 - Wheels flicker in motion on Turnip; not yet reproduced on the system driver.
   Tracked in [issue 3](https://github.com/gabrielbskk/mcla-recomp-rv/issues/3).
 - Clean-profile folder import, final log filenames, per-driver cache behavior,
