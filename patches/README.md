@@ -7,6 +7,10 @@ clean checkout:
 1. `rexglue-android-arm64.patch` — the reviewed SDK/fork Android ARM64 delta.
 2. `rexglue-turnip-loader.patch` — optional user-selected Turnip loading.
 3. `rexglue-driver-cache-path.patch` — Vulkan cache separation by driver.
+4. `rexglue-vulkan-pipeline-background-work.patch` — on Android, run pipeline
+   compilation and pipeline-cache writes below the game and render threads, and
+   keep the driver pipeline-cache save out of a burst of new pipelines (for
+   example while a car loads).
 
 The first patch is a combined source delta and is intentionally pinned by
 SHA-256 in `scripts/ci/check_pins.py`; it is not described as Android-only.

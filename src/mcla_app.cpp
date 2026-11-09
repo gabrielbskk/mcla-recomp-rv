@@ -1073,6 +1073,14 @@ void MclaApp::ApplyPcDefaults() {
       // Keep the driver pipeline cache across launches on Android. The shader
       // description storage alone still recreates every VkPipeline each run.
       {"vulkan_pipeline_cache_file", "true"},
+      // With async pipeline creation, a frame that used a pipeline still being
+      // created is not presented: the last picture stays up, for up to
+      // vulkan_async_skip_incomplete_frames_max_ms (100 ms by default). At the
+      // 30 FPS cap the game runs at, 100 ms holds one picture for three frame
+      // intervals, which is most visible while a car loads and its new
+      // pipelines are compiled. One interval plus a little keeps the hold to a
+      // single frame; the object appears as soon as its pipeline is ready.
+      {"vulkan_async_skip_incomplete_frames_max_ms", "40"},
 #endif
 #if REX_PLATFORM_WIN32
       {"d3d12_hoist_shared_memory_uploads", "true"},

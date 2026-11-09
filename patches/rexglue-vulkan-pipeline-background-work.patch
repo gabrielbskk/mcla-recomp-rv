@@ -1,0 +1,87 @@
+--- a/include/rex/graphics/vulkan/pipeline_cache.h
++++ b/include/rex/graphics/vulkan/pipeline_cache.h
+@@ -472,6 +472,12 @@
+   // Pipelines have been created through vk_pipeline_cache_ since it was last
+   // saved.
+   std::atomic<bool> vk_pipeline_cache_dirty_{false};
++  // When a pipeline was last created through vk_pipeline_cache_, in
++  // microseconds on the steady clock (0 before the first one). A save waits
++  // for a short idle period so it doesn't start in the middle of a burst of
++  // new pipelines (a car loading, for example), when the CPU and the driver's
++  // pipeline cache are busiest.
++  std::atomic<uint64_t> vk_pipeline_cache_last_creation_us_{0};
+   // Size of the data in vk_pipeline_cache_path_ when it was loaded or last
+   // saved; the cache isn't written again while its size stays the same.
+   size_t vk_pipeline_cache_saved_size_ = 0;
+--- a/src/graphics/vulkan/pipeline_cache.cpp
++++ b/src/graphics/vulkan/pipeline_cache.cpp
+@@ -17,6 +17,7 @@
+ #ifdef _WIN32
+ #include <io.h>
+ #else
++#include <sys/resource.h>
+ #include <unistd.h>
+ #endif
+ #include <cstring>
+@@ -1043,9 +1044,22 @@
+   }
+   // Save the driver's pipeline cache now and then while new pipelines are
+   // being created, so they're kept even if the run doesn't end normally.
++  // A save waits for the creation queue to drain and for a short idle period
++  // first: during a burst of new pipelines (a car loading, for example) the
++  // CPU and the driver's cache are busiest, and reading the whole cache and
++  // writing tens of megabytes then costs frame time just when the game needs
++  // it. The shutdown save below still keeps everything if the run ends
++  // normally.
+   if (storage_write_thread_ && vk_pipeline_cache_dirty_.load(std::memory_order_relaxed)) {
+     auto now = std::chrono::steady_clock::now();
+-    if (now - vk_pipeline_cache_save_requested_ >= std::chrono::seconds(10)) {
++    uint64_t last_creation_us =
++        vk_pipeline_cache_last_creation_us_.load(std::memory_order_relaxed);
++    bool idle =
++        !last_creation_us ||
++        now - std::chrono::steady_clock::time_point(std::chrono::microseconds(last_creation_us)) >=
++            std::chrono::seconds(2);
++    if (idle && !IsCreatingPipelines() &&
++        now - vk_pipeline_cache_save_requested_ >= std::chrono::seconds(10)) {
+       vk_pipeline_cache_save_requested_ = now;
+       {
+         std::lock_guard<std::mutex> lock(storage_write_request_lock_);
+@@ -3849,6 +3863,11 @@
+   }
+   if (vk_pipeline_cache_ != VK_NULL_HANDLE) {
+     vk_pipeline_cache_dirty_.store(true, std::memory_order_relaxed);
++    vk_pipeline_cache_last_creation_us_.store(
++        uint64_t(std::chrono::duration_cast<std::chrono::microseconds>(
++                     std::chrono::steady_clock::now().time_since_epoch())
++                     .count()),
++        std::memory_order_relaxed);
+   }
+   bool was_placeholder =
+       creation_arguments.pipeline->second.is_placeholder.load(std::memory_order_acquire);
+@@ -3874,6 +3893,12 @@
+ }
+ 
+ void VulkanPipelineCache::CreationThread(size_t thread_index) {
++#if REX_PLATFORM_ANDROID
++  // Pipeline compilation is background work. Lower this thread's priority so
++  // a burst of new pipelines (a car loading, for example) doesn't take the CPU
++  // from the game and render threads; the compiler still uses idle cores.
++  setpriority(PRIO_PROCESS, 0, 10);
++#endif
+   while (true) {
+     PipelineCreationArguments creation_arguments;
+     {
+@@ -4065,6 +4090,12 @@
+ }
+ 
+ void VulkanPipelineCache::StorageWriteThread() {
++#if REX_PLATFORM_ANDROID
++  // Writing the driver's pipeline cache (tens of megabytes) is background work
++  // too: keep it below the game and render threads so a save doesn't compete
++  // with the frame while the game is loading.
++  setpriority(PRIO_PROCESS, 0, 10);
++#endif
+   ShaderStoredHeader shader_header;
+   // Don't leak anything in unused bits.
+   std::memset(&shader_header, 0, sizeof(shader_header));
