@@ -45,7 +45,7 @@ REXCVAR_DEFINE_BOOL(mcla_gps_icon_aspect, true, "MCLA",
 REXCVAR_DEFINE_INT32(mcla_render_height, 720, "MCLA",
                      "Guest video mode height in lines; the width follows the display aspect ratio. "
                      "The scene and the HUD are drawn at this size and the presenter scales them to "
-                     "the screen. 720 on PC; 644 on Android, where the phone GPU is the limit")
+                     "the screen. 720 is the tested default; lower values are experimental")
     .range(480, 1080)
     .lifecycle(rex::cvar::Lifecycle::kRequiresRestart);
 

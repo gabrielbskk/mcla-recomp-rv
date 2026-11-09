@@ -103,13 +103,15 @@ it lacks at the next start. The pack holds no game data, only fingerprints and
 pipeline descriptions, and is optional. A pack made for another game or
 version is rejected with a `shader pack:` line in `files/logs/mcla_*.log`.
 
-This import path has not yet been measured on the device. Compare the pipeline
-creation burst and the car-load hold with and without the pack, one change at a
-time.
+The user reports a small FPS loss with the pack and the system driver; no
+controlled frame-time comparison is available yet. A 2026-11-09 log showed
+1,721 pipeline descriptions added, but no shaders rebuilt. Compare the
+pipeline creation burst and the car-load hold with and without the pack, one
+change at a time. The pack is not required for gameplay.
 
 ## Sharper picture with the present filter
 
-The guest image is drawn at the guest video mode (1396x644 on a 19.5:9 display
+The guest image is drawn at the guest video mode (1560x720 on a 19.5:9 display
 with the Android default) and scaled to the phone's screen by the presenter,
 which uses a bilinear filter. The build also carries FidelityFX's Contrast
 Adaptive Sharpening and FSR 1 as pixel shaders: they need neither

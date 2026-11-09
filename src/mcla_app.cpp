@@ -1081,14 +1081,10 @@ void MclaApp::ApplyPcDefaults() {
       // pipelines are compiled. One interval plus a little keeps the hold to a
       // single frame; the object appears as soon as its pipeline is ready.
       {"vulkan_async_skip_incomplete_frames_max_ms", "40"},
-      // The guest video mode (src/aspect_ratio.cpp, mcla_render_height): 644
-      // lines instead of the console's 720, the width following the display
-      // aspect ratio (1396x644 for 19.5:9). This changes the mode reported to
-      // the game and the front-buffer copy. The game's own 3D render targets
-      // are created at a fixed 1280x720 (sub_8263D2A8), so whether the scene
-      // itself gets smaller is not established yet: the next device log shows
-      // it in "larger tiles: ...".
-      {"mcla_render_height", "644"},
+      // Keep the guest video mode at 720 lines. On the tested Galaxy S23,
+      // the experimental 644-line mode repeatedly faulted during loading;
+      // forcing 720 in mcla.toml allowed gameplay to start.
+      {"mcla_render_height", "720"},
 #endif
 #if REX_PLATFORM_WIN32
       {"d3d12_hoist_shared_memory_uploads", "true"},

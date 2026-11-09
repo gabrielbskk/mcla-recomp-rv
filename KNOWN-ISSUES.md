@@ -17,12 +17,10 @@
   30 FPS frame) instead of 100 ms, pipeline compilation and driver
   pipeline-cache writes run below the game and render threads on Android, and
   the driver pipeline-cache save waits for a break in pipeline creation
-  instead of writing tens of megabytes during a burst. The guest render height
-  also defaults to 644 lines on Android (1396x644 on a 19.5:9 display, the
-  width following the aspect ratio) instead of 720, but this changes the
-  reported video mode and front-buffer copy; the game's own 3D passes are
-  created at a fixed 1280x720, so whether 644 reduces the scene's fill rate is
-  not yet measured.
+  instead of writing tens of megabytes during a burst. The experimental
+  644-line guest video mode caused repeated guest access violations during
+  loading on the tested Galaxy S23. Forcing 720 lines allowed gameplay to
+  start; the Android default is restored to 720 in source, pending a rebuild.
 - A draw inside an occlusion query still waits for the pipeline it needs: one
   created right away can take up to 400 ms in the driver, and one queued by an
   earlier draw is waited for up to 500 ms. The source now logs both times and

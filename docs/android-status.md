@@ -107,18 +107,22 @@ changes now target that burst, not yet measured on the device:
   Android, and defers the driver pipeline-cache save until the creation queue
   has drained and no pipeline was created for 2 seconds, so a save of tens of
   megabytes does not compete with a loading car.
-- `mcla_render_height` defaults to 644 on Android (`src/aspect_ratio.cpp`,
-  `src/mcla_app.cpp`): the guest video mode becomes 1396x644 on a 19.5:9
-  display instead of 1560x720, with the width following the display aspect
-  ratio. This changes the mode reported to the game and the front-buffer copy.
-  It does not necessarily change the game's own 3D render targets: the
-  recompiled code creates textures at a fixed 1280x720 (`sub_8263D2A8`), and
-  the early logs show a 1280x720 MSAA pass even with a 1560x720 video mode.
-  Whether 644 lines reduce the scene's fill rate is not yet measured; the next
-  device log should show whether `larger tiles: ...` reports 1280x644 or
-  1280x720. On a display whose aspect would take the width below 1280 pixels
-  (16:9 gives 1145), 720 is kept because the SDK reports a mode below
-  1280x720/720 lines as standard definition to the game.
+- The experimental 644-line guest video mode repeatedly faulted while loading
+  on the tested Galaxy S23, with or without the shader pack. Setting
+  `mcla_render_height = 720` in the app's `mcla.toml` allowed the same installed
+  APK to reach gameplay. The source default has been restored to 720, but no
+  APK has been rebuilt from that change yet. The game's own 3D render targets
+  were already observed at a fixed 1280x720 (`sub_8263D2A8`), so a lower
+  guest video mode was not established as a 3D performance improvement.
+- With the system driver and shader pack, the user reports a small FPS loss.
+  The 2026-11-09 log showed 1,721 pipeline descriptions added, zero shaders
+  rebuilt, and one 13 ms occlusion-query pipeline creation. The same log showed
+  a 1280x720 4x MSAA tiled pass. Source comments identify this as the world
+  behind the pause menu or GPS map, not necessarily the ordinary driving
+  scene. These observations do not establish the pack as the cause of lower
+  sustained FPS; a controlled comparison is still needed. The next performance
+  experiment should profile the fixed 1280x720 scene and the present-to-screen
+  step separately, while retaining the working 720-line video mode.
 
 The remaining candidate, now instrumented but not yet changed: a pipeline
 first needed by a draw inside an occlusion query is still created on the GPU
