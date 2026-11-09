@@ -54,12 +54,6 @@ log-name changes compiled but still require focused runtime validation.
 
 ## Evidence and limits
 
-The Android FPS overlay was validated on the Galaxy S23 during gameplay. It
-counts game frame redraws over a half-second window and does not request
-additional presents. A captured driving scene showed 16.9 FPS with the overlay
-visible in the top-left corner. Generated frames, if enabled later, would need
-a separate presentation-rate measurement.
-
 The earlier warm-cache test reduced pipeline-storage preparation from about
 15.8 seconds to 0.47 seconds on two runs, but this does not establish higher
 sustained FPS. The tested phone uses 4 KiB pages; a 16 KiB page device has not

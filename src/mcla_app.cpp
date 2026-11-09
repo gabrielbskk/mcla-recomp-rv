@@ -4,7 +4,6 @@
 #include "automatic_api.h"
 #include "pc_triggers.h"
 
-#include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -1192,57 +1191,9 @@ class VideoBorders final : public rex::ui::ImGuiDialog {
   }
 };
 
-#ifdef __ANDROID__
-class FpsCounter final : public rex::ui::ImGuiDialog {
- public:
-  using Clock = std::chrono::steady_clock;
-  explicit FpsCounter(rex::ui::ImGuiDrawer* drawer) : ImGuiDialog(drawer) {}
-  bool RepaintsContinuously() const override { return false; }
-
- protected:
-  void OnDraw(ImGuiIO& io) override {
-    const auto now = Clock::now();
-    if (previous_ != Clock::time_point{} &&
-        now - previous_ < std::chrono::seconds(2)) {
-      ++frames_;
-      const double elapsed = std::chrono::duration<double>(now - sample_start_).count();
-      if (elapsed >= 0.5) {
-        fps_ = frames_ / elapsed;
-        frames_ = 0;
-        sample_start_ = now;
-      }
-    } else {
-      sample_start_ = now;
-      frames_ = 0;
-      fps_ = 0;
-    }
-    previous_ = now;
-    char label[32];
-    std::snprintf(label, sizeof(label), "FPS %.1f", fps_);
-    auto* draw = ImGui::GetForegroundDrawList();
-    const float scale = io.DisplayFramebufferScale.x > 0 ? io.DisplayFramebufferScale.x : 1.0f;
-    const ImVec2 position(16.0f * scale, 16.0f * scale);
-    const ImVec2 size = ImGui::CalcTextSize(label);
-    draw->AddRectFilled(ImVec2(position.x - 6, position.y - 4),
-                        ImVec2(position.x + size.x + 6, position.y + size.y + 4),
-                        IM_COL32(0, 0, 0, 170), 4.0f);
-    draw->AddText(position, IM_COL32(255, 255, 255, 255), label);
-  }
-
- private:
-  Clock::time_point previous_{};
-  Clock::time_point sample_start_{};
-  unsigned frames_ = 0;
-  double fps_ = 0;
-};
-#endif
-
 }
 
 void MclaApp::OnCreateDialogs(rex::ui::ImGuiDrawer* drawer) {
-#ifdef __ANDROID__
-  fps_counter_ = std::make_unique<FpsCounter>(drawer);
-#endif
   const auto* display = window();
   if (display && display->GetActualPhysicalHeight() &&
       uint64_t(display->GetActualPhysicalWidth()) * 9 >
@@ -1252,6 +1203,5 @@ void MclaApp::OnCreateDialogs(rex::ui::ImGuiDrawer* drawer) {
 }
 
 void MclaApp::OnShutdown() {
-  fps_counter_.reset();
   video_borders_.reset();
 }
