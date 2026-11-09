@@ -29,6 +29,10 @@ The packaging script keeps the debug signing key outside the repository by defau
 
 Without `MCLA_VERSION_CODE`, the script increments a counter outside the repository at `$PREFIX/share/mcla-recomp/version-code`. The default version name is `0.1.<versionCode>`. `MCLA_VERSION_CODE`, `MCLA_VERSION_NAME`, and `MCLA_VERSION_STATE_FILE` override this behavior for a reproducible or release build. The counter is written only after packaging, signature verification and ZIP alignment succeed.
 
+The source manifest omits `versionCode` and `versionName`; `aapt2 link` writes
+the values supplied by the build script. Check the packaged APK with
+`aapt dump badging out/android-arm64/MCLA-arm64.apk` before installation.
+
 Keep approved builds outside the repository: after testing an APK in game, copy it to `Download/MCLA-build-backups/` using a filename that includes the commit and version, then record its SHA-256 hash. The packager's `Download/MCLA-Recomp-arm64.apk` is replaced by each build; the backup folder is not. The rollback build `MCLA-arm64-pre-fps-925ae4b-v0.1.2.apk` is saved there as the pre-counter baseline. It was installed successfully, but its gameplay behavior still needs confirmation after the rebuild. Preserve the signing keystore too: an APK signed with a different key cannot update the installed package without removing its app data.
 
 ## Recreate the native build directories

@@ -30,8 +30,11 @@ not an x86 emulator or a Linux compatibility layer.
   artifact. The system driver removed that artifact in the user's comparison.
 - FPS remains low and stutters occur. GPU thermal and power limits were seen
   during testing, so no sustained performance improvement has been established.
-- The final local APK was built and statically checked, but that exact APK was
-  not installed or played after the final cache and log-export changes.
+- A local APK `0.1.4` (code 4) with the restored 720-line default was built,
+  signed with the existing compatible key, installed on 2026-11-09, and opened
+  on the S23 with the system Vulkan driver and no shader pack. The log confirmed
+  the default without a user override and a screenshot showed the 3D city
+  intro. Driving and sustained FPS in this exact build are not yet verified.
 
 ## Android implementation
 
@@ -110,8 +113,8 @@ changes now target that burst, not yet measured on the device:
 - The experimental 644-line guest video mode repeatedly faulted while loading
   on the tested Galaxy S23, with or without the shader pack. Setting
   `mcla_render_height = 720` in the app's `mcla.toml` allowed the same installed
-  APK to reach gameplay. The source default has been restored to 720, but no
-  APK has been rebuilt from that change yet. The game's own 3D render targets
+  APK to reach gameplay. The rebuilt `0.1.4` APK also reached the 3D city intro
+  with 720 as its compiled default. The game's own 3D render targets
   were already observed at a fixed 1280x720 (`sub_8263D2A8`), so a lower
   guest video mode was not established as a 3D performance improvement.
 - With the system driver and shader pack, the user reports a small FPS loss.
@@ -123,6 +126,10 @@ changes now target that burst, not yet measured on the device:
   sustained FPS; a controlled comparison is still needed. The next performance
   experiment should profile the fixed 1280x720 scene and the present-to-screen
   step separately, while retaining the working 720-line video mode.
+- During the `0.1.4` intro test, the phone's GPU maximum was capped at 295 MHz
+  (`thermal_pwrlevel = 7`); sampled GPU load was roughly 33–40% at that cap.
+  This is an intro measurement, not a driving benchmark. Avoid comparing FPS
+  across runs with different thermal limits.
 
 The remaining candidate, now instrumented but not yet changed: a pipeline
 first needed by a draw inside an occlusion query is still created on the GPU
