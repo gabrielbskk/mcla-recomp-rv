@@ -1,7 +1,7 @@
 # Repository preservation
 
 This repository is maintained as a source and documentation project. At the
-handoff commit `993a552`, it contains 497 tracked files and no tracked
+handoff commit `d2d77a2`, it contains 498 tracked files and no tracked
 worktree changes. The local `game` and `third_party` links used for development
 are outside Git and point to private data.
 
