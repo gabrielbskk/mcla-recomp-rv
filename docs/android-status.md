@@ -80,8 +80,9 @@ cars), SurfaceFlinger frame times were p50 33.4 ms (the 30 FPS cap), p95
 83-92 ms and max 133-225 ms, for 22-24 FPS. The log warned that no shader pack
 was present: `545407F8.shaderpack` exists in the desktop tree but is not in the
 APK assets. The launcher now imports a user-provided pack into
-`files/shaderpack/`, where the native importer finds it; that path is not yet
-measured on the device. 782 pipelines were created in about five minutes,
+`files/shaderpack/`, where the native importer finds it. A later import on the
+device added 1,721 pipeline descriptions; its FPS effect remains unmeasured
+under matched conditions. 782 pipelines were created in about five minutes,
 288/215/173 per minute right after loading. The GPU was held at 475-550 MHz of
 719 MHz by thermal levels 3-4. Tracked in
 [issue 1](https://github.com/gabrielbskk/mcla-recomp-rv/issues/1).
@@ -105,7 +106,8 @@ The car-load burst was captured in the warm system-driver run: between
 02:15:15 and 02:15:24 the GPU thread created 76 pipelines and loaded about
 20 textures, the log skipped presenting a frame at 02:15:17, and the driver
 pipeline-cache file grew to 18,417,450 bytes in the same window. Two source
-changes now target that burst, not yet measured on the device:
+changes target that burst. Their effect on this exact car-load event has not
+been isolated in a matched test:
 
 - `vulkan_async_skip_incomplete_frames_max_ms` defaults to 40 ms on Android
   (`src/mcla_app.cpp`), so a frame that used a pipeline still being created
