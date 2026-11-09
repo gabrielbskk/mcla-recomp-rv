@@ -42,9 +42,10 @@ not an x86 emulator or a Linux compatibility layer.
   uses the same native game library as `0.1.4`; its Android launcher/activity
   code changed.
 - APK `0.1.7` (code 7) was installed on 2026-11-09 with the same compatible
-  signature. Its optional `mcla_fence_sleep_us` remains at the default 0 in
-  the installed configuration. No gameplay or performance result exists for
-  this exact version yet; `0.1.6` remains the measured reference.
+  signature. After installation, the private `mcla.toml` was backed up and
+  `mcla_fence_sleep_us = 50` was set for a future test. No gameplay or
+  performance result exists for this setting yet; `0.1.6` remains the
+  measured reference.
 
 ## Android implementation
 

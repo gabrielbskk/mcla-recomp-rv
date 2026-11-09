@@ -28,8 +28,9 @@ hardcoded `0.1.0` despite the packaging script's higher version output.
 selected in `files/mcla.toml`. It compiled, packaged and installed with the
 compatible signature; no gameplay or performance result exists for it yet.
 Keep the backed-up and measured `0.1.6` as the reference. The installed
-`mcla.toml` did not contain `mcla_fence_sleep_us` at installation, so the
-experimental sleep was off.
+`mcla.toml` did not contain `mcla_fence_sleep_us` at installation. It was
+subsequently backed up and set to 50 microseconds for the next test; that
+setting has not been measured in gameplay.
 
 ## Long driving profile on `0.1.6`
 
