@@ -1,6 +1,9 @@
 * text=auto
 *.sh text eol=lf
 *.patch text eol=lf
+# A unified diff's context lines are a single space when the line is empty:
+# that is the format, not trailing whitespace to fix.
+*.patch -whitespace
 *.shaderpack binary
 # Files `rexglue codegen` rewrites at every build, always with LF line endings:
 # checked out with LF too, so that they do not show as modified (and `git pull`

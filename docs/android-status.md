@@ -42,6 +42,7 @@ The SDK source is ReXGlue v0.10.0 at commit
 2. `patches/rexglue-turnip-loader.patch`
 3. `patches/rexglue-driver-cache-path.patch`
 4. `patches/rexglue-vulkan-pipeline-background-work.patch`
+5. `patches/rexglue-vulkan-occlusion-query-pipeline-wait.patch`
 
 The first patch is a reviewed combined SDK/fork delta, not an Android-only
 patch. The source strategy and future dedicated-fork option are documented in
@@ -118,11 +119,18 @@ changes now target that burst, not yet measured on the device:
   (16:9 gives 1145), 720 is kept because the SDK reports a mode below
   1280x720/720 lines as standard definition to the game.
 
-The remaining candidate, not changed: a pipeline first needed by a draw inside
-an occlusion query is still created on the GPU command thread (the SDK
-documented up to 400 ms for one such frame), and one queued by an earlier draw
-is waited for up to 500 ms. Both paths should be timed on the device before
-changing query behavior.
+The remaining candidate, now instrumented but not yet changed: a pipeline
+first needed by a draw inside an occlusion query is still created on the GPU
+command thread (the SDK documented up to 400 ms for one such frame), and one
+queued by an earlier draw is waited for up to 500 ms. The new
+`patches/rexglue-vulkan-occlusion-query-pipeline-wait.patch` logs how long
+each of those two paths takes (a warning for every 10 ms or more), and adds two
+cvars so the behavior can be tested without a new build:
+`vulkan_occlusion_query_pipeline_wait_ms` (default 500, the SDK's own value;
+0 leaves the draw out right away) and `vulkan_occlusion_query_async_pipelines`
+(default off; on creates those pipelines in the background too and leaves the
+draws out until they are ready, which the query counts as hidden). Both paths
+still need to be timed on the device before the defaults are changed.
 
 The rear-light issue is currently isolated to the tested Turnip variants. Keep
 the system driver selected while investigating it. A wheel flicker was also

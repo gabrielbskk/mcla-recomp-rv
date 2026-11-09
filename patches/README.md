@@ -11,6 +11,11 @@ clean checkout:
    compilation and pipeline-cache writes below the game and render threads, and
    keep the driver pipeline-cache save out of a burst of new pipelines (for
    example while a car loads).
+5. `rexglue-vulkan-occlusion-query-pipeline-wait.patch` — time the pipeline
+   creation and the pipeline wait of the draws inside an occlusion query, and
+   let both be bounded by a cvar (`vulkan_occlusion_query_pipeline_wait_ms`,
+   `vulkan_occlusion_query_async_pipelines`) so their cost can be measured on
+   the device before the behavior is changed.
 
 The first patch is a combined source delta and is intentionally pinned by
 SHA-256 in `scripts/ci/check_pins.py`; it is not described as Android-only.

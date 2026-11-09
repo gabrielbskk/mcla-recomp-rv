@@ -107,6 +107,33 @@ This import path has not yet been measured on the device. Compare the pipeline
 creation burst and the car-load hold with and without the pack, one change at a
 time.
 
+## Measuring the occlusion-query pipeline wait
+
+A draw inside an occlusion query waits for the pipeline it needs: one created
+right away can take a long time in the driver, and one queued by an earlier
+draw is waited for up to 500 ms. The build logs both times when they reach
+10 ms:
+
+```text
+VulkanPipelineCache: the pipeline of a draw inside an occlusion query took N ms to create
+Vulkan: a draw inside an occlusion query waited N ms for the pipeline it needed
+```
+
+Both paths can be bounded without a new build, by adding a line to
+`files/mcla.toml` (the file the runtime reads at every start):
+
+```toml
+vulkan_occlusion_query_pipeline_wait_ms = 16
+vulkan_occlusion_query_async_pipelines = true
+```
+
+The first line caps the wait for a pipeline another draw queued; `0` leaves
+the draw out right away. The second creates those pipelines in the background
+too, leaving the draws out until they are ready, which the occlusion query
+counts as hidden: it trades the query's accuracy for a frame that does not
+wait for the driver. Remove a line to go back to the default. Compare one
+setting at a time, and keep the same driver, temperature and cache state.
+
 ## Rebuilding the APK
 
 No build is performed by this documentation page. The source recipe is in

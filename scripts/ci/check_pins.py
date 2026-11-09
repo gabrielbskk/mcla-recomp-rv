@@ -20,6 +20,7 @@ android_patches = [
     "rexglue-turnip-loader.patch",
     "rexglue-driver-cache-path.patch",
     "rexglue-vulkan-pipeline-background-work.patch",
+    "rexglue-vulkan-occlusion-query-pipeline-wait.patch",
 ]
 
 build_doc = (root / "docs" / "android-build.md").read_text(encoding="utf-8", errors="replace")
@@ -45,6 +46,7 @@ known_hashes = {
     "rexglue-turnip-loader.patch": "57b6794eb912fee5e9c82e2dd96809ca0e4c0c19901633ee6d316007c3a19bf1",
     "rexglue-driver-cache-path.patch": "1e6155c2b617ffc3e82b26472cc5586b20edf3e1773f354a781171aa1a13127e",
     "rexglue-vulkan-pipeline-background-work.patch": "4fd767bc374b994f8baaa11be2cbd189cf9214925a08e9d6f1097f8b5fcf60a2",
+    "rexglue-vulkan-occlusion-query-pipeline-wait.patch": "c28b0408e1a926146afad75dd6a2b4f41b5d69be2c3688c0d52e242df385f3b6",
 }
 for name, expected in known_hashes.items():
     path = patch_dir / name

@@ -23,6 +23,12 @@
   reported video mode and front-buffer copy; the game's own 3D passes are
   created at a fixed 1280x720, so whether 644 reduces the scene's fill rate is
   not yet measured.
+- A draw inside an occlusion query still waits for the pipeline it needs: one
+  created right away can take up to 400 ms in the driver, and one queued by an
+  earlier draw is waited for up to 500 ms. The source now logs both times and
+  bounds them with `vulkan_occlusion_query_pipeline_wait_ms` and
+  `vulkan_occlusion_query_async_pipelines`; the defaults are unchanged and
+  still need a device measurement.
 - The system driver removes the rear-light artifact but keeps a pipeline cache
   per driver: the first run after a switch started with 0 bytes of cache and
   created 782 pipelines in 13.6 s; the next run loaded a 15 MB cache and
