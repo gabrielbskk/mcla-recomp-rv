@@ -1,9 +1,14 @@
 # Repository preservation
 
 This repository is maintained as a source and documentation project. At the
-handoff commit `d2d77a2`, it contains 498 tracked files and no tracked
+handoff commit `36010d0`, it contains 498 tracked files and no tracked
 worktree changes. The local `game` and `third_party` links used for development
 are outside Git and point to private data.
+
+The `.gitignore` entries for `/game` and `/third_party` deliberately omit the
+trailing slash so that the local symlinks are ignored as well as real
+directories. A trailing slash matches directories only, which allowed
+`git add -A` to stage the symlinks and publish machine-local paths.
 
 ## Top-level map
 

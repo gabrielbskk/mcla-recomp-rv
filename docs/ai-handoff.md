@@ -13,7 +13,7 @@ netbook copy keeps the same documents under the dated backup root.
 ## Verified baseline
 
 The target is Android ARM64 on a Samsung Galaxy S23 with an Adreno 740. The
-public repository is at commit `d2d77a2`. The current baseline is the pre-FPS
+public repository is at commit `36010d0`. The current baseline is the pre-FPS
 APK `0.1.2`/versionCode `2`; the FPS overlay was reverted after it appeared to
 reduce performance. One generic wireless gamepad works. Two-player/two-gamepad
 support is not verified. Touch is planned.
