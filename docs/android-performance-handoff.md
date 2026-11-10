@@ -217,6 +217,16 @@ and the queue is empty. A pending sentinel and later wakeups still pump.
 `SDL3-shared` compiled and linked; no APK was generated or installed, and no
 performance improvement has been measured. The approved 0.1.7 stays intact.
 
+2026-11-10 follow-up: the SDL-only candidate was packaged as `0.1.8`
+(versionCode 8) and installed with `pm install -r` using the same signing
+certificate as `0.1.7`. SHA-256 of the candidate APK:
+`d29eb05cbcc350ca0898d1c63f824fe82b4bd69611a148e58f88b6dfcc82a99f`.
+The installed version and retained `mcla_fence_sleep_us = 0`, `mcla_fps = 60`,
+`vsync = false`, selected Turnip driver and imported pack were verified.
+No gameplay, controller, lifecycle or frame-time test of `0.1.8` has occurred.
+`0.1.7` remains the last user-approved gameplay build and its APK is preserved
+for rollback; do not present `0.1.8` as a performance improvement.
+
 Continue by reading the complete Android branch of `SDL_WaitEventTimeoutNS`
 and its Android wait implementation, then tracing the runtime's wakeup events
 and controller-update scheduling. The runtime currently calls `SDL_WaitEvent`
