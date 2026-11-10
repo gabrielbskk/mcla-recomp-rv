@@ -156,11 +156,90 @@ measurable effect is removing runtime shader compilation.
 
 The user's assessment is that the pack mainly adds heat and stability, not a
 large speedup. Keep it optional and do not present it as a general FPS fix.
-The GPU remains the limit in these runs. If stutter returns, the next useful
+The GPU clock caps are an important constraint, but these runs do not establish
+the relative CPU and GPU contribution to the stalls. If stutter returns, the next useful
 step is function-level CPU profiling during an authorized drive
 (`simpleperf`), not another pipeline-default change.
 
 ## Evidence and code entry points
+
+### CPU capture and latest handoff (2026-11-09 evening)
+
+The user authorized CPU profiling, drove, and then reported they had tested
+as much as they could. Do not ask for another drive just to repeat this capture.
+The successful retry used `simpleperf record -p 14899 -f 99
+--call-graph dwarf,8192 --post-unwind=yes --cpu-percent 5 --duration 90`.
+The resulting private file is `out/profiles/2026-11-09-simpleperf/perf.data`
+(6,919,920 bytes); the original is `MCLA-simpleperf-retry.data` in Downloads.
+An early report attempt while recording was still active said the file was
+invalid. After recording and post-unwinding finished, `simpleperf report`
+successfully read 33,449 samples. Earlier assistant statements that the retry
+had failed were premature. Neither simpleperf nor the game was still running
+when the completed file was inspected.
+
+The report covers all sampled process threads, not just SDLThread:
+
+| Thread | Share of sampled CPU cycles |
+| --- | ---: |
+| SDLThread | 28.52% |
+| XThread9C3A7140 | 22.56% |
+| XThread88F71140 | 12.19% |
+| GPU Commands (F | 7.25% |
+| Audio Worker (F | 2.11% |
+
+`__kernel_clock_gettime` on SDLThread accounts for 15.76% of all sampled
+cycles, or 55.23% when the report is filtered to SDLThread. The filtered report
+contains 8,596 samples. Recovered stacks include
+`SDLWindowedAppContext::RunMainMessageLoop`, `SDL_WaitEventTimeoutNS`,
+`SDL_PumpEventsInternal`, `SDL_UpdateJoysticks` and `HIDAPI_UpdateDevices`.
+These are CPU-cycle shares, not frame-time shares or a demonstrated FPS gain.
+Some VDSO samples lack useful caller attribution; their cost must not all be
+assigned to controller polling. Guest threads also have significant cost.
+
+Capture limitations: recording started near launch, without a reliable marker
+separating loading from driving. The attempted synchronized sensor collector
+failed because its output directory was wrong. There is no valid temperature
+and `thermal_pwrlevel` time series for this profile. SurfaceFlinger statistics
+read later include other windows and are not a matched driving measurement.
+Preserve the raw CPU profile and do not claim a controlled A/B result.
+
+### Intended code work and current stopping point
+
+The user explicitly requested a code change after the capture. The proposed
+target was unnecessary repeated work in the Android SDL event/controller path.
+Only source inspection happened before the user interrupted to request this
+documentation: no runtime code change, new APK, installation or performance
+fix resulted from that investigation.
+
+Continue by reading the complete Android branch of `SDL_WaitEventTimeoutNS`
+and its Android wait implementation, then tracing the runtime's wakeup events
+and controller-update scheduling. The runtime currently calls `SDL_WaitEvent`
+in its main message loop. Event maintenance calls `SDL_UpdateJoysticks`, which
+calls HIDAPI device updates. Merely appearing in the stack does not prove
+excessive polling. Do not infer Android behavior from the non-Android polling
+fallback in the same SDL source file.
+
+Use the saved call graphs to identify a concrete redundant wakeup or busy-wait
+before choosing the edit. Implement one isolated, reversible change in that
+path if confirmed, preserving gamepad input, vibration, hotplug and Android
+lifecycle handling. No polling interval has been selected. Do not disable
+HIDAPI or add an arbitrary sleep solely from the current sample percentages.
+Record SDK/SDL changes reproducibly in the repository's patch/build recipe;
+`third_party` points to a shared SDK checkout, so a local edit alone is not a
+reproducible delivery. Keep the approved 0.1.7 APK and signing key available.
+Any eventual device comparison must use the same driver, pack, scene and
+settings and collect thermal data alongside CPU and frame timings.
+
+### Additional external-device evidence
+
+Downloads now also contains a Mali-G52 MC2 user's log. It fails on the same
+missing `vertexPipelineStoresAndAtomics` capability as all three Poco X7 Pro
+Mali-G720 MC7 logs, before graphics-provider creation. These logs establish a
+driver/backend capability rejection, not corrupt game data or measured
+performance. The exact G52 phone model and installed APK identity are unverified.
+PanVK alternatives were researched, but no driver was installed or integrated
+for these users. The user explicitly deferred Mali driver work; it is not the
+current objective.
 
 Private raw evidence on the S23 is in the ignored
 `out/profiles/2026-11-09-stutter/` directory: `gpu.csv`, the MCLA native log
