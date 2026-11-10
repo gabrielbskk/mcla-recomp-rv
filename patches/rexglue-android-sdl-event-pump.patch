@@ -1,0 +1,38 @@
+diff --git a/thirdparty/sdl3/src/events/SDL_events.c b/thirdparty/sdl3/src/events/SDL_events.c
+--- a/thirdparty/sdl3/src/events/SDL_events.c
++++ b/thirdparty/sdl3/src/events/SDL_events.c
+@@ -1681,6 +1681,9 @@
+ {
+     Uint64 start, expiration;
+     bool include_sentinel = (timeoutNS == 0);
++#ifdef SDL_PLATFORM_ANDROID
++    bool pumped_on_entry = false;
++#endif
+     int result;
+ 
+     if (timeoutNS > 0) {
+@@ -1694,6 +1697,9 @@
+     // If there isn't a poll sentinel event pending, pump events and add one
+     if (SDL_GetAtomicInt(&SDL_sentinel_pending) == 0) {
+         SDL_PumpEventsInternal(true);
++#ifdef SDL_PLATFORM_ANDROID
++        pumped_on_entry = true;
++#endif
+     }
+ 
+     // First check for existing events
+@@ -1733,7 +1739,13 @@
+ 
+ #ifdef SDL_PLATFORM_ANDROID
+     for (;;) {
+-        SDL_PumpEventsInternal(true);
++        // The entry pump already ran event maintenance before the first peek.
++        // Do not repeat joystick/HIDAPI updates before the first wait; later
++        // wakeups still need a fresh pump, as does an entry with a sentinel.
++        if (!pumped_on_entry) {
++            SDL_PumpEventsInternal(true);
++        }
++        pumped_on_entry = false;
+ 
+         if (SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_EVENT_FIRST, SDL_EVENT_LAST) > 0) {
+             return true;

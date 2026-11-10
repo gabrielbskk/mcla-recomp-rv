@@ -21,6 +21,9 @@ clean checkout:
    shaders are in the SDK tree and need neither its source nor its runtime)
    into the Android build, so `present_effect = cas` or `fsr` can be tried
    there. The temporal upscaler still needs the runtime and is not offered.
+7. `rexglue-android-sdl-event-pump.patch` — avoid a second joystick/HIDAPI
+   maintenance pump before the first Android event wait when the entry pump
+   has already run. Later wakeups and lifecycle events retain the SDL path.
 
 The first patch is a combined source delta and is intentionally pinned by
 SHA-256 in `scripts/ci/check_pins.py`; it is not described as Android-only.

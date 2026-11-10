@@ -58,6 +58,12 @@ The SDK source is ReXGlue v0.10.0 at commit
 4. `patches/rexglue-vulkan-pipeline-background-work.patch`
 5. `patches/rexglue-vulkan-occlusion-query-pipeline-wait.patch`
 6. `patches/rexglue-android-present-filters.patch`
+7. `patches/rexglue-android-sdl-event-pump.patch`
+
+The seventh patch removes one redundant initial Android SDL event-maintenance
+pump when the event queue is empty and the entry pump already ran. It does not
+change subsequent wakeups or polling intervals. It is a code candidate, not
+a measured performance fix; the approved 0.1.7 APK is unchanged.
 
 The first patch is a reviewed combined SDK/fork delta, not an Android-only
 patch. The source strategy and future dedicated-fork option are documented in

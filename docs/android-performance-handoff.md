@@ -211,6 +211,12 @@ Only source inspection happened before the user interrupted to request this
 documentation: no runtime code change, new APK, installation or performance
 fix resulted from that investigation.
 
+In the following implementation session, a narrow Android SDL patch removed
+the duplicate first event-maintenance pump when the entry pump already ran
+and the queue is empty. A pending sentinel and later wakeups still pump.
+`SDL3-shared` compiled and linked; no APK was generated or installed, and no
+performance improvement has been measured. The approved 0.1.7 stays intact.
+
 Continue by reading the complete Android branch of `SDL_WaitEventTimeoutNS`
 and its Android wait implementation, then tracing the runtime's wakeup events
 and controller-update scheduling. The runtime currently calls `SDL_WaitEvent`
