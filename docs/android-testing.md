@@ -133,6 +133,9 @@ stall while the presenter repeatedly showed the same image; do not use it as
 an FPS measurement or a fix. Remove all experimental settings and restart to
 restore the defaults.
 
+The public reproduction matrix and limitations for the Turnip A740 artifact
+are in [turnip-a740-rendering-artifacts.md](turnip-a740-rendering-artifacts.md).
+
 ## Optional shader pack
 
 The Android build does not ship the precompiled shader pack. If you have
