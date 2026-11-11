@@ -28,6 +28,13 @@ clean checkout:
    record size so importers can reject incompatible packed-bitfield layouts.
 9. `rexglue-android-present-stats.patch` — retain the last 256 successful
    Android host-presentation timestamps for optional FPS and timing summaries.
+10. `rexglue-vulkan-frame-start-sync.patch` — experimental, opt-in Vulkan
+    submission-fence waits at the start of each guest frame, each new
+    submission, or only after an eligible guest primary command buffer ends.
+    All are disabled by default. On the tested A740, waiting at frame start
+    did not help; waiting before every submission removed the artifact but
+    reduced FPS substantially. The selective wait also did not remove the
+    artifact and reduced FPS. Keep all three modes disabled by default.
 
 The first patch is a combined source delta and is intentionally pinned by
 SHA-256 in `scripts/ci/check_pins.py`; it is not described as Android-only.

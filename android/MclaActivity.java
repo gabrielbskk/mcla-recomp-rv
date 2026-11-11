@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.system.Os;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.util.Log;
@@ -14,8 +15,10 @@ import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import org.libsdl.app.SDLActivity;
 import java.io.File;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 
 public final class MclaActivity extends SDLActivity {
     private static final String TAG = "MCLA";
@@ -36,6 +39,7 @@ public final class MclaActivity extends SDLActivity {
 
     @Override
     protected void onCreate(Bundle state) {
+        applyDriverDebugEnvironment();
         File source = new File(getApplicationInfo().nativeLibraryDir, "librexgpu-xenos.so");
         File target = new File(getFilesDir(), "librexgpu-xenos.so");
         try (FileInputStream input = new FileInputStream(source);
@@ -59,6 +63,54 @@ public final class MclaActivity extends SDLActivity {
             }
         }
         applyImmersiveMode();
+    }
+
+    private void applyDriverDebugEnvironment() {
+        // The Vulkan driver is loaded during SDLActivity.onCreate. Keep this
+        // private, opt-in diagnostic setting outside mcla.toml and apply it first.
+        File config = new File(getFilesDir(), "driver.env");
+        String debug = null;
+        try {
+            if (config.exists()) {
+                if (!config.isFile() || config.length() > 512) {
+                    throw new IllegalArgumentException("driver.env must be a file of at most 512 bytes");
+                }
+                try (BufferedReader reader = new BufferedReader(new FileReader(config))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        line = line.trim();
+                        if (line.isEmpty() || line.startsWith("#")) continue;
+                        if (debug != null || !line.startsWith("TU_DEBUG=")) {
+                            throw new IllegalArgumentException("driver.env accepts one TU_DEBUG entry");
+                        }
+                        debug = line.substring("TU_DEBUG=".length());
+                        if (!debug.equals("noubwc") && !debug.equals("syncdraw") &&
+                                !debug.equals("flushall") && !debug.equals("nolrz") &&
+                                !debug.equals("sysmem")) {
+                            throw new IllegalArgumentException("unsupported TU_DEBUG value");
+                        }
+                    }
+                }
+            }
+            if (debug == null) {
+                // Activities can start again in the same process after changing
+                // driver.env. Never carry the previous test into the next run.
+                if (Os.getenv("TU_DEBUG") != null) {
+                    Os.unsetenv("TU_DEBUG");
+                    Log.i(TAG, "Driver debug: TU_DEBUG cleared");
+                }
+            } else {
+                Os.setenv("TU_DEBUG", debug, true);
+                Log.i(TAG, "Driver debug: TU_DEBUG=" + Os.getenv("TU_DEBUG"));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Could not apply driver.env; no driver debug test is active", e);
+            try {
+                Os.unsetenv("TU_DEBUG");
+            } catch (Exception clearError) {
+                Log.e(TAG, "Could not clear TU_DEBUG", clearError);
+            }
+        }
     }
 
     @Override

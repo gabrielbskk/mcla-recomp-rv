@@ -61,6 +61,7 @@ The SDK source is ReXGlue v0.10.0 at commit
 7. `patches/rexglue-android-sdl-event-pump.patch`
 8. `patches/rexglue-pipeline-storage-layout.patch`
 9. `patches/rexglue-android-present-stats.patch`
+10. `patches/rexglue-vulkan-frame-start-sync.patch` (experimental; disabled by default)
 
 The seventh patch removes one redundant initial Android SDL event-maintenance
 pump when the event queue is empty and the entry pump already ran. It does not

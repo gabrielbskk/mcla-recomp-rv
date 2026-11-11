@@ -25,6 +25,7 @@ android_patches = [
     "rexglue-android-sdl-event-pump.patch",
     "rexglue-pipeline-storage-layout.patch",
     "rexglue-android-present-stats.patch",
+    "rexglue-vulkan-frame-start-sync.patch",
 ]
 
 build_doc = (root / "docs" / "android-build.md").read_text(encoding="utf-8", errors="replace")
@@ -55,6 +56,7 @@ known_hashes = {
     "rexglue-android-sdl-event-pump.patch": "bc697f8d5bf95dfef0d2e62e4e426c727eb9145616ae796fee99e6a20c021912",
     "rexglue-pipeline-storage-layout.patch": "6443791149b1d33979269cf28b27fc76f0df258c06a290b530af94687e317e3a",
     "rexglue-android-present-stats.patch": "e9457c30aab4b00962f7c47b3e2cafe01de6fd52f8a39a8bcc199d9993cd6ef7",
+    "rexglue-vulkan-frame-start-sync.patch": "7f0622859910bb2bb3a90f5cb93a99fa76f19f7b4ac2503e3a223e5692a89b06",
 }
 for name, expected in known_hashes.items():
     path = patch_dir / name

@@ -93,6 +93,46 @@ performance. The spoofed `realme/RMX5070` string in old logs is not the phone
 model. Thermal throttling was observed, so FPS comparisons require similar
 temperature and cache conditions.
 
+### Turnip driver debug switches (diagnostic APK)
+
+To isolate a Turnip rendering artifact, put exactly one line in the app-private
+`files/driver.env` before starting the game, for example `TU_DEBUG=noubwc`.
+The Android activity applies it before SDL loads Vulkan and logs the applied
+value under the `MCLA` Android logcat tag. Supported values are `noubwc`,
+`syncdraw`, `flushall`, `nolrz` and `sysmem`; do not combine them in one run.
+Restart the game after changing or removing the file. Delete `driver.env`
+after testing to return to normal driver behavior. These switches may reduce
+performance; compare the same scene and keep the shader and pipeline caches.
+
+`TU_DEBUG=syncdraw` removed both rear-light and wheel flashes on the tested
+Adreno 740, while `noubwc` and `nolrz` did not. This does not establish that a
+wait once per frame is sufficient: `syncdraw` also affects draws within a
+frame. APK 0.1.13 adds an experimental, disabled-by-default Vulkan test. With
+`driver.env` removed, set `vulkan_sync_at_frame_start = true` and
+`vulkan_sync_at_frame_start_frames = 0` in `files/mcla.toml` and restart the
+game. `0` waits for all submitted work; values up to `3` permit that many
+prior *submissions* in flight, not necessarily whole frames. The GPU log
+reports wait counts and total microseconds in roughly two-second intervals.
+On the tested A740, this frame-start wait did **not** remove either artifact.
+APK 0.1.14 adds `vulkan_sync_at_submission = true` as a separate opt-in test:
+wait for the preceding submission before beginning the next one. This does
+not serialize draws within a submission. On the tested A740 it removed both
+artifacts, but reduced host-presentation FPS from about 29 to 15 in the tested
+sessions. With `vulkan_submit_on_primary_buffer_end = false`, the artifacts
+returned despite the wait. APK 0.1.15 adds a separate experimental option,
+`vulkan_sync_after_primary_buffer_end = true`, to wait only for submissions
+closed at eligible guest primary command-buffer boundaries. Session 051
+confirmed that this selective wait did not remove the artifact: median host
+presentation was 22.5 FPS, with about 40 waits and 1.39 seconds blocked per
+two-second interval. The usable workaround remains `TU_DEBUG=syncdraw` with
+threaded submission enabled (session 040: 28.8 FPS median, no artifact).
+Test each mode separately, without `driver.env`, and restart after changing
+`mcla.toml`.
+`vulkan_threaded_submission_split_draws = 1` caused the loading screen to
+stall while the presenter repeatedly showed the same image; do not use it as
+an FPS measurement or a fix. Remove all experimental settings and restart to
+restore the defaults.
+
 ## Optional shader pack
 
 The Android build does not ship the precompiled shader pack. If you have
