@@ -1193,7 +1193,11 @@ namespace {
 class FpsCounter final : public rex::ui::ImGuiDialog {
  public:
   explicit FpsCounter(rex::ui::ImGuiDrawer* drawer) : ImGuiDialog(drawer) {}
-  bool RepaintsContinuously() const override { return false; }
+  // OnDraw samples the presenter and writes the periodic log. Without UI
+  // repaints neither happens if the guest presents off the UI thread.
+  bool RepaintsContinuously() const override {
+    return REXCVAR_GET(mcla_fps_overlay) || REXCVAR_GET(mcla_fps_log);
+  }
 
  protected:
   void OnDraw(ImGuiIO&) override {

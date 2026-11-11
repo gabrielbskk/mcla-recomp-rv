@@ -54,6 +54,45 @@ frame-time test of 0.1.9 has occurred yet; the previous 0.1.8 APK remains
 preserved for rollback. Do not present 0.1.9 as a performance improvement
 until matched measurements exist.
 
+### FPS repaint follow-up (2026-11-11)
+
+The 0.1.9 game log contains no `host presentation` summaries: the FPS dialog
+had `RepaintsContinuously() = false`, so its sampling and logging callback was
+not guaranteed to run when guest presentation happened off the UI thread.
+The follow-up requests UI paints whenever either the overlay or the log is
+enabled. This may add UI work and must be measured on the S23; no Android cost
+measurement has been made. Both flags disabled means no continuous FPS paint.
+
+The user's next comparison is **without the shader pack** and with Turnip 27.
+Remove only the active `.shaderpack` file (retain a private backup); preserve
+the entire shareable shader storage. In particular, the valid native 66-byte
+FBO entries must stay, and the `.xsh` file must not be deleted just because
+the pack is no longer present: it may contain shaders used by native entries.
+The previously claimed `fsi` hash count at stride 68 was a mistaken comparison
+against the native 66-byte file and does not establish that every 68-byte
+record was invalid. The selected driver `.so` hash did **not** match the
+Turnip-27 ZIP found under `Download/MCLA/`: `mcla_029.log` confirms it is
+Mesa **26.3.0-devel** (`git-a995eaeda4`), while `mcla_028.log` was Mesa
+**27.0.0-devel** (`git-79cb04951e`). Explicitly import the desired 27 ZIP
+through the launcher before claiming a matched driver comparison.
+Do not infer a driver's identity solely from its `selected.txt` filename.
+After a matched no-pack driving baseline, change only
+`gpu_allow_invalid_fetch_constants`, then measure again. No occlusion-query
+behavior change is authorized without measurement.
+
+The repaint follow-up was packaged as **0.1.10** (versionCode 10), SHA-256
+`1d17567d508de55d0f54d269c7e7560f76badf50ceb67dfd60f0b481828d6bf7`,
+installed with `pm install -r` without clearing data. The active shader-pack
+file was renamed to `545407F8.shaderpack.disabled` in the app's private
+`shaderpack` directory (reversible). All existing shader-storage files were
+left untouched. The APK is at
+`Download/MCLA/MCLA-fps-repaint-v0.1.10.apk`; 0.1.9 and earlier rollback APKs
+remain. No gameplay or on-device FPS-log verification of 0.1.10 yet. The
+selected driver was still 26.3 at installation; the user must explicitly
+import `Download/MCLA/Turnip-v27.0.0-20261107-8G2-OneUI.zip` via the launcher
+before the requested 27/no-pack driving run. Verify `driverInfo` in the next
+native log; do not infer driver identity from the launcher status text.
+
 The device is a Samsung Galaxy S23, 8 GB RAM, 256 GB storage, Adreno 740.
 The user confirmed that one gamepad works and that the `0.1.6` launch rotation
 works. With the system Vulkan driver, the user saw no rear-light flash that
