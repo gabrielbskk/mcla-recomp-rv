@@ -93,6 +93,44 @@ import `Download/MCLA/Turnip-v27.0.0-20261107-8G2-OneUI.zip` via the launcher
 before the requested 27/no-pack driving run. Verify `driverInfo` in the next
 native log; do not infer driver identity from the launcher status text.
 
+### 0.1.10 user run and next configuration test (2026-11-11)
+
+`mcla_030.log` confirms the 27.0.0-devel driver (`git-79cb04951e`), no active
+pack, and a working FPS dialog/log. The user observed high FPS **during
+loading**. The host-presentation metric includes UI-only paints and repeats
+of the same guest frame, and loading can be uncapped; a 256-sample window
+reported up to 290.30 host presents/s. This is **not** evidence of gameplay
+above the configured `mcla_fps = 60`; pipeline creation near a spike does
+not prove it caused the spike. Other log windows include roughly 12–25 host
+presents/s, but these are not matched before/after performance measurements.
+
+The next APK keeps raw host-present FPS/p50/p95 in the log and changes only
+overlay presentation: above a positive `mcla_fps` target it displays
+`Host FPS 60+ (target 60)` instead of an unqualified 290 or a falsely exact
+60. Other targets update dynamically; a nonpositive target shows raw host
+rate without a target. This does not change frame pacing.
+The user also requested the *separate* `gpu_allow_invalid_fetch_constants`
+experiment. This option changes how the emulator handles guest texture/vertex
+fetch constants whose type is marked invalid; it is **not** a Turnip Vulkan
+driver setting or a demonstrated headlight/wheel fix. Back up the old config,
+set it to `true`, and leave driver/pack/cache/occlusion unchanged. Since the
+overlay and config changes are bundled at the user's request, performance
+differences cannot be attributed to either without an additional controlled
+run. Visuals and warnings can be compared against `mcla_030.log`.
+
+The **0.1.11** APK (versionCode 11) containing the overlay text correction
+was signed with the same key and installed via `pm install -r`; SHA-256:
+`950969465f0db6b263919bdcbba007c53c9835dc0ceb1281ae8905bf8ac978f0`.
+The APK is `Download/MCLA/MCLA-fps-target-invalid-fetch-test-v0.1.11.apk`.
+In the app-private `mcla.toml`, `gpu_allow_invalid_fetch_constants = true`
+was added after backing up the prior file as
+`mcla.toml.before-invalid-fetch-2026-11-11`. The current FPS target remains
+60, Turnip 27 is still selected, the pack remains disabled, and no cache was
+removed. This combination is **not yet tested in gameplay**. Compare texture
+artifacts and the two previous invalid-fetch warnings against `mcla_030.log`;
+if regressions occur, restore only the flag to false. No occlusion-query
+behavior was changed.
+
 The device is a Samsung Galaxy S23, 8 GB RAM, 256 GB storage, Adreno 740.
 The user confirmed that one gamepad works and that the `0.1.6` launch rotation
 works. With the system Vulkan driver, the user saw no rear-light flash that

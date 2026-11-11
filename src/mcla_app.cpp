@@ -51,6 +51,7 @@
 #include <rex/system/interfaces/graphics.h>
 
 #ifdef __ANDROID__
+REXCVAR_DECLARE(int32_t, mcla_fps);  // Defined in frame_timing.cpp.
 REXCVAR_DEFINE_BOOL(mcla_fps_overlay, true, "MCLA",
                     "Show successful host-present FPS (not guest swaps or display scanout)");
 REXCVAR_DEFINE_BOOL(mcla_fps_log, true, "MCLA",
@@ -1234,8 +1235,18 @@ class FpsCounter final : public rex::ui::ImGuiDialog {
       }
     }
     if (overlay) {
-      char text[48];
-      std::snprintf(text, sizeof(text), "FPS %.1f (host)", fps_);
+      char text[80];
+      // The loading path can run uncapped, and UI-only host paints can repeat
+      // the same guest frame. Do not present those as a higher gameplay FPS.
+      // Keep the uncapped host-present value in the log for investigation.
+      const int32_t target_fps = REXCVAR_GET(mcla_fps);
+      if (target_fps > 0 && fps_ > target_fps) {
+        std::snprintf(text, sizeof(text), "Host FPS %d+ (target %d)", target_fps, target_fps);
+      } else if (target_fps > 0) {
+        std::snprintf(text, sizeof(text), "Host FPS %.1f (target %d)", fps_, target_fps);
+      } else {
+        std::snprintf(text, sizeof(text), "Host FPS %.1f", fps_);
+      }
       auto* draw = ImGui::GetForegroundDrawList();
       const ImVec2 size = ImGui::CalcTextSize(text);
       draw->AddRectFilled(ImVec2(10, 10), ImVec2(22 + size.x, 22 + size.y),
