@@ -5,6 +5,8 @@
 #include "pc_triggers.h"
 
 #include <cstdint>
+#include <chrono>
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -45,6 +47,15 @@
 #include <rex/runtime.h>
 #include <rex/system.h>
 #include <rex/system/gpu_plugin.h>
+#include <rex/ui/presenter.h>
+#include <rex/system/interfaces/graphics.h>
+
+#ifdef __ANDROID__
+REXCVAR_DEFINE_BOOL(mcla_fps_overlay, true, "MCLA",
+                    "Show successful host-present FPS (not guest swaps or display scanout)");
+REXCVAR_DEFINE_BOOL(mcla_fps_log, true, "MCLA",
+                    "Log host-present FPS and interval percentiles every five seconds");
+#endif
 
 REXCVAR_DEFINE_STRING(mcla_gpu_backend, "any", "MCLA",
                       "Graphics backend for the Xenos GPU plugin: any, vulkan or d3d12")
@@ -1178,6 +1189,63 @@ void MclaApp::OnPostSetup() {
 
 namespace {
 
+#ifdef __ANDROID__
+class FpsCounter final : public rex::ui::ImGuiDialog {
+ public:
+  explicit FpsCounter(rex::ui::ImGuiDrawer* drawer) : ImGuiDialog(drawer) {}
+  bool RepaintsContinuously() const override { return false; }
+
+ protected:
+  void OnDraw(ImGuiIO&) override {
+    const bool overlay = REXCVAR_GET(mcla_fps_overlay);
+    const bool logging = REXCVAR_GET(mcla_fps_log);
+    if (!overlay && !logging) return;
+    const auto now = std::chrono::steady_clock::now();
+    if (now - sampled_ >= std::chrono::milliseconds(500)) {
+      sampled_ = now;
+      auto* runtime = rex::Runtime::instance();
+      auto* graphics = runtime ? runtime->graphics_system() : nullptr;
+      auto* presenter = graphics ? graphics->presenter() : nullptr;
+      if (!presenter) return;
+      auto times = presenter->GetRecentPresentationTimes();
+      const uint64_t now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+          now.time_since_epoch()).count();
+      const uint64_t cutoff = now_ns > 2'000'000'000 ? now_ns - 2'000'000'000 : 0;
+      times.erase(times.begin(), std::lower_bound(times.begin(), times.end(), cutoff));
+      fps_ = p50_ = p95_ = 0;
+      if (times.size() >= 2 && times.back() > times.front()) {
+        fps_ = double(times.size() - 1) * 1e9 / double(times.back() - times.front());
+        std::vector<double> intervals;
+        for (size_t i = 1; i < times.size(); ++i) {
+          intervals.push_back(double(times[i] - times[i - 1]) / 1e6);
+        }
+        std::sort(intervals.begin(), intervals.end());
+        p50_ = intervals[(intervals.size() - 1) / 2];
+        p95_ = intervals[(intervals.size() * 95 + 99) / 100 - 1];
+      }
+      if (logging && now - logged_ >= std::chrono::seconds(5)) {
+        logged_ = now;
+        REXLOG_INFO("host presentation (recent 2s): {:.2f} FPS, p50 {:.2f} ms, p95 {:.2f} ms; "
+                    "{} samples, not display scanout", fps_, p50_, p95_, times.size());
+      }
+    }
+    if (overlay) {
+      char text[48];
+      std::snprintf(text, sizeof(text), "FPS %.1f (host)", fps_);
+      auto* draw = ImGui::GetForegroundDrawList();
+      const ImVec2 size = ImGui::CalcTextSize(text);
+      draw->AddRectFilled(ImVec2(10, 10), ImVec2(22 + size.x, 22 + size.y),
+                          IM_COL32(0, 0, 0, 180), 4);
+      draw->AddText(ImVec2(16, 16), IM_COL32(255, 255, 255, 255), text);
+    }
+  }
+
+ private:
+  std::chrono::steady_clock::time_point sampled_{}, logged_{};
+  double fps_ = 0, p50_ = 0, p95_ = 0;
+};
+#endif
+
 class VideoBorders final : public rex::ui::ImGuiDialog {
  public:
   explicit VideoBorders(rex::ui::ImGuiDrawer* drawer) : ImGuiDialog(drawer) {}
@@ -1206,6 +1274,9 @@ class VideoBorders final : public rex::ui::ImGuiDialog {
 }
 
 void MclaApp::OnCreateDialogs(rex::ui::ImGuiDrawer* drawer) {
+#ifdef __ANDROID__
+  fps_counter_ = std::make_unique<FpsCounter>(drawer);
+#endif
   const auto* display = window();
   if (display && display->GetActualPhysicalHeight() &&
       uint64_t(display->GetActualPhysicalWidth()) * 9 >
@@ -1215,5 +1286,6 @@ void MclaApp::OnCreateDialogs(rex::ui::ImGuiDrawer* drawer) {
 }
 
 void MclaApp::OnShutdown() {
+  fps_counter_.reset();
   video_borders_.reset();
 }

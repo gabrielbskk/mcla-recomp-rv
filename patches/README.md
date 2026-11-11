@@ -24,6 +24,10 @@ clean checkout:
 7. `rexglue-android-sdl-event-pump.patch` — avoid a second joystick/HIDAPI
    maintenance pump before the first Android event wait when the entry pump
    has already run. Later wakeups and lifecycle events retain the SDL path.
+8. `rexglue-pipeline-storage-layout.patch` — expose the native Vulkan pipeline
+   record size so importers can reject incompatible packed-bitfield layouts.
+9. `rexglue-android-present-stats.patch` — retain the last 256 successful
+   Android host-presentation timestamps for optional FPS and timing summaries.
 
 The first patch is a combined source delta and is intentionally pinned by
 SHA-256 in `scripts/ci/check_pins.py`; it is not described as Android-only.

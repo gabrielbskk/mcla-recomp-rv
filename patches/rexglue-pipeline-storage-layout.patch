@@ -1,0 +1,36 @@
+diff --git a/include/rex/graphics/shader_storage.h b/include/rex/graphics/shader_storage.h
+--- a/include/rex/graphics/shader_storage.h
++++ b/include/rex/graphics/shader_storage.h
+@@ -12,6 +12,7 @@
+ #pragma once
+ 
+ #include <cstdint>
++#include <rex/platform.h>
+ 
+ namespace rex::graphics::shader_storage {
+ 
+@@ -23,4 +24,12 @@
+ // <title>.fbo.vk.xpso and <title>.fsi.vk.xpso: 'XEPS', 0 or 1, then this version byte-swapped.
+ inline constexpr uint32_t kVulkanPipelineStorageVersion = 0x20260228;
+ 
++// Packed pipeline bitfields are ABI-dependent. pipeline_cache.cpp checks this
++// public stride against sizeof(PipelineStoredDescription) in the active build.
++#if REX_PLATFORM_ANDROID
++inline constexpr uint32_t kVulkanPipelineStorageRecordSize = 66;
++#else
++inline constexpr uint32_t kVulkanPipelineStorageRecordSize = 68;
++#endif
++
+ }  // namespace rex::graphics::shader_storage
+diff --git a/src/graphics/vulkan/pipeline_cache.cpp b/src/graphics/vulkan/pipeline_cache.cpp
+--- a/src/graphics/vulkan/pipeline_cache.cpp
++++ b/src/graphics/vulkan/pipeline_cache.cpp
+@@ -590,6 +590,8 @@
+                          SpirvShaderTranslator::Modification::kVersion) ==
+                 shader_storage::kVulkanPipelineStorageVersion);
+   static_assert(ShaderStoredHeader::kVersion == shader_storage::kShaderStorageVersion);
++  static_assert(sizeof(PipelineStoredDescription) == shader_storage::kVulkanPipelineStorageRecordSize,
++                "Update the public storage stride for this compiler ABI");
+   const uint32_t pipeline_storage_version_swapped = rex::byte_swap(
+       std::max(PipelineDescription::kVersion, SpirvShaderTranslator::Modification::kVersion));
+   struct {

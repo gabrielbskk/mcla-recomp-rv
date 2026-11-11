@@ -23,6 +23,8 @@ android_patches = [
     "rexglue-vulkan-occlusion-query-pipeline-wait.patch",
     "rexglue-android-present-filters.patch",
     "rexglue-android-sdl-event-pump.patch",
+    "rexglue-pipeline-storage-layout.patch",
+    "rexglue-android-present-stats.patch",
 ]
 
 build_doc = (root / "docs" / "android-build.md").read_text(encoding="utf-8", errors="replace")
@@ -51,6 +53,8 @@ known_hashes = {
     "rexglue-vulkan-occlusion-query-pipeline-wait.patch": "c28b0408e1a926146afad75dd6a2b4f41b5d69be2c3688c0d52e242df385f3b6",
     "rexglue-android-present-filters.patch": "a0225b43527a9d8b2208caa70b4921b3e72b191aabadd5f668af85fa8f1dfe70",
     "rexglue-android-sdl-event-pump.patch": "bc697f8d5bf95dfef0d2e62e4e426c727eb9145616ae796fee99e6a20c021912",
+    "rexglue-pipeline-storage-layout.patch": "6443791149b1d33979269cf28b27fc76f0df258c06a290b530af94687e317e3a",
+    "rexglue-android-present-stats.patch": "e9457c30aab4b00962f7c47b3e2cafe01de6fd52f8a39a8bcc199d9993cd6ef7",
 }
 for name, expected in known_hashes.items():
     path = patch_dir / name

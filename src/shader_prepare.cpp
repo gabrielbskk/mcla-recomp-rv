@@ -954,6 +954,17 @@ constexpr ListSpec kLists[] = {
 };
 constexpr size_t kListCount = std::size(kLists);
 
+// Pack records describe the producer's ABI. Native storage may use a
+// different packed-bitfield layout despite sharing the same format version.
+size_t NativeRecordSize(const ListSpec& spec) {
+#ifdef __ANDROID__
+  if (std::string_view(spec.name).ends_with(".vk.xpso")) {
+    return ss::kVulkanPipelineStorageRecordSize;
+  }
+#endif
+  return spec.record_size;
+}
+
 std::array<uint8_t, 12> ListHeader(const ListSpec& spec) {
   std::array<uint8_t, 12> h{};
   const uint32_t words[3] = {0x53504558, spec.magic_api, ByteSwap32(spec.version)};
@@ -1091,7 +1102,13 @@ Pack ReadPack(const std::filesystem::path& path) {
       if (Hash(l.records.back().data() + 8, record_size - 8) != Le64(l.records.back().data()))
         throw bad();
     }
-    pack.lists.push_back(std::move(l));
+    if (NativeRecordSize(kLists[spec]) != record_size) {
+      REXLOG_WARN("shader pack: skipping {} pipeline records: pack stride {}, native stride {}; "
+                  "preserving native storage and importing shaders only for this list",
+                  name, record_size, NativeRecordSize(kLists[spec]));
+    } else {
+      pack.lists.push_back(std::move(l));
+    }
   }
   if (p != d.size() - 8) throw bad();
   return pack;
@@ -1140,10 +1157,11 @@ StoredFile ReadPipelineStorage(const std::filesystem::path& path, const ListSpec
   if (!f.present || d.size() < 12 || std::memcmp(d.data(), header.data(), 12) != 0) return f;
   f.header_ok = true;
   size_t p = 12;
-  while (p + spec.record_size <= d.size() &&
-         Hash(d.data() + p + 8, spec.record_size - 8) == Le64(d.data() + p)) {
+  const size_t record_size = NativeRecordSize(spec);
+  while (p + record_size <= d.size() &&
+         Hash(d.data() + p + 8, record_size - 8) == Le64(d.data() + p)) {
     f.keys.insert(Le64(d.data() + p));
-    p += spec.record_size;
+    p += record_size;
   }
   f.valid.assign(d.begin(), d.begin() + p);
   return f;
@@ -1769,7 +1787,7 @@ bool RetireStale(const Import& im) {
   for (size_t k = 0; k < kListCount; ++k) {
     const StoredFile& f = im.lists[k];
     if (!f.header_ok) continue;
-    const size_t rs = kLists[k].record_size;
+    const size_t rs = NativeRecordSize(kLists[k]);
     std::vector<uint8_t> data(f.valid.begin(), f.valid.begin() + 12);
     size_t removed = 0;
     for (size_t p = 12; p + rs <= f.valid.size(); p += rs) {
@@ -1947,7 +1965,7 @@ void WriteStamp(rex::Runtime* runtime, const std::string& report) {
       std::string entry = fmt::format("{}:{{\"size\":{}", mcla::shader_storage::JsonString(name), size);
       for (const ListSpec& spec : kLists)
         if (name == spec.name && size >= 12)
-          entry += fmt::format(",\"count\":{}", (uint64_t(size) - 12) / spec.record_size);
+          entry += fmt::format(",\"count\":{}", (uint64_t(size) - 12) / NativeRecordSize(spec));
       files += (files.empty() ? "" : ",") + entry + "}";
     }
   }

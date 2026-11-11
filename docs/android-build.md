@@ -51,6 +51,8 @@ git -C third_party/rexglue-sdk apply "$PATCHES/rexglue-vulkan-pipeline-backgroun
 git -C third_party/rexglue-sdk apply "$PATCHES/rexglue-vulkan-occlusion-query-pipeline-wait.patch"
 git -C third_party/rexglue-sdk apply "$PATCHES/rexglue-android-present-filters.patch"
 git -C third_party/rexglue-sdk apply "$PATCHES/rexglue-android-sdl-event-pump.patch"
+git -C third_party/rexglue-sdk apply "$PATCHES/rexglue-pipeline-storage-layout.patch"
+git -C third_party/rexglue-sdk apply "$PATCHES/rexglue-android-present-stats.patch"
 ```
 
 If the SDK checkout already exists, start with a clean copy at that commit instead of cloning over it. Do not apply a patch twice. The first patch contains the fork's SDK changes as well as Android ARM64 support; the later ones add optional Turnip loading, per-driver Vulkan cache files, lower-priority pipeline compilation and cache writing on Android, the timing and the cvar bounds of the occlusion-query pipeline wait, the presenter's scaling filters, and a reduced initial SDL event pump on Android.

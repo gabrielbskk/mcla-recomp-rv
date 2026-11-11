@@ -7,6 +7,41 @@ Git. Do not interpret compilation or an APK install as a gameplay fix.
 
 ## Tested configuration and user observations
 
+### 0.1.9 candidate implementation (2026-11-11)
+
+The user now requests an FPS overlay enabled by default plus periodic log
+summaries. This supersedes the earlier no-overlay preference. Android options
+`mcla_fps_overlay` and `mcla_fps_log` default to true. The overlay samples
+successful host presentations every 500 ms, and the log reports the recent
+two-second window every five seconds (FPS, p50, p95 and sample count).
+The SDK retains at most 256 timestamps. These are host-present completion
+intervals, not guest swaps, UI callback counts or SurfaceFlinger scanout;
+repeated host presentations of the same guest image may be counted. No
+continuous repaint is requested solely for the counter. The extra rendering
+and instrumentation cost has not been measured.
+
+The shader-pack investigation found incompatible packed Vulkan pipeline
+records: the imported lists use 68 bytes, while this Android compiler's native
+records use 66. All 407 native FBO records and all 474 pack-format FSI records
+in the inspected files passed XXH3 validation at their respective strides.
+Simply changing the pack parser's stride would invalidate its input; the
+candidate instead exposes the native SDK record size and skips importing
+incompatible pipeline lists after validating them. Native storage reading,
+retirement and stamp counts use the native stride. Compatible shader import
+continues and native pipelines can still be learned during gameplay. No cache
+deletion is necessary for the valid native FBO file inspected in this session.
+This avoids the repeated import/rejection cycle without claiming a portable
+bitfield conversion. Full cross-compiler pipeline conversion remains future work.
+
+Earlier conversational conclusions were too broad: the loaded driver Vulkan
+cache is distinct from rejected shareable pipeline descriptions, and a failed
+first record does not establish that every record is independently corrupt.
+Neither invalid texture-fetch warnings nor YUV fallback messages identify the
+headlight/wheel draws. No texture fix or gain from enabling invalid fetch
+constants is established; that option stays unchanged. Likewise, absence of
+artifacts on the system driver points to a driver/backend interaction, not
+proof that the driver alone is at fault. Local driver builds are deferred.
+
 The device is a Samsung Galaxy S23, 8 GB RAM, 256 GB storage, Adreno 740.
 The user confirmed that one gamepad works and that the `0.1.6` launch rotation
 works. With the system Vulkan driver, the user saw no rear-light flash that

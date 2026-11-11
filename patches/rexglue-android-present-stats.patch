@@ -1,0 +1,48 @@
+diff --git a/include/rex/ui/presenter.h b/include/rex/ui/presenter.h
+--- a/include/rex/ui/presenter.h
++++ b/include/rex/ui/presenter.h
+@@ -183,6 +183,27 @@
+ // only to the UI thread.
+ class Presenter {
+  public:
++#if REX_PLATFORM_ANDROID
++  // Completed host presents, not UI paints or guest swaps. These timestamps
++  // do not measure when SurfaceFlinger actually displays a buffer.
++  std::vector<uint64_t> GetRecentPresentationTimes() const {
++    std::lock_guard<std::mutex> lock(presentation_times_mutex_);
++    std::vector<uint64_t> times;
++    const size_t count = std::min(presentation_times_count_, presentation_times_.size());
++    for (size_t i = 0; i < count; ++i) {
++      times.push_back(presentation_times_[(presentation_times_count_ - count + i) %
++                                         presentation_times_.size()]);
++    }
++    return times;
++  }
++
++ private:
++  mutable std::mutex presentation_times_mutex_;
++  std::array<uint64_t, 256> presentation_times_{};
++  size_t presentation_times_count_ = 0;
++
++ public:
++#endif
+   // May be actually called on the UI thread even if statically_from_ui_thread
+   // is false, such as when the guest output is refreshed by the UI thread.
+   using HostGpuLossCallback =
+diff --git a/src/ui/presenter.cpp b/src/ui/presenter.cpp
+--- a/src/ui/presenter.cpp
++++ b/src/ui/presenter.cpp
+@@ -2091,6 +2091,13 @@
+     }
+   }
+   PaintResult result = PaintAndPresentImpl(execute_ui_drawers);
++#if REX_PLATFORM_ANDROID
++  if (result == PaintResult::kPresented || result == PaintResult::kPresentedSuboptimal) {
++    const uint64_t now = PresentLog::Now();
++    std::lock_guard<std::mutex> lock(presentation_times_mutex_);
++    presentation_times_[presentation_times_count_++ % presentation_times_.size()] = now;
++  }
++#endif
+   if (log_present) {
+     const uint64_t paint_end = PresentLog::Now();
+     PresentLog::Get().Paint(paint_end,

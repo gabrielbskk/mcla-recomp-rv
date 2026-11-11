@@ -59,6 +59,8 @@ The SDK source is ReXGlue v0.10.0 at commit
 5. `patches/rexglue-vulkan-occlusion-query-pipeline-wait.patch`
 6. `patches/rexglue-android-present-filters.patch`
 7. `patches/rexglue-android-sdl-event-pump.patch`
+8. `patches/rexglue-pipeline-storage-layout.patch`
+9. `patches/rexglue-android-present-stats.patch`
 
 The seventh patch removes one redundant initial Android SDL event-maintenance
 pump when the event queue is empty and the entry pump already ran. It does not
