@@ -42,6 +42,18 @@ constants is established; that option stays unchanged. Likewise, absence of
 artifacts on the system driver points to a driver/backend interaction, not
 proof that the driver alone is at fault. Local driver builds are deferred.
 
+### 0.1.9 installation (2026-11-11)
+
+`0.1.9` (versionCode 9) was built with the native-stride-aware pack import and
+the default-on host-present FPS overlay/log. SHA-256 of the installed APK:
+`a745df152f82526a4a2fc6b017121bdad15668b638e39cc294f9dd05293e0889`.
+Installation via `pm install -r` succeeded with the compatible signing key.
+The retained configuration is Turnip Mesa 27.0.0-devel, shader pack active,
+`mcla_fence_sleep_us = 0`, `mcla_fps = 60`, `vsync = false`. No gameplay or
+frame-time test of 0.1.9 has occurred yet; the previous 0.1.8 APK remains
+preserved for rollback. Do not present 0.1.9 as a performance improvement
+until matched measurements exist.
+
 The device is a Samsung Galaxy S23, 8 GB RAM, 256 GB storage, Adreno 740.
 The user confirmed that one gamepad works and that the `0.1.6` launch rotation
 works. With the system Vulkan driver, the user saw no rear-light flash that
