@@ -77,9 +77,8 @@ gamepad, it hides after six seconds with no fingers down, then the next touch
 reveals it. These prototypes have not had an on-device gameplay/input test;
 do not describe them as a supported release until tested. The 0.1.24
 Snapdragon APK ships this overlay as experimental; report layout, dead zones
-and missing buttons from a real driving session. The Snapdragon
-and Mali test APKs use the same touch implementation but different Vulkan
-runtimes, and share a package ID, so they cannot coexist on one device.
+and missing buttons from a real driving session. Test APK variants share a
+package ID, so two of them cannot coexist on one device.
 The launcher in newer local prototypes has **Customize touch controls**:
 drag controls in its landscape preview, adjust the overall size, hide the
 toolbar to reach controls underneath it, and use **Reset layout** to restore
@@ -88,18 +87,10 @@ survives `pm install -r`. Sticks recenter where the finger initially touches
 their hit area; their visible thumb moves with the finger and returns to
 neutral on release. The original six-second/gamepad auto-hide rules remain.
 
-The 2026-11-12 Mali-G52 MC2 diagnostic log passed the opt-in
-`vertexPipelineStoresAndAtomics` check, then stopped because the device lacks
-`fillModeNonSolid` while `vulkan_require_fill_mode_non_solid` was true. A newer
-local Mali-only diagnostic build defaults that requirement to false using
-`MCLA_MALI_DIAGNOSTIC_APK=ON` when building `libmain.so`. This changes only
-device selection/solid-fill fallback, not vertex shader memory exports. Test
-startup and rendering separately on Mali; no successful gameplay is implied.
-Build normal Snapdragon binaries with the CMake option OFF.
-The local Snapdragon and Mali test launchers now share a dark card-based
-layout with separate Game files, Graphics, Extras and Launch sections. The
-same import, driver selection, shader-pack, touch-editor and Play actions
-remain available; the appearance does not change Vulkan behavior.
+The launcher uses a dark card-based layout with separate Game files,
+Graphics, Extras and Launch sections. The same import, driver selection,
+shader-pack, touch-editor and Play actions remain available; the appearance
+does not change Vulkan behavior.
 
 ## No game sound until recording starts
 
