@@ -40,8 +40,11 @@ slowdown remain. See the [A740 test matrix](docs/turnip-a740-rendering-artifacts
 2. Supply the 13 extracted files from **your own legally obtained Xbox 360 copy**.
    The game data is not included; the import needs about 6.2 GB of free
    destination space in addition to your extracted source files.
-3. Follow [the installation and import guide](docs/android-testing.md). Use a
-   gamepad: touch controls are not available.
+3. Follow [the installation and import guide](docs/android-testing.md).
+
+**Controls:** A single gamepad is the only validated in-game input method.
+Keyboard and mouse may work, but have not been tested. Touch controls are
+not supported yet; there are no on-screen driving controls.
 
 The APK is **debug-signed** and includes a native library generated from the
 game executable, but no extracted game assets, saves, Turnip package, shader

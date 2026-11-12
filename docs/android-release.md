@@ -29,6 +29,10 @@ these private artifacts. Users must supply their own legally obtained game
 files. The prior release below is preserved for reference; do not replace or
 delete its APK asset when publishing this version.
 
+Input: a single gamepad is the only validated in-game control method.
+Keyboard and mouse may work but have not been verified; touch controls are
+not supported yet.
+
 ## 2026-11-08 development APK (previous release)
 
 This release contains the **same APK** delivered locally on 2026-11-08, not a newer rebuild. It is an experimental, debug-signed build for ARM64 Android. The game data is **not** in the APK. Users must provide and import the 13 extracted files from their own copy of *Midnight Club: Los Angeles Complete Edition* for Xbox 360 (Title ID `545407F8`). See [Android testing and import](android-testing.md).
