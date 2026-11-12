@@ -6,13 +6,12 @@ port. Read it with `README.md`, `docs/android-status.md`,
 `docs/android-testing.md`.
 
 The private S23 and netbook handoffs stay outside Git because they contain
-local paths, game data, signing keys and infrastructure details. On the
-maintainer's Termux installation, read the latest
-`~/MCLA-2026-11-09-SESSION-HANDOFF.md`, then `~/MCLA-TERMUX-S23-HANDOFF.md`,
-`~/MCLA-PROJECT-LEDGER.md` and `~/MCLA-NETBOOK-OPERATIONS.md`. Older private
-archive copies may exist; verify their dates and contents before relying on
-them for recovery. The latest local session handoff is not assumed to be
-synced elsewhere.
+local paths, game data, signing keys and infrastructure details. Ask the
+maintainer for the current private handoff notes if you need them; do not
+look for them in Git and do not copy them into public documentation. Older
+private copies may exist; verify their dates and contents before relying on
+them for recovery. The latest local notes are not assumed to be synced
+elsewhere.
 
 ## Verified baseline
 
