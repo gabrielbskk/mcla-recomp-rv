@@ -1,33 +1,6 @@
 # Android ARM64 release notes
 
-## Version 0.1.25
-
-APK `MCLA-Recomp-Snapdragon-Audio-v0.1.25.apk` (versionCode 25), SHA-256
-`8ad7dfca6a580990cbdeb2202a528f1436d08058e3f25fb69a4105e23748ef8d`.
-Debug-signed with the same certificate as the installed test builds, so it
-updates over an existing installation without clearing app data. It was
-installed with `pm install -r` on the Galaxy S23 (Adreno 740, 8 GB RAM), and
-game audio was confirmed audible in normal play without screen recording.
-
-This APK fixes Android audio that only played while another stream was open
-(for example, while screen recording). SDL3 opened AAudio with the low-latency
-performance mode, and on the affected device that fast stream stayed
-inaudible until another app opened the normal mixer. The build now opens the
-normal mixer path by default; `mcla_audio_low_latency = true` in
-`files/mcla.toml` restores the low-latency stream when latency matters more
-than compatibility. The game activity also requests audio focus and sets the
-volume control stream to music, so another app's playback is paused instead
-of leaving the game ducked. Logcat confirmed the change:
-`MMAP not used because AAUDIO_PERFORMANCE_MODE_LOW_LATENCY ... not requested`,
-an AAudio Legacy stream and an active 48 kHz 5.1 output track. Audio latency
-was not measured.
-
-Everything else matches 0.1.24: the card-based launcher, the generic
-**Select Vulkan driver (.zip)** button, and the experimental Xbox-style touch
-overlay with its HUD editor. Touch input still has no gameplay validation, so
-a gamepad remains the only validated control method. The APK contains
-`libmain.so`, generated from the game's executable, but no ISO, extracted game
-assets, saves, shader pack, Vulkan driver ZIP or signing key.
+> **Recommended stable build:** v0.1.24
 
 ## Version 0.1.24
 
