@@ -43,6 +43,11 @@
 #include <rex/input/device_assignment.h>
 #include <rex/input/input_system.h>
 #include <rex/logging.h>
+
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
+
 #include <rex/platform.h>
 #include <rex/runtime.h>
 #include <rex/system.h>
@@ -1216,9 +1221,13 @@ class FpsCounter final : public rex::ui::ImGuiDialog {
   }
 
  protected:
+    protected:
   void OnDraw(ImGuiIO&) override {
+    REXLOG_INFO("FpsCounter OnDraw called");
     const bool overlay = REXCVAR_GET(mcla_fps_overlay);
     const bool logging = REXCVAR_GET(mcla_fps_log);
+    REXLOG_INFO("FpsCounter: overlay={} logging={}", overlay, logging);
+    
     if (!overlay && !logging) return;
     const auto now = std::chrono::steady_clock::now();
     if (now - sampled_ >= std::chrono::milliseconds(500)) {
@@ -1304,8 +1313,18 @@ class VideoBorders final : public rex::ui::ImGuiDialog {
 }
 
 void MclaApp::OnCreateDialogs(rex::ui::ImGuiDrawer* drawer) {
+#if defined(__ANDROID__)
+#include <android/log.h>
+__android_log_write(ANDROID_LOG_INFO, "MCLA", "OnCreateDialogs called from native");
+#endif
+REXLOG_INFO("#################################### OnCreateDialogs START, drawer={}", (void*)drawer);
 #ifdef __ANDROID__
-  fps_counter_ = std::make_unique<FpsCounter>(drawer);
+  if (drawer) {
+    REXLOG_INFO(">>> Creating FpsCounter");
+    fps_counter_ = std::make_unique<FpsCounter>(drawer);
+  } else {
+    REXLOG_WARN(">>> OnCreateDialogs: drawer is null!");
+  }
 #endif
   const auto* display = window();
   if (display && display->GetActualPhysicalHeight() &&

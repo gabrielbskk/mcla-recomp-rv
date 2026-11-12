@@ -44,6 +44,7 @@ set(MCLA_SOURCES
     # The C library's fma replaced for a CPU without FMA3 (llvm-mingw, x86-64 only; the file is empty elsewhere).
     src/fma_fast.cpp
     src/frame_timing.cpp
+    src/fps_counter.cpp
     src/render_perf.cpp
     src/perf_options.cpp
     src/poll_wait.cpp

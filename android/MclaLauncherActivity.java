@@ -2,6 +2,7 @@ package org.mcla.recomp;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -56,6 +57,7 @@ public final class MclaLauncherActivity extends Activity {
     private Button shaderButton;
     private Button audioButton;
     private TextView driverStatus;
+    private boolean isMaliBuild;
     private TextView shaderStatus;
     private ProgressBar progress;
     private boolean playPending;
@@ -114,6 +116,13 @@ public final class MclaLauncherActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
+        // Detect build variant from the application label
+        try {
+            CharSequence label = getPackageManager().getApplicationLabel(getApplicationInfo());
+            isMaliBuild = label != null && label.toString().contains("Mali");
+        } catch (Exception e) {
+            isMaliBuild = false;
+        }
         MclaLogExporter.exportAsync(this);
         getWindow().setNavigationBarColor(0xFF0B161F);
         LinearLayout layout = new LinearLayout(this);
@@ -166,7 +175,7 @@ public final class MclaLauncherActivity extends Activity {
         updateDriverStatus();
 
         driverButton = new Button(this);
-        driverButton.setText("Select Vulkan driver (.zip)");
+        driverButton.setText(isMaliBuild ? "Select PanVK driver (.zip)" : "Select Turnip driver (.zip)");
         driverButton.setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -256,7 +265,8 @@ public final class MclaLauncherActivity extends Activity {
 
     private void updateDriverStatus() {
         boolean custom = new File(driverFolder(), "selected.txt").isFile();
-        driverStatus.setText(custom ? "Selected driver: custom (Turnip / PanVK)" :
+        String driverLabel = isMaliBuild ? "PanVK" : "Turnip";
+        driverStatus.setText(custom ? "Selected driver: " + driverLabel + " (custom)" :
                 "Selected driver: system");
         if (systemButton != null) systemButton.setEnabled(custom);
     }
@@ -317,7 +327,7 @@ public final class MclaLauncherActivity extends Activity {
             if (uri == null) return;
             driverButton.setEnabled(false);
             playButton.setEnabled(false);
-            status.setText("Importing Vulkan driver...");
+            status.setText("Importing " + (isMaliBuild ? "PanVK" : "Turnip") + " driver...");
             new Thread(() -> importDriver(uri), "MCLA driver import").start();
             return;
         }
@@ -480,7 +490,7 @@ public final class MclaLauncherActivity extends Activity {
             }
             mainHandler.post(() -> {
                 updateDriverStatus();
-                status.setText("Driver imported. Tap Play to test it.");
+                status.setText((isMaliBuild ? "PanVK" : "Turnip") + " driver imported. Tap Play to test it.");
             });
         } catch (Exception e) {
             Log.e(TAG, "Driver import failed", e);

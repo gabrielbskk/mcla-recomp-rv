@@ -92,6 +92,34 @@ Graphics, Extras and Launch sections. The same import, driver selection,
 shader-pack, touch-editor and Play actions remain available; the appearance
 does not change Vulkan behavior.
 
+## FPS Counter (cleaner overlay)
+
+Since v0.1.41, a new FPS counter is integrated into the frame timing system (`mcla_frame_delta` hook). It provides:
+
+- **Per-frame timing** with a rolling 240-frame window (~4 seconds at 60 FPS)
+- **Menu vs gameplay separation** (detected via render height < 800px)
+- **Detailed percentiles**: p50, p90, p95, p99, 1% low (p99), 0.1% low (p99.9)
+- **CPU/GPU timing** separation
+- **Separate logging** for menu vs gameplay
+
+**Important:** The FPS counter only activates during actual gameplay. The app starts in the launcher UI; the frame timing hooks (`mcla_frame_delta`, etc.) are only triggered after pressing "Play" in the launcher and the actual game loop starts.
+
+**Configuration (in `files/mcla.toml`):**
+```toml
+mcla_fps_counter_enabled = true
+mcla_fps_counter_window_frames = 120  # 2 seconds at 60 FPS
+mcla_fps_counter_log_interval_ms = 5000
+mcla_fps_counter_separate_menu = true
+```
+
+**Log output example:**
+```
+FPS [GAME]: frames=180 avg=22.4 p50=44.6ms p95=67.2ms p99=89.1ms 1%low=89.1ms 0.1%low=112.3ms
+FPS [MENU]: frames=45 avg=58.2 p50=17.2ms p95=18.1ms p99=18.5ms
+```
+
+**Note:** The FPS counter only activates during actual gameplay. The app starts in the launcher UI; the frame timing hooks are only triggered after pressing "Play" in the launcher.
+
 ## No game sound until recording starts
 
 Some devices keep the AAudio low-latency output stream inaudible until another
