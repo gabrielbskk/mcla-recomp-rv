@@ -24,6 +24,12 @@ not an x86 emulator or a Linux compatibility layer.
   stream opened the mixer), keeps `mcla_audio_low_latency` as the opt-in for
   the old behaviour, and requests audio focus from the game activity. Latency
   was not measured.
+- A later local build (versionCode 26) adds an audio mode button to the
+  launcher's Extras card, between the two paths. The maintainer reports better
+  performance on the low-latency path and working audio only on the normal
+  mixer path; a controlled before/after frame-rate measurement is still
+  missing, so no default has been chosen from data. The touch overlay was
+  confirmed working in gameplay on the same phone.
 - 0.1.24 added the card-based launcher (Game files / Graphics / Extras /
   Launch), the generic **Select Vulkan driver (.zip)** label and the
   experimental Xbox-style touch overlay with a HUD editor. Touch input is not

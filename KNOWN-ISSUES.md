@@ -2,14 +2,15 @@
 
 - Audio on some devices is silent until another app opens the audio mixer
   (for example while screen recording). The current Android build defaults to
-  the normal mixer path and requests audio focus; `mcla_audio_low_latency`
-  restores the old low-latency stream. This has no measured latency result
-  yet.
+  the normal mixer path and requests audio focus, which fixed the reported
+  silence. The launcher can switch back to the low-latency stream for
+  performance, at the risk of the silence returning. A frame-rate difference
+  between the modes has been reported but not measured.
 
 - Only one gamepad is validated for in-game controls. Keyboard and mouse do
-  not work as in-game controls on Android. v0.1.24 includes an experimental
-  Xbox-style touch overlay, but it has not been validated in a driving
-  session; treat it as unsupported until it is tested.
+  not work as in-game controls on Android. The experimental Xbox-style touch
+  overlay was confirmed working in gameplay on the maintainer's phone, but it
+  is not yet validated across devices or as a replacement for a gamepad.
 
 - Turnip OneUI and Standard v27.0.0-20261107, and Turnip Mesa 27.0.0-devel
   (git-79cb04951e), produced intermittent white rear lights on the tested

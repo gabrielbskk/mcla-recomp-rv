@@ -74,10 +74,10 @@ two sticks, D-pad, A/B/X/Y, LB/RB, LT/RT, LS/RS, Back and Start. The overlay
 is present only in the game activity. A detected physical gamepad hides it
 and clears held touch input; unplugging the gamepad brings it back. With no
 gamepad, it hides after six seconds with no fingers down, then the next touch
-reveals it. These prototypes have not had an on-device gameplay/input test;
-do not describe them as a supported release until tested. The 0.1.24
-Snapdragon APK ships this overlay as experimental; report layout, dead zones
-and missing buttons from a real driving session. Test APK variants share a
+reveals it. The maintainer confirmed the overlay works in gameplay on the
+tested phone, but it remains experimental: report layout, dead zones and
+missing buttons from other devices. The Snapdragon builds ship this overlay;
+it is still not a supported alternative to a gamepad. Test APK variants share a
 package ID, so two of them cannot coexist on one device.
 The launcher in newer local prototypes has **Customize touch controls**:
 drag controls in its landscape preview, adjust the overall size, hide the
@@ -98,10 +98,16 @@ Some devices keep the AAudio low-latency output stream inaudible until another
 stream opens the normal mixer, so the game is silent until screen recording
 (or another app's audio) starts. The current Android build opens the normal
 mixer path by default, and the activity requests audio focus so another app's
-playback is paused instead of leaving the game ducked. Low-latency output can
-be restored with `mcla_audio_low_latency = true` in `files/mcla.toml` when
-latency matters more than compatibility. Neither change has a measured
-audio-latency result yet.
+playback is paused instead of leaving the game ducked.
+
+The launcher's **03 Extras** card has an audio mode button:
+**Audio: compatibility (normal mixer, always audible)** is the default, and
+**Audio: low-latency (best performance, may be silent)** selects the old
+AAudio fast path. The choice is stored in app-private preferences and applied
+as the `REX_MCLA_AUDIO_LOW_LATENCY` environment override before the runtime
+starts; the same value can be set as `mcla_audio_low_latency` in
+`files/mcla.toml`. A reported frame-rate difference between the two modes has
+not been measured in a controlled run, and audio latency was not measured.
 
 ## Optional Vulkan driver
 

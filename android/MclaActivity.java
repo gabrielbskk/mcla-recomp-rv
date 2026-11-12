@@ -73,6 +73,7 @@ public final class MclaActivity extends SDLActivity {
 
     @Override
     protected void onCreate(Bundle state) {
+        applyAudioEnvironment();
         applyDriverDebugEnvironment();
         File source = new File(getApplicationInfo().nativeLibraryDir, "librexgpu-xenos.so");
         File target = new File(getFilesDir(), "librexgpu-xenos.so");
@@ -108,6 +109,22 @@ public final class MclaActivity extends SDLActivity {
             }
         }
         applyImmersiveMode();
+    }
+
+    private void applyAudioEnvironment() {
+        // The native side reads the cvar, which accepts a REX_ environment
+        // override. Set it before the runtime starts.
+        boolean lowLatency = getSharedPreferences("audio", MODE_PRIVATE)
+                .getBoolean("low_latency", false);
+        try {
+            if (lowLatency) {
+                Os.setenv("REX_MCLA_AUDIO_LOW_LATENCY", "true", true);
+            } else {
+                Os.unsetenv("REX_MCLA_AUDIO_LOW_LATENCY");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Could not apply the audio mode", e);
+        }
     }
 
     private void applyDriverDebugEnvironment() {

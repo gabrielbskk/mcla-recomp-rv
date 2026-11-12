@@ -54,6 +54,7 @@ public final class MclaLauncherActivity extends Activity {
     private Button driverButton;
     private Button systemButton;
     private Button shaderButton;
+    private Button audioButton;
     private TextView driverStatus;
     private TextView shaderStatus;
     private ProgressBar progress;
@@ -212,6 +213,16 @@ public final class MclaLauncherActivity extends Activity {
                 startActivity(new Intent(this, MclaTouchEditorActivity.class)));
         addAction(extrasCard, touchEditor, false);
 
+        audioButton = new Button(this);
+        audioButton.setOnClickListener(view -> {
+            boolean lowLatency = !audioLowLatency();
+            getSharedPreferences("audio", MODE_PRIVATE).edit()
+                    .putBoolean("low_latency", lowLatency).apply();
+            updateAudioStatus();
+        });
+        addAction(extrasCard, audioButton, false);
+        updateAudioStatus();
+
         playButton = new Button(this);
         playButton.setText("Play");
         playButton.setEnabled(hasGameFiles());
@@ -228,6 +239,19 @@ public final class MclaLauncherActivity extends Activity {
 
     private File driverFolder() {
         return new File(getFilesDir(), "gpu-drivers");
+    }
+
+    private boolean audioLowLatency() {
+        return getSharedPreferences("audio", MODE_PRIVATE)
+                .getBoolean("low_latency", false);
+    }
+
+    private void updateAudioStatus() {
+        if (audioButton == null) return;
+        boolean lowLatency = audioLowLatency();
+        audioButton.setText(lowLatency
+                ? "Audio: low-latency (best performance, may be silent)"
+                : "Audio: compatibility (normal mixer, always audible)");
     }
 
     private void updateDriverStatus() {
