@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/mcla-recomp-cover.png" alt="MCLA Recomp: a night drive through Los Angeles" width="480">
+  <img src="docs/assets/mcla-recomp-project-cover.png" alt="Midnight Club Los Angeles Complete Edition: Android recompilation" width="480">
 </p>
 
 <h1 align="center">MCLA RECOMP <sub>RV</sub></h1>
@@ -33,6 +33,23 @@ before launch; it is **not enabled by default** and currently requires access
 to the app-private `files/driver.env` (typically root). Stutters and thermal
 slowdown remain. See the [A740 test matrix](docs/turnip-a740-rendering-artifacts.md),
 [known issues](KNOWN-ISSUES.md) and [Android status](docs/android-status.md).
+
+### Device variants
+
+<table>
+  <tr>
+    <th>Snapdragon / Adreno</th>
+    <th>Mali (diagnostic only)</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/assets/mcla-recomp-cover.png" alt="Snapdragon build artwork" width="240"></td>
+    <td align="center"><img src="docs/assets/mcla-recomp-mali.png" alt="Mali diagnostic build artwork" width="240"></td>
+  </tr>
+  <tr>
+    <td>Galaxy S23 gameplay validated. <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/android-arm64-v0.1.15">Download v0.1.15</a>.</td>
+    <td>Experimental local diagnostic APK; no Mali gameplay validation or public release yet. Mali-G720 MC7 and Mali-G52 MC2 logs report a missing Vulkan feature.</td>
+  </tr>
+</table>
 
 ### 02 / GET ON THE ROAD
 
