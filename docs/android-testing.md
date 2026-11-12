@@ -64,8 +64,9 @@ clean-profile picker import remains unverified.
 Single-gamepad input is the only supported and validated in-game input method
 at present. Two-gamepad/two-player input is not supported at this time.
 Keyboard and mouse do not work as in-game controls in this Android port.
-Xbox-style touch controls are under development, not supported in the public
-APK yet. The intended overlay hides when a gamepad is connected; without a
+Xbox-style touch controls are included in the 0.1.24 Snapdragon APK as an
+experiment, but not yet validated in gameplay; a gamepad remains the only
+validated method. The overlay hides when a gamepad is connected; without a
 gamepad it hides after six seconds without interaction and returns on touch.
 
 Local Android touch prototypes implement a synthetic Xbox-style controller:
@@ -74,7 +75,9 @@ is present only in the game activity. A detected physical gamepad hides it
 and clears held touch input; unplugging the gamepad brings it back. With no
 gamepad, it hides after six seconds with no fingers down, then the next touch
 reveals it. These prototypes have not had an on-device gameplay/input test;
-do not describe them as a supported release until tested. The Snapdragon
+do not describe them as a supported release until tested. The 0.1.24
+Snapdragon APK ships this overlay as experimental; report layout, dead zones
+and missing buttons from a real driving session. The Snapdragon
 and Mali test APKs use the same touch implementation but different Vulkan
 runtimes, and share a package ID, so they cannot coexist on one device.
 The launcher in newer local prototypes has **Customize touch controls**:

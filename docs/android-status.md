@@ -11,11 +11,23 @@ The port recompiles the Xbox 360 PowerPC code to ARM64 C++ and runs it through
 the ReXGlue runtime, SDL3 and Vulkan. It is native ARM64 Android integration,
 not an x86 emulator or a Linux compatibility layer.
 
-## Current release (0.1.15)
+## Current release (0.1.24)
 
-- [Android ARM64 v0.1.15](android-release.md) is debug-signed, installed and
-  played on the Galaxy S23 (Adreno 740, 8 GB RAM). The public release carries
-  the tested APK and artwork as release assets, not tracked source files.
+- [Android ARM64 v0.1.24](android-release.md) is debug-signed with the existing
+  certificate and was installed with `pm install -r` on the Galaxy S23
+  (Adreno 740, 8 GB RAM); versionCode 24 is what the device reports. Gameplay,
+  the touch overlay and the redesigned launcher were **not** re-validated in a
+  device session after this build. The public release carries the APK as a
+  release asset, not a tracked source file.
+- 0.1.24 adds the card-based launcher (Game files / Graphics / Extras /
+  Launch), the generic **Select Vulkan driver (.zip)** label and an
+  experimental Xbox-style touch overlay with a HUD editor. Touch input is not
+  yet validated in gameplay; a gamepad remains the only validated method.
+  Mali/PanVK support is documented as a local experiment and is not released.
+- The previous validated gameplay release remains
+  [Android ARM64 v0.1.15](android-release.md), played on the same phone. The
+  public release carries the tested APK and artwork as release assets, not
+  tracked source files.
 - The selected Turnip 27 build runs without the observed rear-light and wheel
   flashes **only with the opt-in** `TU_DEBUG=syncdraw` diagnostic switch on the
   tested phone. Without that switch the artifacts return. The system Vulkan
@@ -25,11 +37,10 @@ not an x86 emulator or a Linux compatibility layer.
   32.9 to 38.8 C while the GPU maximum clock moved between 615 and 550 MHz,
   reaching 475 MHz near the end. Host-presentation FPS varied with the scene;
   the sample does not isolate a single cause of low FPS or stutter.
-- Single-gamepad input is the only validated in-game input. Keyboard and mouse
-  do not work as Android in-game controls. Xbox-style touch controls are under
-  development, but not supported by the public APK. A
-  clean-profile import, 16 KiB page runtime and broad GPU compatibility have
-  not been established.
+- Single-gamepad input remains the only validated in-game input. Keyboard and
+  mouse do not work as Android in-game controls. The 0.1.24 touch overlay is
+  included but not yet validated in gameplay, and a clean-profile import,
+  16 KiB page runtime and broad GPU compatibility have not been established.
 - Push CI runs repository checks. The full patched-SDK build is restricted to
   pull requests and manual dispatch. Manual run
   [43132894300](https://github.com/gabrielbskk/mcla-recomp-rv/actions/runs/43132894300)

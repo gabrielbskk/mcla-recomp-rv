@@ -1,5 +1,48 @@
 # Android ARM64 release notes
 
+## Version 0.1.24
+
+APK `MCLA-Recomp-Snapdragon-Launcher-v0.1.24.apk` (versionCode 24), SHA-256
+`718b3c138554a69ed210b1f301cd707bdf127cd72e1f4e2a07dac6fce2623f84`.
+Debug-signed with the same certificate as the installed test builds, so it
+updates over an existing installation without clearing app data. It was
+installed with `pm install -r` on the Samsung Galaxy S23 (Adreno 740, 8 GB
+RAM) and reports `versionName=0.1.24`; gameplay, the touch overlay and the new
+launcher were **not** yet re-validated in a device session after this build.
+
+This APK is built with `MCLA_MALI_DIAGNOSTIC_APK=OFF`, so the Mali diagnostic
+defaults (`vulkan_require_fill_mode_non_solid=false`,
+`vulkan_require_geometry_shader=false`) are not compiled in.
+
+Changes since 0.1.15:
+
+- **Launcher redesign.** Dark card layout with separate *Game files*,
+  *Graphics*, *Extras* and *Launch* sections, the project cover as the app
+  icon, an explicit driver status line, and a **Select Vulkan driver (.zip)**
+  button that replaces the Turnip-only label. The same ZIP import path still
+  expects an AdrenoTools-compatible driver saved as
+  `libvulkan_freedreno.so`. Mesa PanVK packages from
+  `zenithblue-oss/panvk-kbase-android` (`-gamehub.zip`) use that name and can
+  be imported, but Mali/PanVK rendering is **not** validated and is documented
+  as a local experiment only. No Mali or PanVK driver is shipped in the APK.
+- **Xbox-style touch controls (experimental).** An on-screen overlay with
+  analog sticks, face buttons, bumpers, triggers, dpad and start/back, plus a
+  HUD editor for size and position. The overlay hides automatically when a
+  gamepad is detected. Without a gamepad it hides after six seconds of
+  inactivity and returns on touch. The layout is stored in app-private
+  storage. Touch input has not yet been validated in gameplay, so a gamepad
+  remains the only validated control method.
+- No change to the Vulkan defaults: the system driver remains the safe default
+  and the Turnip `TU_DEBUG=syncdraw` workaround still has to be placed in
+  `files/driver.env` before launch.
+
+The APK contains `libmain.so`, generated from the game's executable, but no
+ISO, extracted game assets, saves, shader pack, Vulkan driver ZIP or signing
+key. The source repository does not include any of these private artifacts.
+Do not clear app data when updating if you want to keep the imported files and
+saves. Exported logs are in `Documents/MCLA/logs/` as `.txt` files; original
+`.log` files remain in the app-private `files/logs/`.
+
 ## Version 0.1.15
 
 APK `MCLA-Recomp-arm64-v0.1.15.apk` (versionCode 15), SHA-256
