@@ -10,10 +10,6 @@ installed with `pm install -r` on the Samsung Galaxy S23 (Adreno 740, 8 GB
 RAM) and reports `versionName=0.1.24`; gameplay, the touch overlay and the new
 launcher were **not** yet re-validated in a device session after this build.
 
-This APK is built with `MCLA_MALI_DIAGNOSTIC_APK=OFF`, so the Mali diagnostic
-defaults (`vulkan_require_fill_mode_non_solid=false`,
-`vulkan_require_geometry_shader=false`) are not compiled in.
-
 Changes since 0.1.15:
 
 - **Launcher redesign.** Dark card layout with separate *Game files*,
@@ -21,10 +17,7 @@ Changes since 0.1.15:
   icon, an explicit driver status line, and a **Select Vulkan driver (.zip)**
   button that replaces the Turnip-only label. The same ZIP import path still
   expects an AdrenoTools-compatible driver saved as
-  `libvulkan_freedreno.so`. Mesa PanVK packages from
-  `zenithblue-oss/panvk-kbase-android` (`-gamehub.zip`) use that name and can
-  be imported, but Mali/PanVK rendering is **not** validated and is documented
-  as a local experiment only. No Mali or PanVK driver is shipped in the APK.
+  `libvulkan_freedreno.so`. No Vulkan driver is shipped in the APK.
 - **Xbox-style touch controls (experimental).** An on-screen overlay with
   analog sticks, face buttons, bumpers, triggers, dpad and start/back, plus a
   HUD editor for size and position. The overlay hides automatically when a

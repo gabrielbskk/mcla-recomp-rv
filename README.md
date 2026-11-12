@@ -66,7 +66,7 @@ sticks, buttons, triggers and a HUD editor; it is included but not yet
 validated in gameplay. The overlay hides when a gamepad connects and, without
 a gamepad, hides after six seconds of inactivity and returns on touch. The
 launcher has a new card layout and a generic **Select Vulkan driver (.zip)**
-button; Mali/PanVK drivers remain an unvalidated local experiment.
+button for compatible driver packages.
 
 The APK is **debug-signed** and includes a native library generated from the
 game executable, but no extracted game assets, saves, Turnip package, shader

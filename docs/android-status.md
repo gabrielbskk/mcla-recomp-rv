@@ -23,7 +23,6 @@ not an x86 emulator or a Linux compatibility layer.
   Launch), the generic **Select Vulkan driver (.zip)** label and an
   experimental Xbox-style touch overlay with a HUD editor. Touch input is not
   yet validated in gameplay; a gamepad remains the only validated method.
-  Mali/PanVK support is documented as a local experiment and is not released.
 - The previous validated gameplay release remains
   [Android ARM64 v0.1.15](android-release.md), played on the same phone. The
   public release carries the tested APK and artwork as release assets, not

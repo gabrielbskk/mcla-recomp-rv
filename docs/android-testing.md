@@ -101,26 +101,6 @@ layout with separate Game files, Graphics, Extras and Launch sections. The
 same import, driver selection, shader-pack, touch-editor and Play actions
 remain available; the appearance does not change Vulkan behavior.
 
-### PanVK (Mesa) on Mali, local experiment
-
-The **Select Vulkan driver (.zip)** button loads any AdrenoTools-compatible
-ICD saved as `libvulkan_freedreno.so`. That includes the Mesa PanVK packages
-from `zenithblue-oss/panvk-kbase-android`, whose `-gamehub.zip` layout already
-uses this file name. PanVK talks to Android's `mali_kbase` directly and needs
-`minApi 29`; it is not bundled with this app.
-
-On Mali v7 (G52), Mesa reports `geometryShader=false`,
-`fillModeNonSolid=false` and `vertexPipelineStoresAndAtomics=false`. The SDK
-has downlevel paths for the first two (vertex-shader primitive expansion and
-solid fill). The vertex-store path stays diagnostic-only: draws that use
-vertex memory export remain unsupported and may be missing or wrong. Snapdragon
-builds keep the normal requirements; only `MCLA_MALI_DIAGNOSTIC_APK=ON` also
-defaults `vulkan_require_geometry_shader=false`.
-
-Tested device note: the G52 tester uses a Galaxy A06 (Helio G85, Mali-G52
-MC2, Android 14). PanVK's own G52 validation was on a Galaxy A31; the A06
-result must come from its own log. Expect weak performance even if it starts.
-
 ## Optional Vulkan driver
 
 The default is the system Vulkan driver. In the launcher, tap **SELECT TURNIP
