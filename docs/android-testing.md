@@ -85,6 +85,19 @@ survives `pm install -r`. Sticks recenter where the finger initially touches
 their hit area; their visible thumb moves with the finger and returns to
 neutral on release. The original six-second/gamepad auto-hide rules remain.
 
+The 2026-11-12 Mali-G52 MC2 diagnostic log passed the opt-in
+`vertexPipelineStoresAndAtomics` check, then stopped because the device lacks
+`fillModeNonSolid` while `vulkan_require_fill_mode_non_solid` was true. A newer
+local Mali-only diagnostic build defaults that requirement to false using
+`MCLA_MALI_DIAGNOSTIC_APK=ON` when building `libmain.so`. This changes only
+device selection/solid-fill fallback, not vertex shader memory exports. Test
+startup and rendering separately on Mali; no successful gameplay is implied.
+Build normal Snapdragon binaries with the CMake option OFF.
+The local Snapdragon and Mali test launchers now share a dark card-based
+layout with separate Game files, Graphics, Extras and Launch sections. The
+same import, driver selection, shader-pack, touch-editor and Play actions
+remain available; the appearance does not change Vulkan behavior.
+
 ## Optional Vulkan driver
 
 The default is the system Vulkan driver. In the launcher, tap **SELECT TURNIP

@@ -5,6 +5,9 @@ import android.content.pm.ActivityInfo;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -56,25 +59,92 @@ public final class MclaLauncherActivity extends Activity {
     private ProgressBar progress;
     private boolean playPending;
 
+    private int dp(int value) {
+        return (int) (value * getResources().getDisplayMetrics().density + .5f);
+    }
+
+    private GradientDrawable surface(int color, int stroke) {
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(color);
+        background.setCornerRadius(dp(20));
+        background.setStroke(dp(1), stroke);
+        return background;
+    }
+
+    private TextView label(String text, int size, int color, boolean bold) {
+        TextView label = new TextView(this);
+        label.setText(text);
+        label.setTextColor(color);
+        label.setTextSize(size);
+        if (bold) label.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        return label;
+    }
+
+    private LinearLayout card(LinearLayout parent, String title, String subtitle) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(dp(18), dp(17), dp(18), dp(18));
+        card.setBackground(surface(0xFF172532, 0xFF2C4352));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.bottomMargin = dp(14);
+        parent.addView(card, params);
+        card.addView(label(title, 19, Color.WHITE, true));
+        TextView caption = label(subtitle, 13, 0xFFA8B9C4, false);
+        LinearLayout.LayoutParams captionParams = new LinearLayout.LayoutParams(-1, -2);
+        captionParams.topMargin = dp(4);
+        captionParams.bottomMargin = dp(9);
+        card.addView(caption, captionParams);
+        return card;
+    }
+
+    private void addAction(LinearLayout card, Button button, boolean primary) {
+        button.setAllCaps(false);
+        button.setTextSize(15);
+        button.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        button.setTextColor(primary ? 0xFF06191A : Color.WHITE);
+        button.setBackground(surface(primary ? 0xFF70DFCA : 0xFF263A48,
+                primary ? 0xFF70DFCA : 0xFF39515F));
+        button.setMinHeight(dp(50));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.topMargin = dp(9);
+        card.addView(button, params);
+    }
+
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         MclaLogExporter.exportAsync(this);
+        getWindow().setNavigationBarColor(0xFF0B161F);
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setGravity(Gravity.CENTER);
-        int padding = (int) (24 * getResources().getDisplayMetrics().density);
-        layout.setPadding(padding, padding, padding, padding);
+        layout.setPadding(dp(18), dp(24), dp(18), dp(26));
+        layout.setBackgroundColor(0xFF0B161F);
+
+        TextView eyebrow = label("MCLA  /  ANDROID", 12, 0xFF70DFCA, true);
+        layout.addView(eyebrow);
+        TextView heading = label("Ready to race?", 32, Color.WHITE, true);
+        LinearLayout.LayoutParams headingParams = new LinearLayout.LayoutParams(-1, -2);
+        headingParams.topMargin = dp(6);
+        layout.addView(heading, headingParams);
+        TextView intro = label("Prepare your game, choose a graphics driver, and set up your controls.",
+                14, 0xFFA8B9C4, false);
+        LinearLayout.LayoutParams introParams = new LinearLayout.LayoutParams(-1, -2);
+        introParams.bottomMargin = dp(20);
+        layout.addView(intro, introParams);
+
+        LinearLayout gameCard = card(layout, "01  Game files", "Import the 13 extracted files from your own copy.");
 
         status = new TextView(this);
         status.setText(hasGameFiles() ? "Game files ready." :
                 "Select the folder containing the 13 extracted files from your original MCLA copy. "
                 + "The files must be directly inside that folder. Copying may take several minutes.");
-        layout.addView(status);
+        status.setTextColor(0xFFD9E7EB);
+        status.setTextSize(14);
+        gameCard.addView(status);
 
         progress = new ProgressBar(this);
         progress.setVisibility(View.GONE);
-        layout.addView(progress);
+        gameCard.addView(progress);
 
         pickButton = new Button(this);
         pickButton.setText("Select game folder");
@@ -85,10 +155,13 @@ public final class MclaLauncherActivity extends Activity {
                     | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
             startActivityForResult(intent, PICK_GAME_FOLDER);
         });
-        layout.addView(pickButton);
+        addAction(gameCard, pickButton, false);
+
+        LinearLayout graphicsCard = card(layout, "02  Graphics", "Select a Vulkan driver for this device.");
 
         driverStatus = new TextView(this);
-        layout.addView(driverStatus);
+        driverStatus.setTextColor(0xFF70DFCA);
+        graphicsCard.addView(driverStatus);
         updateDriverStatus();
 
         driverButton = new Button(this);
@@ -100,7 +173,7 @@ public final class MclaLauncherActivity extends Activity {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivityForResult(intent, PICK_TURNIP_ZIP);
         });
-        layout.addView(driverButton);
+        addAction(graphicsCard, driverButton, false);
 
         systemButton = new Button(this);
         systemButton.setText("Use system driver");
@@ -113,10 +186,13 @@ public final class MclaLauncherActivity extends Activity {
             updateDriverStatus();
             status.setText("System driver selected.");
         });
-        layout.addView(systemButton);
+        addAction(graphicsCard, systemButton, false);
+
+        LinearLayout extrasCard = card(layout, "03  Extras", "Optional graphics assets and touch layout.");
 
         shaderStatus = new TextView(this);
-        layout.addView(shaderStatus);
+        shaderStatus.setTextColor(0xFFA8B9C4);
+        extrasCard.addView(shaderStatus);
         updateShaderPackStatus();
 
         shaderButton = new Button(this);
@@ -128,21 +204,24 @@ public final class MclaLauncherActivity extends Activity {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivityForResult(intent, PICK_SHADER_PACK);
         });
-        layout.addView(shaderButton);
+        addAction(extrasCard, shaderButton, false);
 
         Button touchEditor = new Button(this);
         touchEditor.setText("Customize touch controls");
         touchEditor.setOnClickListener(view ->
                 startActivity(new Intent(this, MclaTouchEditorActivity.class)));
-        layout.addView(touchEditor);
+        addAction(extrasCard, touchEditor, false);
 
         playButton = new Button(this);
         playButton.setText("Play");
         playButton.setEnabled(hasGameFiles());
         playButton.setOnClickListener(view -> startGame());
-        layout.addView(playButton);
+        addAction(card(layout, "Launch", "Gamepad supported · touch controls experimental"),
+                playButton, true);
 
         ScrollView scroll = new ScrollView(this);
+        scroll.setFillViewport(true);
+        scroll.setBackgroundColor(0xFF0B161F);
         scroll.addView(layout);
         setContentView(scroll);
     }

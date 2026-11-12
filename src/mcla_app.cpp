@@ -1103,6 +1103,12 @@ void MclaApp::ApplyPcDefaults() {
       // the experimental 644-line mode repeatedly faulted during loading;
       // forcing 720 in mcla.toml allowed gameplay to start.
       {"mcla_render_height", "720"},
+#if defined(MCLA_MALI_DIAGNOSTIC_APK)
+      // Mali-G52 MC2 passed the vertex-stores diagnostic probe but reported
+      // fillModeNonSolid=false. Allow the SDK's solid-fill fallback only in
+      // the local Mali diagnostic APK; neither rendering nor gameplay is validated.
+      {"vulkan_require_fill_mode_non_solid", "false"},
+#endif
 #endif
 #if REX_PLATFORM_WIN32
       {"d3d12_hoist_shared_memory_uploads", "true"},
