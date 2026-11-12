@@ -30,8 +30,12 @@ not an x86 emulator or a Linux compatibility layer.
   clean-profile import, 16 KiB page runtime and broad GPU compatibility have
   not been established.
 - Push CI runs repository checks. The full patched-SDK build is restricted to
-  pull requests and manual dispatch; a successful push check is **not** proof
-  of a fresh rebuild or a gameplay test.
+  pull requests and manual dispatch. Manual run
+  [43132894300](https://github.com/gabrielbskk/mcla-recomp-rv/actions/runs/43132894300)
+  on `ae92602` passed both the clean patched-SDK cross-build and the host
+  syntax check with generated-header stand-ins. This does **not** build an APK
+  from game data or verify gameplay; a successful push check alone is not
+  proof of a fresh rebuild.
 
 ## Historical test state (2026-11-09)
 
