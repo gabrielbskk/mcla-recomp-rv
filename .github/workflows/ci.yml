@@ -113,4 +113,6 @@ jobs:
           cmake --install "$sdk/out/build/android-arm64"
 
       - name: Compile host sources with generated-header stand-ins
-        run: scripts/ci/host_compile_android.sh "$RUNNER_TEMP/rexglue-sdk/out/install/android-arm64"
+        run: |
+          MCLA_HOST_CHECK_NDK="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION" \
+            scripts/ci/host_compile_android.sh "$RUNNER_TEMP/rexglue-sdk/out/install/android-arm64"

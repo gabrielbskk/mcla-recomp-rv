@@ -11,7 +11,9 @@ Build on Termux with `clang`, CMake, Ninja, Python 3, Java, `aapt2`, `apksigner`
 The GitHub Actions cross-build uses NDK `30.0.16248370` rather than the
 on-device Termux Clang: the earlier CI NDK r27 lacks the floating-point
 `std::from_chars` overloads required by the pinned SDK. This CI toolchain
-choice does not change the published APK or its on-device build recipe.
+choice does not change the published APK or its on-device build recipe. Its
+host-source syntax check uses the same NDK compiler and locally generated
+stand-in headers; it does not run game codegen or include any game files.
 
 From the repository root, after the SDK patch or C++ code changes:
 
