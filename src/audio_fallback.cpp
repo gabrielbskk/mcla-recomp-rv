@@ -19,11 +19,24 @@
 #include <rex/audio/sdl/sdl_audio_system.h>
 #include <rex/cvar.h>
 #include <rex/logging.h>
+#include <rex/platform.h>
 #include <rex/runtime.h>
 #include <rex/thread.h>
 
+#if REX_PLATFORM_ANDROID
+#include <SDL3/SDL.h>
+#endif
+
 REXCVAR_DEFINE_STRING(mcla_audio, "sdl", "MCLA",
                       "Audio output: sdl (falls back to silent if no device), or none");
+#if REX_PLATFORM_ANDROID
+REXCVAR_DEFINE_BOOL(mcla_audio_low_latency, false, "MCLA",
+                    "Android: open the audio output on the AAudio low-latency path. Off uses the normal mixer "
+                    "path, which some devices need before they route any game sound (they stay silent with a "
+                    "fast stream until another app opens the mixer, for example while screen recording). "
+                    "Takes effect at the next start")
+    .lifecycle(rex::cvar::Lifecycle::kInitOnly);
+#endif
 
 // A platform with its own audio output (the PS5 host) sets this to a function
 // that makes a driver, or returns nullptr if it cannot; it is tried before
@@ -120,5 +133,16 @@ class FallbackAudioSystem : public rex::audio::sdl::SDLAudioSystem {
 
 std::unique_ptr<rex::system::IAudioSystem> CreateMclaAudioSystem(
     rex::runtime::FunctionDispatcher* function_dispatcher) {
+#if REX_PLATFORM_ANDROID
+  // SDL3 opens AAudio with AAUDIO_PERFORMANCE_MODE_LOW_LATENCY by default.
+  // On some devices that fast stream is inaudible until another stream opens
+  // the normal mixer, so the game only gets sound while something else is
+  // recording or playing. The normal mixer path costs latency and is the safe
+  // default; mcla_audio_low_latency restores the old behaviour.
+  const bool low_latency = REXCVAR_GET(mcla_audio_low_latency);
+  SDL_SetHint(SDL_HINT_ANDROID_LOW_LATENCY_AUDIO, low_latency ? "1" : "0");
+  REXLOG_INFO("audio: Android low-latency path {} (mcla_audio_low_latency)",
+              low_latency ? "enabled" : "disabled; using the normal mixer path");
+#endif
   return FallbackAudioSystem::Create(function_dispatcher);
 }

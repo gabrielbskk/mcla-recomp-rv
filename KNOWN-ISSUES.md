@@ -1,5 +1,11 @@
 # Android known issues
 
+- Audio on some devices is silent until another app opens the audio mixer
+  (for example while screen recording). The current Android build defaults to
+  the normal mixer path and requests audio focus; `mcla_audio_low_latency`
+  restores the old low-latency stream. This has no measured latency result
+  yet.
+
 - Only one gamepad is validated for in-game controls. Keyboard and mouse do
   not work as in-game controls on Android. v0.1.24 includes an experimental
   Xbox-style touch overlay, but it has not been validated in a driving

@@ -1,5 +1,8 @@
 package org.mcla.recomp;
 
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Build;
 import android.os.PowerManager;
@@ -27,6 +30,10 @@ public final class MclaActivity extends SDLActivity {
     private static final String TAG = "MCLA";
     private MclaTouchControls touchControls;
     private InputManager inputManager;
+    private AudioManager audioManager;
+    private AudioFocusRequest audioFocusRequest;
+    private final AudioManager.OnAudioFocusChangeListener audioFocusListener =
+            focusChange -> { };
     private final InputManager.InputDeviceListener gamepadListener =
             new InputManager.InputDeviceListener() {
                 @Override public void onInputDeviceAdded(int id) { updateGamepad(); }
@@ -89,6 +96,8 @@ public final class MclaActivity extends SDLActivity {
             if (inputManager != null) inputManager.registerInputDeviceListener(gamepadListener, logHandler);
             updateGamepad();
         }
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
         if (Build.VERSION.SDK_INT >= 24) {
             PowerManager power = (PowerManager) getSystemService(Context.POWER_SERVICE);
             if (power != null && power.isSustainedPerformanceModeSupported()) {
@@ -162,6 +171,7 @@ public final class MclaActivity extends SDLActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        requestAudioFocus();
         updateGamepad();
         if (touchControls != null) touchControls.resumeControls();
         logHandler.removeCallbacks(exportLogs);
@@ -172,6 +182,7 @@ public final class MclaActivity extends SDLActivity {
     protected void onPause() {
         logHandler.removeCallbacks(exportLogs);
         if (touchControls != null) touchControls.clearInput();
+        abandonAudioFocus();
         super.onPause();
         MclaLogExporter.exportAsync(this);
     }
@@ -183,6 +194,36 @@ public final class MclaActivity extends SDLActivity {
         if (touchControls != null) touchControls.clearInput();
         MclaLogExporter.exportAsync(this);
         super.onDestroy();
+    }
+
+    private void requestAudioFocus() {
+        if (audioManager == null) return;
+        if (Build.VERSION.SDK_INT >= 26) {
+            if (audioFocusRequest == null) {
+                AudioAttributes attributes = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_GAME)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build();
+                audioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                        .setAudioAttributes(attributes)
+                        .setOnAudioFocusChangeListener(audioFocusListener)
+                        .setWillPauseWhenDucked(false)
+                        .build();
+            }
+            audioManager.requestAudioFocus(audioFocusRequest);
+        } else {
+            audioManager.requestAudioFocus(audioFocusListener, AudioManager.STREAM_MUSIC,
+                    AudioManager.AUDIOFOCUS_GAIN);
+        }
+    }
+
+    private void abandonAudioFocus() {
+        if (audioManager == null) return;
+        if (Build.VERSION.SDK_INT >= 26) {
+            if (audioFocusRequest != null) audioManager.abandonAudioFocusRequest(audioFocusRequest);
+        } else {
+            audioManager.abandonAudioFocus(audioFocusListener);
+        }
     }
 
     private void applyImmersiveMode() {

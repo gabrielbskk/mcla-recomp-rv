@@ -101,6 +101,17 @@ layout with separate Game files, Graphics, Extras and Launch sections. The
 same import, driver selection, shader-pack, touch-editor and Play actions
 remain available; the appearance does not change Vulkan behavior.
 
+## No game sound until recording starts
+
+Some devices keep the AAudio low-latency output stream inaudible until another
+stream opens the normal mixer, so the game is silent until screen recording
+(or another app's audio) starts. The current Android build opens the normal
+mixer path by default, and the activity requests audio focus so another app's
+playback is paused instead of leaving the game ducked. Low-latency output can
+be restored with `mcla_audio_low_latency = true` in `files/mcla.toml` when
+latency matters more than compatibility. Neither change has a measured
+audio-latency result yet.
+
 ## Optional Vulkan driver
 
 The default is the system Vulkan driver. In the launcher, tap **SELECT TURNIP
