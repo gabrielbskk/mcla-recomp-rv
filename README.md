@@ -54,6 +54,10 @@ repository does **not** include game data, generated code, APKs or private
 artifacts. Do not clear app data when updating if you want to keep your imported
 game and saves.
 
+**Logs:** Open `Documents/MCLA/logs/` in a file manager for the exported
+`.txt` logs. The app keeps its original `.log` files privately under
+`files/logs/`; reopen the launcher if a log was not exported after a crash.
+
 ### 03 / UNDER THE HOOD
 
 The [Android build recipe](docs/android-build.md) pins ReXGlue SDK commit
