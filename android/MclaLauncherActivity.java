@@ -130,6 +130,12 @@ public final class MclaLauncherActivity extends Activity {
         });
         layout.addView(shaderButton);
 
+        Button touchEditor = new Button(this);
+        touchEditor.setText("Customize touch controls");
+        touchEditor.setOnClickListener(view ->
+                startActivity(new Intent(this, MclaTouchEditorActivity.class)));
+        layout.addView(touchEditor);
+
         playButton = new Button(this);
         playButton.setText("Play");
         playButton.setEnabled(hasGameFiles());

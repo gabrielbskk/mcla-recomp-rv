@@ -77,6 +77,13 @@ reveals it. These prototypes have not had an on-device gameplay/input test;
 do not describe them as a supported release until tested. The Snapdragon
 and Mali test APKs use the same touch implementation but different Vulkan
 runtimes, and share a package ID, so they cannot coexist on one device.
+The launcher in newer local prototypes has **Customize touch controls**:
+drag controls in its landscape preview, adjust the overall size, hide the
+toolbar to reach controls underneath it, and use **Reset layout** to restore
+the defaults. The layout is stored in app-private Android preferences and
+survives `pm install -r`. Sticks recenter where the finger initially touches
+their hit area; their visible thumb moves with the finger and returns to
+neutral on release. The original six-second/gamepad auto-hide rules remain.
 
 ## Optional Vulkan driver
 
