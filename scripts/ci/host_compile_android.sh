@@ -18,7 +18,8 @@ if [ -n "${MCLA_HOST_CHECK_NDK:-}" ]; then
     set -- \
         "-DCMAKE_TOOLCHAIN_FILE=$MCLA_HOST_CHECK_NDK/build/cmake/android.toolchain.cmake" \
         -DANDROID_ABI=arm64-v8a \
-        -DANDROID_PLATFORM=android-35
+        -DANDROID_PLATFORM=android-35 \
+        -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH
 else
     set --
 fi
