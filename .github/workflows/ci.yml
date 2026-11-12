@@ -63,7 +63,17 @@ jobs:
           git clone --recursive https://github.com/rexglue/rexglue-sdk.git "$sdk"
           git -C "$sdk" checkout "$SDK_COMMIT"
           git -C "$sdk" submodule update --init --recursive
-          for patch in rexglue-android-arm64.patch rexglue-turnip-loader.patch rexglue-driver-cache-path.patch; do
+          for patch in \
+            rexglue-android-arm64.patch \
+            rexglue-turnip-loader.patch \
+            rexglue-driver-cache-path.patch \
+            rexglue-vulkan-pipeline-background-work.patch \
+            rexglue-vulkan-occlusion-query-pipeline-wait.patch \
+            rexglue-android-present-filters.patch \
+            rexglue-android-sdl-event-pump.patch \
+            rexglue-pipeline-storage-layout.patch \
+            rexglue-android-present-stats.patch \
+            rexglue-vulkan-frame-start-sync.patch; do
             git -C "$sdk" apply "$GITHUB_WORKSPACE/patches/$patch"
           done
 

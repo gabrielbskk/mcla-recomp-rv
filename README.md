@@ -58,8 +58,9 @@ game and saves.
 
 The [Android build recipe](docs/android-build.md) pins ReXGlue SDK commit
 `f5337cdc947ff6d4c4196737e2c807a48f2a1fc2` and applies the Android
-patches in `patches/`. Android CI builds the patched SDK and checks the host
-source without game files. See the [release notes](docs/android-release.md)
+patches in `patches/`. Push CI checks the repository; pull requests and manual
+CI runs also build the patched SDK and check the host source without game
+files. See the [release notes](docs/android-release.md)
 for the APK hash, device test scope and remaining limitations.
 
 ---

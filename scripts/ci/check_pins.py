@@ -37,6 +37,14 @@ apply_lines = re.findall(r"git -C third_party/rexglue-sdk apply \"?\$PATCHES/([^
 if apply_lines != android_patches:
     errors.append(f"docs/android-build.md patch order is {apply_lines!r}, expected {android_patches!r}")
 
+workflow_text = (root / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+workflow_apply = re.search(r"for patch in\s+(.*?); do\s*\n", workflow_text, re.S)
+workflow_patches = (
+    re.findall(r"rexglue-[\w-]+\.patch", workflow_apply.group(1)) if workflow_apply else []
+)
+if workflow_patches != android_patches:
+    errors.append(f"Android CI patch order is {workflow_patches!r}, expected {android_patches!r}")
+
 patch_dir = root / "patches"
 for name in android_patches:
     path = patch_dir / name

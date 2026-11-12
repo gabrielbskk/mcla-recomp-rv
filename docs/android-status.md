@@ -1,6 +1,6 @@
 # Android ARM64 status
 
-Last reviewed: 2026-11-09. This is the canonical handoff for the Android port.
+Last reviewed: 2026-11-12. This is the canonical handoff for the Android port.
 The important historical decisions are summarized in
 [android-history.md](android-history.md); the detailed build recipe is in
 [android-build.md](android-build.md).
@@ -11,7 +11,29 @@ The port recompiles the Xbox 360 PowerPC code to ARM64 C++ and runs it through
 the ReXGlue runtime, SDL3 and Vulkan. It is native ARM64 Android integration,
 not an x86 emulator or a Linux compatibility layer.
 
-## Verified state
+## Current release (0.1.15)
+
+- [Android ARM64 v0.1.15](android-release.md) is debug-signed, installed and
+  played on the Galaxy S23 (Adreno 740, 8 GB RAM). The public release carries
+  the tested APK and artwork as release assets, not tracked source files.
+- The selected Turnip 27 build runs without the observed rear-light and wheel
+  flashes **only with the opt-in** `TU_DEBUG=syncdraw` diagnostic switch on the
+  tested phone. Without that switch the artifacts return. The system Vulkan
+  driver avoided the observed artifacts without a switch, but was slower in
+  the tested sessions. See the [A740 test matrix](turnip-a740-rendering-artifacts.md).
+- The latest two-minute on-device sample observed the battery rise from
+  32.9 to 38.8 C while the GPU maximum clock moved between 615 and 550 MHz,
+  reaching 475 MHz near the end. Host-presentation FPS varied with the scene;
+  the sample does not isolate a single cause of low FPS or stutter.
+- Single-gamepad input is the only validated in-game input. Keyboard and mouse
+  may work but remain unverified; there are no touch driving controls. A
+  clean-profile import, 16 KiB page runtime and broad GPU compatibility have
+  not been established.
+- Push CI runs repository checks. The full patched-SDK build is restricted to
+  pull requests and manual dispatch; a successful push check is **not** proof
+  of a fresh rebuild or a gameplay test.
+
+## Historical test state (2026-11-09)
 
 - The tested phone is a Samsung Galaxy S23 with an Adreno 740 GPU, 8 GB RAM and
   256 GB storage. Older logs show `realme/RMX5070` because device spoofing was
@@ -25,9 +47,9 @@ not an x86 emulator or a Linux compatibility layer.
   input method. Two-gamepad/two-player input is not supported at this time.
   Keyboard and mouse support is possible through Android/SDL but remains
   unverified. Touch controls are planned and are not implemented yet.
-- The system Vulkan driver is the recommended choice on the tested phone.
-  Both tested Turnip variants loaded, but both produced a rear-light flashing
-  artifact. The system driver removed that artifact in the user's comparison.
+- At the time, system Vulkan was the recommended choice without a workaround.
+  Both tested Turnip variants loaded but showed rear-light flashes. Later
+  tests established the opt-in `syncdraw` workaround described above.
 - FPS remains low and stutters occur. GPU thermal and power limits were seen
   during testing, so no sustained performance improvement has been established.
 - A local APK `0.1.4` (code 4) with the restored 720-line default was built,
@@ -65,8 +87,8 @@ The SDK source is ReXGlue v0.10.0 at commit
 
 The seventh patch removes one redundant initial Android SDL event-maintenance
 pump when the event queue is empty and the entry pump already ran. It does not
-change subsequent wakeups or polling intervals. It is a code candidate, not
-a measured performance fix; the approved 0.1.7 APK is unchanged.
+change subsequent wakeups or polling intervals. It was a code candidate when
+first documented and is not a measured performance fix.
 
 The first patch is a reviewed combined SDK/fork delta, not an Android-only
 patch. The source strategy and future dedicated-fork option are documented in
@@ -181,8 +203,9 @@ been isolated in a matched test:
 - `mcla_fence_sleep_us` is an experimental CPU-side option for the guest's GPU
   fence polling hook. The default 0 preserves the tested yield-only behavior;
   a small value such as 50 sleeps that many microseconds after every 64 polls.
-  It compiles but has not been installed or measured. Check both frame times
-  and rendering correctness before considering a new default.
+  A 50-us setting was installed in an earlier test build but has not had a
+  matched A/B measurement. Check both frame times and rendering correctness
+  before considering a new default.
 
 The remaining candidate, now instrumented but not yet changed: a pipeline
 first needed by a draw inside an occlusion query is still created on the GPU
@@ -197,11 +220,12 @@ cvars so the behavior can be tested without a new build:
 draws out until they are ready, which the query counts as hidden). Both paths
 still need to be timed on the device before the defaults are changed.
 
-The rear-light issue is currently isolated to the tested Turnip variants. Keep
-the system driver selected while investigating it. A wheel flicker was also
-reported on the same Turnip run and has not yet been reproduced on the system
-driver. Do not treat the historical spoofed model string or a single screenshot
-as evidence about the physical device or a transient artifact. Tracked in
+The rear-light issue appeared on the tested Turnip variants. The later
+`syncdraw` workaround and the artifact-free system-driver alternative are
+summarized above. A wheel flicker was also reported on Turnip without that
+switch and has not yet been reproduced on the system driver. Do not treat the
+historical spoofed model string or a single screenshot as evidence about the
+physical device or a transient artifact. Tracked in
 [issue 2](https://github.com/gabrielbskk/mcla-recomp-rv/issues/2) and
 [issue 3](https://github.com/gabrielbskk/mcla-recomp-rv/issues/3).
 
