@@ -165,7 +165,7 @@ public final class MclaLauncherActivity extends Activity {
         updateDriverStatus();
 
         driverButton = new Button(this);
-        driverButton.setText("Select Turnip (.zip)");
+        driverButton.setText("Select Vulkan driver (.zip)");
         driverButton.setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -232,7 +232,7 @@ public final class MclaLauncherActivity extends Activity {
 
     private void updateDriverStatus() {
         boolean custom = new File(driverFolder(), "selected.txt").isFile();
-        driverStatus.setText(custom ? "Selected driver: Turnip (experimental)" :
+        driverStatus.setText(custom ? "Selected driver: custom (Turnip / PanVK)" :
                 "Selected driver: system");
         if (systemButton != null) systemButton.setEnabled(custom);
     }
@@ -293,8 +293,8 @@ public final class MclaLauncherActivity extends Activity {
             if (uri == null) return;
             driverButton.setEnabled(false);
             playButton.setEnabled(false);
-            status.setText("Importing Turnip driver...");
-            new Thread(() -> importDriver(uri), "MCLA Turnip import").start();
+            status.setText("Importing Vulkan driver...");
+            new Thread(() -> importDriver(uri), "MCLA driver import").start();
             return;
         }
         if (requestCode == PICK_SHADER_PACK) {
@@ -456,11 +456,11 @@ public final class MclaLauncherActivity extends Activity {
             }
             mainHandler.post(() -> {
                 updateDriverStatus();
-                status.setText("Turnip imported. Tap Play to test it.");
+                status.setText("Driver imported. Tap Play to test it.");
             });
         } catch (Exception e) {
-            Log.e(TAG, "Turnip import failed", e);
-            mainHandler.post(() -> status.setText("Turnip import failed: " + e.getMessage()));
+            Log.e(TAG, "Driver import failed", e);
+            mainHandler.post(() -> status.setText("Driver import failed: " + e.getMessage()));
         } finally {
             part.delete();
             mainHandler.post(() -> {
