@@ -35,6 +35,10 @@ clean checkout:
     did not help; waiting before every submission removed the artifact but
     reduced FPS substantially. The selective wait also did not remove the
     artifact and reduced FPS. Keep all three modes disabled by default.
+11. `rexglue-android-bionic-link.patch` — link Android against `dl` without
+    requesting separate `pthread` or `rt` libraries: Bionic provides those
+    functions in libc, and the NDK does not ship those two libraries. No
+    change to the observed gameplay behavior is intended.
 
 The first patch is a combined source delta and is intentionally pinned by
 SHA-256 in `scripts/ci/check_pins.py`; it is not described as Android-only.

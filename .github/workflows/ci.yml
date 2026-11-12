@@ -89,7 +89,8 @@ jobs:
             rexglue-android-sdl-event-pump.patch \
             rexglue-pipeline-storage-layout.patch \
             rexglue-android-present-stats.patch \
-            rexglue-vulkan-frame-start-sync.patch; do
+            rexglue-vulkan-frame-start-sync.patch \
+            rexglue-android-bionic-link.patch; do
             git -C "$sdk" apply "$GITHUB_WORKSPACE/patches/$patch"
           done
 
