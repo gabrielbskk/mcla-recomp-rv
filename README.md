@@ -7,7 +7,7 @@
 An unofficial Android ARM64 port of <em>Midnight Club: Los Angeles Complete Edition</em> for Xbox 360.</p>
 
 <p align="center">
-  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/android-arm64-v0.1.24"><strong>DOWNLOAD v0.1.24</strong></a>
+  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/android-arm64-v0.1.25"><strong>DOWNLOAD v0.1.25</strong></a>
   &nbsp; · &nbsp;
   <a href="docs/android-testing.md">INSTALL &amp; PLAY</a>
   &nbsp; · &nbsp;
@@ -34,9 +34,11 @@ to the app-private `files/driver.env` (typically root). Stutters and thermal
 slowdown remain. See the [A740 test matrix](docs/turnip-a740-rendering-artifacts.md),
 [known issues](KNOWN-ISSUES.md) and [Android status](docs/android-status.md).
 
+Mali support is being worked on; there is no supported Mali build yet.
+
 ### 02 / GET ON THE ROAD
 
-1. Download the **ARM64 APK** from the [v0.1.24 release](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/android-arm64-v0.1.24).
+1. Download the **ARM64 APK** from the [v0.1.25 release](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/android-arm64-v0.1.25).
 2. Supply the 13 extracted files from **your own legally obtained Xbox 360 copy**.
    The game data is not included; the import needs about 6.2 GB of free
    destination space in addition to your extracted source files.
@@ -44,7 +46,7 @@ slowdown remain. See the [A740 test matrix](docs/turnip-a740-rendering-artifacts
 
 **Controls:** A single gamepad remains the only validated in-game input
 method. Keyboard and mouse do not work as in-game controls in this Android
-port. v0.1.24 adds an **experimental** Xbox-style touch overlay with analog
+port. v0.1.25 includes an **experimental** Xbox-style touch overlay with analog
 sticks, buttons, triggers and a HUD editor; it is included but not yet
 validated in gameplay. The overlay hides when a gamepad connects and, without
 a gamepad, hides after six seconds of inactivity and returns on touch. The

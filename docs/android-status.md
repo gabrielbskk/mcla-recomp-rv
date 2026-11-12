@@ -11,16 +11,21 @@ The port recompiles the Xbox 360 PowerPC code to ARM64 C++ and runs it through
 the ReXGlue runtime, SDL3 and Vulkan. It is native ARM64 Android integration,
 not an x86 emulator or a Linux compatibility layer.
 
-## Current release (0.1.24)
+## Current release (0.1.25)
 
-- [Android ARM64 v0.1.24](android-release.md) is debug-signed with the existing
+- [Android ARM64 v0.1.25](android-release.md) is debug-signed with the existing
   certificate and was installed with `pm install -r` on the Galaxy S23
-  (Adreno 740, 8 GB RAM); versionCode 24 is what the device reports. Gameplay,
-  the touch overlay and the redesigned launcher were **not** re-validated in a
-  device session after this build. The public release carries the APK as a
-  release asset, not a tracked source file.
-- 0.1.24 adds the card-based launcher (Game files / Graphics / Extras /
-  Launch), the generic **Select Vulkan driver (.zip)** label and an
+  (Adreno 740, 8 GB RAM); versionCode 25 is what the device reports. The
+  maintainer confirmed audio now plays without screen recording. Touch and the
+  redesigned launcher still have no gameplay validation. The public release
+  carries the APK as a release asset, not a tracked source file.
+- 0.1.25 opens the normal AAudio mixer path instead of the low-latency stream
+  by default (the fast stream was silent on the affected device until another
+  stream opened the mixer), keeps `mcla_audio_low_latency` as the opt-in for
+  the old behaviour, and requests audio focus from the game activity. Latency
+  was not measured.
+- 0.1.24 added the card-based launcher (Game files / Graphics / Extras /
+  Launch), the generic **Select Vulkan driver (.zip)** label and the
   experimental Xbox-style touch overlay with a HUD editor. Touch input is not
   yet validated in gameplay; a gamepad remains the only validated method.
 - The previous validated gameplay release remains
