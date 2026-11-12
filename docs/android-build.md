@@ -8,6 +8,11 @@ This port is written in **C++23** (plus Java for the Android launcher). The APK 
 
 Build on Termux with `clang`, CMake, Ninja, Python 3, Java, `aapt2`, `apksigner`, `zipalign`, `readelf`, and enough free space for generated code. The SDK and AdrenoTools checkouts under `third_party/` are ignored by Git. The current SDK was built from `f5337cdc947ff6d4c4196737e2c807a48f2a1fc2` (ReXGlue v0.10.0); AdrenoTools is pinned by `scripts/build_adrenotools_android.sh`.
 
+The GitHub Actions cross-build uses NDK `30.0.16248370` rather than the
+on-device Termux Clang: the earlier CI NDK r27 lacks the floating-point
+`std::from_chars` overloads required by the pinned SDK. This CI toolchain
+choice does not change the published APK or its on-device build recipe.
+
 From the repository root, after the SDK patch or C++ code changes:
 
 ```sh

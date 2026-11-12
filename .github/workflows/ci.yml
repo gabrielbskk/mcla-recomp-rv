@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
-      ANDROID_NDK_VERSION: 27.2.12479018
+      ANDROID_NDK_VERSION: 30.0.16248370
       ANDROID_PLATFORM: android-35
       SDK_COMMIT: f5337cdc947ff6d4c4196737e2c807a48f2a1fc2
     steps:
@@ -54,6 +54,22 @@ jobs:
           fi
           yes | "$sdkmanager" --licenses >/dev/null || true
           "$sdkmanager" "platforms;$ANDROID_PLATFORM" "ndk;$ANDROID_NDK_VERSION"
+
+      - name: Check NDK floating-point charconv support
+        shell: bash
+        run: |
+          set -euo pipefail
+          toolchain="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64"
+          cat <<'CPP' | "$toolchain/bin/clang++" --target=aarch64-none-linux-android35 \
+            --sysroot="$toolchain/sysroot" -std=c++23 -fsyntax-only -x c++ -
+          #include <charconv>
+          void check(const char* first, const char* last) {
+            float f;
+            double d;
+            (void)std::from_chars(first, last, f, std::chars_format::general);
+            (void)std::from_chars(first, last, d, std::chars_format::general);
+          }
+          CPP
 
       - name: Clone the pinned ReXGlue SDK and apply Android patches
         shell: bash
