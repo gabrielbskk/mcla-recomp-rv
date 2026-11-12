@@ -1,5 +1,9 @@
 # Android known issues
 
+- Only one gamepad is validated for in-game controls. Keyboard and mouse do
+  not work as in-game controls on Android. Xbox-style touch controls are in
+  development; the public APK does not have a supported touch driving overlay.
+
 - Turnip OneUI and Standard v27.0.0-20261107, and Turnip Mesa 27.0.0-devel
   (git-79cb04951e), produced intermittent white rear lights on the tested
   Galaxy S23. On the latter build, `TU_DEBUG=syncdraw` removed the observed

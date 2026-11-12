@@ -8,8 +8,11 @@ import android.os.Looper;
 import android.system.Os;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.hardware.input.InputManager;
 import android.util.Log;
+import android.view.InputDevice;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
@@ -22,6 +25,30 @@ import java.io.FileReader;
 
 public final class MclaActivity extends SDLActivity {
     private static final String TAG = "MCLA";
+    private MclaTouchControls touchControls;
+    private InputManager inputManager;
+    private final InputManager.InputDeviceListener gamepadListener =
+            new InputManager.InputDeviceListener() {
+                @Override public void onInputDeviceAdded(int id) { updateGamepad(); }
+                @Override public void onInputDeviceRemoved(int id) { updateGamepad(); }
+                @Override public void onInputDeviceChanged(int id) { updateGamepad(); }
+            };
+
+    private void updateGamepad() {
+        if (touchControls == null) return;
+        boolean connected = false;
+        for (int id : InputDevice.getDeviceIds()) {
+            InputDevice device = InputDevice.getDevice(id);
+            if (device == null || device.isVirtual()) continue;
+            int sources = device.getSources();
+            if ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD ||
+                    (sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
+                connected = true;
+                break;
+            }
+        }
+        touchControls.setGamepadConnected(connected);
+    }
     private final Handler logHandler = new Handler(Looper.getMainLooper());
     private final Runnable exportLogs = new Runnable() {
         @Override public void run() {
@@ -53,6 +80,15 @@ public final class MclaActivity extends SDLActivity {
             Log.e(TAG, "Could not stage the Xenos Vulkan plugin", e);
         }
         super.onCreate(state);
+        if (mLayout != null) {
+            touchControls = new MclaTouchControls(this);
+            mLayout.addView(touchControls, new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.MATCH_PARENT));
+            inputManager = (InputManager) getSystemService(Context.INPUT_SERVICE);
+            if (inputManager != null) inputManager.registerInputDeviceListener(gamepadListener, logHandler);
+            updateGamepad();
+        }
         if (Build.VERSION.SDK_INT >= 24) {
             PowerManager power = (PowerManager) getSystemService(Context.POWER_SERVICE);
             if (power != null && power.isSustainedPerformanceModeSupported()) {
@@ -118,12 +154,16 @@ public final class MclaActivity extends SDLActivity {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
             applyImmersiveMode();
+        } else if (touchControls != null) {
+            touchControls.clearInput();
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        updateGamepad();
+        if (touchControls != null) touchControls.resumeControls();
         logHandler.removeCallbacks(exportLogs);
         logHandler.postDelayed(exportLogs, 30_000);
     }
@@ -131,6 +171,7 @@ public final class MclaActivity extends SDLActivity {
     @Override
     protected void onPause() {
         logHandler.removeCallbacks(exportLogs);
+        if (touchControls != null) touchControls.clearInput();
         super.onPause();
         MclaLogExporter.exportAsync(this);
     }
@@ -138,6 +179,8 @@ public final class MclaActivity extends SDLActivity {
     @Override
     protected void onDestroy() {
         logHandler.removeCallbacks(exportLogs);
+        if (inputManager != null) inputManager.unregisterInputDeviceListener(gamepadListener);
+        if (touchControls != null) touchControls.clearInput();
         MclaLogExporter.exportAsync(this);
         super.onDestroy();
     }

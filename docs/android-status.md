@@ -26,7 +26,8 @@ not an x86 emulator or a Linux compatibility layer.
   reaching 475 MHz near the end. Host-presentation FPS varied with the scene;
   the sample does not isolate a single cause of low FPS or stutter.
 - Single-gamepad input is the only validated in-game input. Keyboard and mouse
-  may work but remain unverified; there are no touch driving controls. A
+  do not work as Android in-game controls. Xbox-style touch controls are under
+  development, but not supported by the public APK. A
   clean-profile import, 16 KiB page runtime and broad GPU compatibility have
   not been established.
 - Push CI runs repository checks. The full patched-SDK build is restricted to

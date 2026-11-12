@@ -30,8 +30,8 @@ files. The prior release below is preserved for reference; do not replace or
 delete its APK asset when publishing this version.
 
 Input: a single gamepad is the only validated in-game control method.
-Keyboard and mouse may work but have not been verified; touch controls are
-not supported yet.
+Keyboard and mouse do not work as in-game controls in this Android port.
+Xbox-style touch controls are in development and are not supported by this APK.
 
 For troubleshooting, exported logs are in `Documents/MCLA/logs/` as `.txt`
 files. The original `.log` files remain in the app-private `files/logs/`.

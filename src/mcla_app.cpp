@@ -99,6 +99,9 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 std::unique_ptr<rex::system::IAudioSystem> CreateMclaAudioSystem(
     rex::runtime::FunctionDispatcher* function_dispatcher);
 void MclaDevPadConfigure(rex::RuntimeConfig& config);
+#ifdef __ANDROID__
+void MclaTouchControlsConfigure(rex::RuntimeConfig& config);
+#endif
 void MclaDevPadStart(rex::ui::Window* window, rex::ui::ImGuiDrawer* imgui_drawer);
 void MclaApplyAspectRatio(rex::ui::Window* window);
 void MclaSaveMenuSettings();  // src/settings_menu.cpp
@@ -863,6 +866,9 @@ void MclaApp::OnPreSetup(rex::RuntimeConfig& config) {
 
   // Development: scripted controller input (src/dev_pad.cpp), off by default.
   MclaDevPadConfigure(config);
+#ifdef __ANDROID__
+  MclaTouchControlsConfigure(config);
+#endif
 }
 
 #ifdef _WIN32

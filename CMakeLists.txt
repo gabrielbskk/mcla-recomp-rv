@@ -71,6 +71,10 @@ set(MCLA_SOURCES
 )
 
 if(ANDROID)
+    list(APPEND MCLA_SOURCES src/touch_controls.cpp)
+endif()
+
+if(ANDROID)
     # SDL's Android activity loads libmain.so and calls SDL_main from it.
     # Keep the package arm64-only in the Android Gradle template.
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)

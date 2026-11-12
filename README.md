@@ -60,8 +60,10 @@ slowdown remain. See the [A740 test matrix](docs/turnip-a740-rendering-artifacts
 3. Follow [the installation and import guide](docs/android-testing.md).
 
 **Controls:** A single gamepad is the only validated in-game input method.
-Keyboard and mouse may work, but have not been tested. Touch controls are
-not supported yet; there are no on-screen driving controls.
+Keyboard and mouse do not work as in-game controls in this Android port.
+Xbox-style touch controls are in development and are not supported in the
+published APK. The planned overlay hides when a gamepad connects and, without
+a gamepad, hides after six seconds of inactivity and returns on touch.
 
 The APK is **debug-signed** and includes a native library generated from the
 game executable, but no extracted game assets, saves, Turnip package, shader
