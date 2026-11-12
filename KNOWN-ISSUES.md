@@ -2,7 +2,11 @@
 
 - Turnip OneUI and Standard v27.0.0-20261107, and Turnip Mesa 27.0.0-devel
   (git-79cb04951e), produced intermittent white rear lights on the tested
-  Galaxy S23; system Vulkan is the recommended driver. Tracked in
+  Galaxy S23. On the latter build, `TU_DEBUG=syncdraw` removed the observed
+  rear-light and wheel artifacts, but does not fix the underlying issue and
+  may cost performance. System Vulkan also avoids the observed artifacts, at
+  lower performance in the tested runs. See the
+  [test matrix](docs/turnip-a740-rendering-artifacts.md). Tracked in
   [issue 2](https://github.com/gabrielbskk/mcla-recomp-rv/issues/2).
 - Sustained FPS is low and stutters remain. The first seconds after the city
   loads are the worst: the Android build ships without the precompiled shader
@@ -40,7 +44,8 @@
   derives the guest video mode width from the aspect ratio; not yet measured.
   Tracked in
   [issue 4](https://github.com/gabrielbskk/mcla-recomp-rv/issues/4).
-- Wheels flicker in motion on Turnip; not yet reproduced on the system driver.
+- Wheels flicker in motion on Turnip without `syncdraw`; the workaround
+  removed the flicker in the tested sessions. Not reproduced on system Vulkan.
   Tracked in [issue 3](https://github.com/gabrielbskk/mcla-recomp-rv/issues/3).
 - Clean-profile folder import, final log filenames, per-driver cache behavior,
   two-gamepad/two-player input, long sessions and 16 KiB page-device runtime

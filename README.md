@@ -6,13 +6,13 @@ An experimental native Android ARM64 port of *Midnight Club: Los Angeles Complet
 
 ## Status
 
-The port reaches menus, audio and 3D gameplay on a Samsung Galaxy S23 (Adreno 740, 8 GB RAM, 256 GB storage). System Vulkan is the recommended driver on the tested phone. Optional Turnip packages load, but the tested variants still produce a rear-light flashing artifact. Sustained FPS is low and stutters remain. See the consolidated [Android status](docs/android-status.md) and [known issues](KNOWN-ISSUES.md).
+The port reaches menus, audio and 3D gameplay on a Samsung Galaxy S23 (Adreno 740, 8 GB RAM, 256 GB storage). On this device the system Vulkan driver avoids the tested Turnip rendering artifacts, but is slower. The tested Turnip 27 build is playable without the rear-light and wheel flashes when `TU_DEBUG=syncdraw` is set before launch; without that workaround, the artifacts remain. Sustained FPS is limited and stutters remain, especially as the phone heats up. See the [Turnip test matrix](docs/turnip-a740-rendering-artifacts.md), [Android status](docs/android-status.md) and [known issues](KNOWN-ISSUES.md).
 
-The public Android release is experimental and debug-signed. Its APK still contains generated native game code; the source repository never contains game data, generated game sources, saves, keys, driver packages or shader packs. A source-only release is the preferred future distribution and requires a separate release decision.
+Android release APKs are debug-signed and include a native library generated from the game's executable. Unlike release APK assets, the source repository never contains game data, generated game sources, saves, keys, driver packages or shader packs. This build has only been tested on a limited set of devices; it is not a general Android compatibility guarantee.
 
 ## Build
 
-The reproducible source recipe is in [docs/android-build.md](docs/android-build.md). It pins ReXGlue SDK commit `f5337cdc947ff6d4c4196737e2c807a48f2a1fc2` and applies the three Android patches in `patches/`. The Android CI builds the patched SDK and performs a host syntax check without game files. This repository does not provide the game data.
+The reproducible source recipe is in [docs/android-build.md](docs/android-build.md). It pins ReXGlue SDK commit `f5337cdc947ff6d4c4196737e2c807a48f2a1fc2` and applies the Android patches in `patches/`. The Android CI builds the patched SDK and performs a host syntax check without game files. This repository does not provide the game data.
 
 ## Install and import data
 
@@ -21,7 +21,7 @@ Provide your own legally obtained Xbox 360 game data, extract the 13 required fi
 ## Limitations
 
 - Only ARM64 Android is supported; 16 KiB page-device runtime and clean-profile folder import remain unverified.
-- System Vulkan is currently safer than the optional Turnip path on the tested device.
+- The system Vulkan driver avoids the observed Turnip artifacts; Turnip 27 needs the diagnostic `TU_DEBUG=syncdraw` workaround on the tested device.
 - Gamepad is the only officially supported input method at the moment. Keyboard
   and mouse may work through Android/SDL but are not verified; touch input is
   planned for a future update.

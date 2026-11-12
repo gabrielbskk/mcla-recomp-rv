@@ -86,12 +86,14 @@ falls back to the system driver. Check `files/logs/mcla_*.log` for
 `AdrenoTools opened Vulkan for selected Turnip`, the actual `Vulkan device`
 line, or `AdrenoTools rejected selected driver`.
 
-The system driver is recommended on the tested Samsung Galaxy S23. Turnip
-8G2-OneUI and Standard v27.0.0-20261107 both produced rear-light flashes in
-the user's tests; system Vulkan removed the artifact, with somewhat lower
-performance. The spoofed `realme/RMX5070` string in old logs is not the phone
-model. Thermal throttling was observed, so FPS comparisons require similar
-temperature and cache conditions.
+The system driver is the artifact-free option without a diagnostic switch on
+the tested Samsung Galaxy S23. Turnip 8G2-OneUI and Standard
+v27.0.0-20261107 produced rear-light flashes in the user's tests; the tested
+Turnip 27 build needs `TU_DEBUG=syncdraw` to avoid the observed rear-light and
+wheel artifacts. System Vulkan was slower in the tested sessions. The spoofed
+`realme/RMX5070` string in old logs is not the phone model. Thermal throttling
+was observed, so FPS comparisons require similar temperature and cache
+conditions.
 
 ### Turnip driver debug switches (diagnostic APK)
 
