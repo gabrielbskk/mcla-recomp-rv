@@ -13,6 +13,8 @@ An unofficial Android ARM64 port of <em>Midnight Club: Los Angeles Complete Edit
   &nbsp; · &nbsp; <a href="docs/android-build.md">BUILD</a>
 </p>
 
+<p align="center">Discord: <strong>gabrielbskk</strong></p>
+
 > **Early Android port.** Compatibility and performance vary. You need your
 > own legally obtained Xbox 360 game files; they are not included.
 
