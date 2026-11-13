@@ -7,16 +7,31 @@
 An unofficial Android ARM64 port of <em>Midnight Club: Los Angeles Complete Edition</em> for Xbox 360.</p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Android-ARM64-3DDC84?style=flat-square&amp;logo=android&amp;logoColor=white" alt="Android ARM64">
+  <img src="https://img.shields.io/badge/Renderer-Vulkan-AC162C?style=flat-square&amp;logo=vulkan" alt="Vulkan renderer">
+  <img src="https://img.shields.io/badge/Status-Early%20port-E9A820?style=flat-square" alt="Early port">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0--or--later-5865F2?style=flat-square" alt="GPL-3.0-or-later license"></a>
+</p>
+
+<p align="center">
   <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap"><strong>DOWNLOAD</strong></a>
   &nbsp; · &nbsp; <a href="docs/android-testing.md">INSTALL GUIDE</a>
   &nbsp; · &nbsp; <a href="docs/android-compatibility.md">COMPATIBILITY</a>
   &nbsp; · &nbsp; <a href="docs/android-build.md">BUILD</a>
+  &nbsp; · &nbsp; <a href="https://github.com/gabrielbskk/mcla-recomp-rv/issues">REPORT A BUG</a>
 </p>
 
 <p align="center">Discord: <strong>gabrielbskk</strong></p>
 
-> **Early Android port.** Compatibility and performance vary. You need your
+> [!IMPORTANT]
+> **Early Android port — compatibility and performance vary.** You need your
 > own legally obtained Xbox 360 game files; they are not included.
+
+## Start here
+
+**[Download the APK](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap)** → **[Import your game files](docs/android-testing.md)** → **Play with the system driver first.**
+
+Native ARM64 code · Vulkan graphics · Controller support · Experimental touch controls
 
 ## Choose a build
 
@@ -57,19 +72,33 @@ device details and likely requirements, see [compatibility and performance](docs
    launcher's driver selector is separate. Touch controls and their editor are
    experimental; one gamepad is the validated input method.
 
-Both APKs share a package ID and replace each other. For compatible updates use
-`pm install -r`; **do not uninstall or clear data** if you want to keep your
-game files and saves. Downgrades can be rejected by Android. Shared logs are
-exported to `Documents/MCLA/logs/` on Android 10+; reopen the launcher after
-a crash if necessary.
+> [!WARNING]
+> **Keep your game files and saves:** both APKs share a package ID and replace
+> each other. For compatible updates use `pm install -r`; **do not uninstall or
+> clear data**. Downgrades can be rejected by Android.
+
+## Need help?
+
+Check the [known issues](KNOWN-ISSUES.md) before opening a
+[bug report](https://github.com/gabrielbskk/mcla-recomp-rv/issues). Include:
+
+- Phone model, GPU, Android version and APK version.
+- Driver name/version and a short description of how to reproduce the problem.
+- An exported log; review it for personal information before sharing.
+
+Shared logs are exported to `Documents/MCLA/logs/` on Android 10+; reopen the
+launcher after a crash if necessary. Never upload game files or saves.
 
 ## Documentation
 
-- [Compatibility, performance and likely requirements](docs/android-compatibility.md)
-- [Installation and testing](docs/android-testing.md) · [Known issues](KNOWN-ISSUES.md)
-- [Release notes and hashes](docs/android-release.md) · [Mali investigation](docs/android-mali-driver.md)
-- [Build from source](docs/android-build.md) · [Android status](docs/android-status.md)
-- [Security policy](SECURITY.md) · [Credits](CREDITS.md) · [Third-party notices](THIRD-PARTY-NOTICES.md)
+| For players | For contributors |
+| --- | --- |
+| [Installation and testing](docs/android-testing.md) | [Build from source](docs/android-build.md) |
+| [Compatibility and performance](docs/android-compatibility.md) | [Android status](docs/android-status.md) |
+| [Release notes and hashes](docs/android-release.md) | [Mali investigation](docs/android-mali-driver.md) |
+| [Known issues](KNOWN-ISSUES.md) | [Security policy](SECURITY.md) |
+
+## About the project
 
 This project uses static recompilation, C++23, SDL3, Vulkan and ReXGlue; it is
 not an x86 emulator or an official release. APKs are debug-signed and contain a
@@ -82,3 +111,5 @@ Built on [holdmysocks/mcla-recomp](https://github.com/holdmysocks/mcla-recomp),
 the [RenanQueiroz fork](https://github.com/RenanQueiroz/mcla-recomp), ReXGlue,
 SDL3 and AdrenoTools. This unofficial project is not affiliated with the game's
 rights holders. Source code is licensed under [GPL-3.0-or-later](LICENSE).
+
+[Credits](CREDITS.md) · [Third-party notices](THIRD-PARTY-NOTICES.md)
