@@ -22,9 +22,36 @@ Static recompilation brings the Xbox 360 game to native ARM64 using C++23,
 SDL3, Vulkan and the ReXGlue runtime. This is **not** an x86 emulator, a
 Linux compatibility layer, or an official release.
 
-| Tested on | Graphics | Current state |
+| Device reported/tested | Graphics | Did it run? / compatibility |
 | :--- | :--- | :--- |
-| Galaxy S23 · Snapdragon 8 Gen 2 · Adreno 740 · 8 GB RAM | System Vulkan or optional Turnip 27 | Menus, audio and driving work; performance and compatibility vary |
+| Galaxy S23 · Snapdragon 8 Gen 2 · Adreno 740 · 8 GB RAM | System Vulkan / Turnip 27 | **Yes, on older builds:** menus, audio and driving. System Vulkan avoided tested Turnip visual artifacts but was slower in those runs. v0.1.45 has no equivalent controlled gameplay retest. |
+| Galaxy A06 · Helio G85 · Mali-G52 MC2 | Stock Arm / tested PanVK | **No validated gameplay:** stock driver lacks a required Vulkan feature; PanVK failed swapchain creation. The Mali APK is diagnostic, not a compatibility claim. |
+| RedMagic 11 Air · Snapdragon 8 Elite (tester report) | Adreno | **Audio test only:** stereo output confirmed in logs, but cuts reported. Gameplay performance/compatibility is not established; its APK is withheld. |
+
+**Performance evidence (Galaxy S23, older test builds; not v0.1.45 benchmarks):**
+a 150-second `0.1.6` drive with system Vulkan and no shader pack averaged
+**14.223 presented FPS** (p95 frame interval 110 ms). A separate Turnip 27
+run measured **22–24 presented FPS**, with different settings and thermal
+limits. These are not a controlled driver comparison or a prediction for the
+current APK: cache warm-up, shader compilation and thermal throttling can
+cause substantial stutter. The Mali and RedMagic devices have **no validated
+comparable gameplay FPS measurement**. See [Android test evidence](docs/android-status.md)
+and [performance methodology](docs/android-performance-handoff.md).
+
+**Likely requirements, not a verified minimum specification:** ARM64 Android
+(APK declares API 23 / Android 6.0 as its *installation* minimum), a working
+Vulkan driver with `vertexPipelineStoresAndAtomics` and compatible Android
+swapchain support, and your own legally obtained Xbox 360 game files. The
+only demonstrated playable phone here has Snapdragon 8 Gen 2 / Adreno 740
+and 8 GB RAM: this is a **tested reference**, not proof that weaker devices
+or less memory cannot run it. Plan for about **6.2 GB free for the app's
+imported copy**, plus space for your extracted source files, shader caches
+and Android itself; roughly **13 GB free** is a cautious starting estimate
+when the source files are also stored on the device, not a measured hard
+minimum. Android 10+ supports the documented shared-log export. Devices with
+16 KiB memory pages and other chipsets still need runtime testing. Vulkan
+1.3 is needed for optional FSR features, not established as the base game's
+minimum.
 
 The system Vulkan driver avoids the artifacts seen with Turnip on this device,
 but was slower in tested runs. With the tested Turnip 27 build, rear lights and
