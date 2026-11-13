@@ -1,5 +1,9 @@
 # Android known issues
 
+> These observations span multiple builds and devices; source changes or older
+> test results are not guarantees for the current APK. For a concise current
+> device matrix, see [compatibility and performance](docs/android-compatibility.md).
+
 - Audio on some devices is silent until another app opens the audio mixer
   (for example while screen recording). The current Android build defaults to
   the normal mixer path and requests audio focus, which fixed the reported

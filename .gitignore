@@ -18,9 +18,15 @@
 /generated/*
 !/generated/rexglue.cmake
 /shaderpack/
+*.shaderpack
 
 # Keys
 *.key
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
 keys.*
 
 # Build output
@@ -35,6 +41,7 @@ keys.*
 *.exe
 *.dll
 *.so
+*.apk
 # /third_party is a local symlink as well; see the /game note above.
 /third_party
 /tools/
