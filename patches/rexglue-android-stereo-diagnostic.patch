@@ -1,0 +1,36 @@
+--- a/src/audio/sdl/sdl_audio_driver.cpp
++++ b/src/audio/sdl/sdl_audio_driver.cpp
+@@ -25,6 +25,9 @@
+ #include <SDL3/SDL.h>
+ 
+ REXCVAR_DEFINE_BOOL(audio_mute, false, "Audio", "Mute audio output");
++REXCVAR_DEFINE_BOOL(audio_android_force_stereo, false, "Audio",
++                    "Android diagnostic: request stereo from SDL instead of sending six channels")
++    .lifecycle(rex::cvar::Lifecycle::kInitOnly);
+ REXCVAR_DEFINE_BOOL(audio_adaptive_queue, false, "Audio",
+                     "When the output runs dry after the first seconds of the game's audio (the mixer was late), "
+                     "let the mixer run further ahead from then on: audio_adaptive_queue_step more frames of "
+@@ -73,8 +76,12 @@
+   SDL_AudioSpec obtained_spec = {};
+   desired_spec.freq = frame_frequency_;
+   desired_spec.format = SDL_AUDIO_F32LE;
+-  desired_spec.channels = frame_channels_;
+-  sdl_device_channels_ = frame_channels_;
++  const bool force_stereo = REX_PLATFORM_ANDROID && REXCVAR_GET(audio_android_force_stereo);
++  desired_spec.channels = force_stereo ? 2 : frame_channels_;
++  sdl_device_channels_ = desired_spec.channels;
++  if (force_stereo) {
++    REXAPU_INFO("Android stereo diagnostic: requesting 2 channels from SDL; downmixing six guest channels");
++  }
+   sdl_stream_ = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &desired_spec,
+                                           SDLCallback, this);
+   if (!sdl_stream_) {
+@@ -95,7 +102,7 @@
+ 
+   // A 1-channel device gets the stereo fold too, then SDL collapses to mono.
+   // Handing it a 6ch stream instead would use SDL's own downmix.
+-  if (obtained_spec.channels <= 2) {
++  if (obtained_spec.channels <= 2 && desired_spec.channels != 2) {
+     SDL_DestroyAudioStream(sdl_stream_);
+     sdl_stream_ = nullptr;
+     desired_spec.channels = 2;

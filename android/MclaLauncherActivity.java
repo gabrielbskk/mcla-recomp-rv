@@ -255,6 +255,7 @@ public final class MclaLauncherActivity extends Activity {
 
         audioButton = new Button(this);
         audioButton.setOnClickListener(view -> {
+            if (MclaBuildVariant.isRedMagicAudioTest(this)) return;
             boolean lowLatency = !audioLowLatency();
             getSharedPreferences("audio", MODE_PRIVATE).edit()
                     .putBoolean("low_latency", lowLatency).apply();
@@ -288,6 +289,11 @@ public final class MclaLauncherActivity extends Activity {
 
     private void updateAudioStatus() {
         if (audioButton == null) return;
+        if (MclaBuildVariant.isRedMagicAudioTest(this)) {
+            audioButton.setText("Audio test: stereo / normal mixer (fixed for comparison)");
+            audioButton.setEnabled(false);
+            return;
+        }
         boolean lowLatency = audioLowLatency();
         audioButton.setText(lowLatency
                 ? "Audio: low-latency (best performance, may be silent)"

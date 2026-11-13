@@ -132,9 +132,16 @@ public final class MclaActivity extends SDLActivity {
     private void applyAudioEnvironment() {
         // The native side reads the cvar, which accepts a REX_ environment
         // override. Set it before the runtime starts.
-        boolean lowLatency = getSharedPreferences("audio", MODE_PRIVATE)
+        boolean stereoTest = MclaBuildVariant.isRedMagicAudioTest(this);
+        boolean lowLatency = !stereoTest && getSharedPreferences("audio", MODE_PRIVATE)
                 .getBoolean("low_latency", false);
         try {
+            if (stereoTest) {
+                Os.setenv("REX_AUDIO_ANDROID_FORCE_STEREO", "true", true);
+                Log.i(TAG, "RedMagic audio diagnostic: stereo output, normal mixer");
+            } else {
+                Os.unsetenv("REX_AUDIO_ANDROID_FORCE_STEREO");
+            }
             if (lowLatency) {
                 Os.setenv("REX_MCLA_AUDIO_LOW_LATENCY", "true", true);
             } else {
