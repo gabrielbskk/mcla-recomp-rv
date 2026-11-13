@@ -13,6 +13,7 @@
         android:allowBackup="false"
         android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen"
         android:hardwareAccelerated="true">
+        <meta-data android:name="org.mcla.recomp.GPU_VARIANT" android:value="snapdragon" />
         <activity
             android:name="org.mcla.recomp.MclaActivity"
             android:screenOrientation="landscape"

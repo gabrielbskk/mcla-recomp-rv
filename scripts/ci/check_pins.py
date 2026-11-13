@@ -27,6 +27,7 @@ android_patches = [
     "rexglue-android-present-stats.patch",
     "rexglue-vulkan-frame-start-sync.patch",
     "rexglue-android-bionic-link.patch",
+    "rexglue-android-driver-selection.patch",
 ]
 
 build_doc = (root / "docs" / "android-build.md").read_text(encoding="utf-8", errors="replace")
@@ -67,6 +68,7 @@ known_hashes = {
     "rexglue-android-present-stats.patch": "e9457c30aab4b00962f7c47b3e2cafe01de6fd52f8a39a8bcc199d9993cd6ef7",
     "rexglue-vulkan-frame-start-sync.patch": "7f0622859910bb2bb3a90f5cb93a99fa76f19f7b4ac2503e3a223e5692a89b06",
     "rexglue-android-bionic-link.patch": "e3bf87a2847134ae9b92a0ac2299c6f86359646a234265cbd1e325eadbcb692a",
+    "rexglue-android-driver-selection.patch": "d4fec822e4db5a27d0e905e5280c852a0a76002f8f9b8b71894ca166f3159fb5",
 }
 for name, expected in known_hashes.items():
     path = patch_dir / name

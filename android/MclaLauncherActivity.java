@@ -37,7 +37,7 @@ import java.util.zip.ZipInputStream;
 public final class MclaLauncherActivity extends Activity {
     private static final String TAG = "MCLA Import";
     private static final int PICK_GAME_FOLDER = 1;
-    private static final int PICK_TURNIP_ZIP = 2;
+    private static final int PICK_DRIVER_ZIP = 2;
     private static final int PICK_SHADER_PACK = 3;
     private static final long MAX_DRIVER_BYTES = 128L * 1024 * 1024;
     private static final long MAX_SHADER_PACK_BYTES = 64L * 1024 * 1024;
@@ -119,13 +119,7 @@ public final class MclaLauncherActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        // Detect build variant from the application label
-        try {
-            CharSequence label = getPackageManager().getApplicationLabel(getApplicationInfo());
-            isMaliBuild = label != null && label.toString().contains("Mali");
-        } catch (Exception e) {
-            isMaliBuild = false;
-        }
+        isMaliBuild = MclaBuildVariant.isMali(this);
         MclaLogExporter.exportAsync(this);
         getWindow().setNavigationBarColor(0xFF0B161F);
         LinearLayout layout = new LinearLayout(this);
@@ -184,7 +178,7 @@ public final class MclaLauncherActivity extends Activity {
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("*/*");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivityForResult(intent, PICK_TURNIP_ZIP);
+            startActivityForResult(intent, PICK_DRIVER_ZIP);
         });
         addAction(graphicsCard, driverButton, false);
 
@@ -370,7 +364,7 @@ public final class MclaLauncherActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK || data == null) return;
-        if (requestCode == PICK_TURNIP_ZIP) {
+        if (requestCode == PICK_DRIVER_ZIP) {
             Uri uri = data.getData();
             if (uri == null) return;
             driverButton.setEnabled(false);
@@ -496,8 +490,9 @@ public final class MclaLauncherActivity extends Activity {
 
     private void importDriver(Uri uri) {
         File folder = driverFolder();
-        File part = new File(folder, "libvulkan_freedreno.so.partial");
-        File target = new File(folder, "libvulkan_freedreno.so");
+        String driverName = isMaliBuild ? "libvulkan_panfrost.so" : "libvulkan_freedreno.so";
+        File part = new File(folder, driverName + ".partial");
+        File target = new File(folder, driverName);
         try {
             if (!folder.isDirectory() && !folder.mkdirs())
                 throw new Exception("Could not create the driver folder.");
@@ -509,8 +504,9 @@ public final class MclaLauncherActivity extends Activity {
                     while ((entry = zip.getNextEntry()) != null) {
                         String name = entry.getName();
                         if (entry.isDirectory() || name == null ||
-                                !(name.equals("libvulkan_freedreno.so") ||
-                                  name.endsWith("/libvulkan_freedreno.so"))) continue;
+                                !(name.equals(driverName) || name.endsWith("/" + driverName) ||
+                                  (isMaliBuild && (name.equals("libvulkan_freedreno.so") ||
+                                  name.endsWith("/libvulkan_freedreno.so"))))) continue;
                         if (found) throw new Exception("The ZIP contains more than one driver.");
                         found = true;
                         long copied = 0;
@@ -528,12 +524,12 @@ public final class MclaLauncherActivity extends Activity {
                     }
                 }
             }
-            if (!found) throw new Exception("The ZIP does not contain libvulkan_freedreno.so.");
+            if (!found) throw new Exception("The ZIP does not contain " + driverName + ".");
             validateArm64Library(part);
             if (!part.renameTo(target)) throw new Exception("Could not save the driver.");
             File selection = new File(folder, "selected.txt");
             try (FileOutputStream output = new FileOutputStream(selection)) {
-                output.write("libvulkan_freedreno.so\n".getBytes("UTF-8"));
+                output.write((driverName + "\n").getBytes("UTF-8"));
                 output.getFD().sync();
             }
             mainHandler.post(() -> {

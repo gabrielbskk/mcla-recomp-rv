@@ -148,6 +148,12 @@ public final class MclaActivity extends SDLActivity {
     private void applyDriverDebugEnvironment() {
         // The Vulkan driver is loaded during SDLActivity.onCreate. Keep this
         // private, opt-in diagnostic setting outside mcla.toml and apply it first.
+        if (MclaBuildVariant.isMali(this)) {
+            try { Os.unsetenv("TU_DEBUG"); } catch (Exception e) {
+                Log.e(TAG, "Could not clear Turnip debug flags on Mali", e);
+            }
+            return;
+        }
         File config = new File(getFilesDir(), "driver.env");
         String debug = null;
         try {
@@ -172,10 +178,14 @@ public final class MclaActivity extends SDLActivity {
                     }
                 }
             }
-            CharSequence label = getPackageManager().getApplicationLabel(getApplicationInfo());
-            boolean snapdragon = label != null && !label.toString().contains("Mali");
-            boolean customDriver = new File(getFilesDir(), "gpu-drivers/selected.txt").isFile();
-            if (!snapdragon || !customDriver) {
+            boolean turnipSelected = false;
+            File selection = new File(getFilesDir(), "gpu-drivers/selected.txt");
+            if (selection.isFile()) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(selection))) {
+                    turnipSelected = "libvulkan_freedreno.so".equals(reader.readLine());
+                }
+            }
+            if (!turnipSelected) {
                 // Turnip debug flags must never leak to system Vulkan or PanVK.
                 debug = null;
             } else if (debug == null) {

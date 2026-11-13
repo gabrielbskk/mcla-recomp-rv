@@ -1,0 +1,50 @@
+--- a/src/ui/vulkan/vulkan_instance.cpp
++++ b/src/ui/vulkan/vulkan_instance.cpp
+@@ -10,6 +10,7 @@
+  */
+ 
+ #include <sstream>
++#include <fstream>
+ #include <string>
+ #include <unordered_map>
+ #include <utility>
+@@ -48,12 +49,21 @@
+ #if REX_PLATFORM_ANDROID
+ static void* OpenSelectedAndroidDriver() {
+   const std::filesystem::path driver_dir = rex::filesystem::GetUserFolder() / "gpu-drivers";
+-  if (!std::filesystem::exists(driver_dir / "selected.txt")) {
+-    return nullptr;
+-  }
+-  const std::filesystem::path driver = driver_dir / "libvulkan_freedreno.so";
++  std::ifstream selection(driver_dir / "selected.txt");
++  if (!selection) {
++    return nullptr;
++  }
++  std::string driver_name;
++  std::getline(selection, driver_name);
++  // Never use arbitrary paths from app data as a library name.
++  if (driver_name != "libvulkan_freedreno.so" &&
++      driver_name != "libvulkan_panfrost.so") {
++    REXLOG_WARN("Unknown selected Android Vulkan driver; using system Vulkan");
++    return nullptr;
++  }
++  const std::filesystem::path driver = driver_dir / driver_name;
+   if (!std::filesystem::is_regular_file(driver)) {
+-    REXLOG_WARN("Selected Turnip driver is missing; using system Vulkan");
++    REXLOG_WARN("Selected Android Vulkan driver is missing; using system Vulkan");
+     return nullptr;
+   }
+   Dl_info self_info{};
+@@ -79,9 +89,10 @@
+   const std::string hook_path = hook_dir.string();
+   const std::string driver_path = driver_dir.string() + "/";
+   void* handle = open(RTLD_NOW, kCustomDriver, nullptr, hook_path.c_str(),
+-                      driver_path.c_str(), "libvulkan_freedreno.so", nullptr, nullptr);
++                      driver_path.c_str(), driver_name.c_str(), nullptr, nullptr);
+   if (handle) {
+-    REXLOG_INFO("AdrenoTools opened Vulkan for selected Turnip from {}; verify GPU name", driver.string());
++    REXLOG_INFO("Driver loader opened selected Vulkan library from {}; verify GPU and driver name",
++                driver.string());
+   } else {
+     REXLOG_WARN("AdrenoTools rejected selected driver; using system Vulkan");
+   }
