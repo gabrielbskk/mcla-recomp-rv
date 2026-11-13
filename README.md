@@ -7,11 +7,7 @@
 An unofficial Android ARM64 port of <em>Midnight Club: Los Angeles Complete Edition</em> for Xbox 360.</p>
 
 <p align="center">
-  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap"><strong>SNAPDRAGON v0.1.45</strong></a>
-  &nbsp; · &nbsp;
-  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/8elite-experimental-build">REDMAGIC / 8 ELITE EXPERIMENTAL</a>
-  &nbsp; · &nbsp;
-  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/mali-experimental">MALI DIAGNOSTIC</a>
+  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap"><strong>DOWNLOAD: SNAPDRAGON + MALI DIAGNOSTIC</strong></a>
   &nbsp; · &nbsp;
   <a href="docs/android-testing.md">INSTALL &amp; PLAY</a>
   &nbsp; · &nbsp;
@@ -39,12 +35,12 @@ slowdown remain. See the [A740 test matrix](docs/turnip-a740-rendering-artifacts
 [known issues](KNOWN-ISSUES.md) and [Android status](docs/android-status.md).
 
 The Mali APK is diagnostic only: gameplay is **not validated**. The RedMagic
-11 Air / 8 Elite APK is an audio experiment; reported cuts remain under
-investigation. The `stable-snap` label is not a new gameplay validation.
+11 Air / 8 Elite APK is withheld while reported audio cuts are investigated.
+The `stable-snap` tag is not a new gameplay validation.
 
 ### 02 / GET ON THE ROAD
 
-1. Download the APK for your device: [Snapdragon v0.1.45](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap), [RedMagic diagnostic v0.1.47](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/8elite-experimental-build), or [Mali diagnostic v0.1.23](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/mali-experimental). The older v0.1.24 was the previously recommended Snapdragon build; v0.1.45 has not been revalidated as an equivalent stable baseline.
+1. Choose [Snapdragon v0.1.45 or Mali diagnostic v0.1.23 from the same release](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap). Mali gameplay is not validated. The older v0.1.24 was the previously recommended Snapdragon build; v0.1.45 has not been revalidated as an equivalent stable baseline.
 2. Supply the 13 extracted files from **your own legally obtained Xbox 360 copy**.
    The game data is not included; the import needs about 6.2 GB of free
    destination space in addition to your extracted source files.
