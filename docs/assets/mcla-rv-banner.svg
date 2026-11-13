@@ -1,54 +1,63 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
-  <title id="title">MCLA Recomp RV — Android ARM64</title>
-  <desc id="desc">Original green and graphite banner inspired by the Xbox 360 era, with luminous rings and Android ARM64 port lettering.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-labelledby="title desc">
+  <title id="title">MCLA Recomp RV — Los Angeles, recompiled.</title>
+  <desc id="desc">A midnight graphite and sunset amber banner with a city skyline, sweeping road lines and a racing-inspired RV emblem. Unofficial Android ARM64 community port.</desc>
   <defs>
-    <linearGradient id="background" x2="1" y2="1">
-      <stop offset="0" stop-color="#101714"/>
-      <stop offset="0.55" stop-color="#0b100e"/>
-      <stop offset="1" stop-color="#19281a"/>
+    <linearGradient id="night" x2="1" y2="1">
+      <stop stop-color="#171b24"/>
+      <stop offset="0.6" stop-color="#0c1018"/>
+      <stop offset="1" stop-color="#24202a"/>
     </linearGradient>
-    <linearGradient id="stripe" x2="1" y2="0">
-      <stop offset="0" stop-color="#58b124"/>
-      <stop offset="0.45" stop-color="#a4e444"/>
-      <stop offset="1" stop-color="#356f25"/>
-    </linearGradient>
-    <radialGradient id="orb">
-      <stop offset="0" stop-color="#cafa7e"/>
-      <stop offset="0.42" stop-color="#67c132"/>
-      <stop offset="0.78" stop-color="#234d25"/>
-      <stop offset="1" stop-color="#102419"/>
+    <radialGradient id="sunset">
+      <stop stop-color="#f59e42" stop-opacity="0.23"/>
+      <stop offset="1" stop-color="#f59e42" stop-opacity="0"/>
     </radialGradient>
-    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
-      <feGaussianBlur stdDeviation="10"/>
-    </filter>
-    <clipPath id="frame"><rect width="1200" height="360" rx="24"/></clipPath>
+    <linearGradient id="amber">
+      <stop stop-color="#ffd18b"/>
+      <stop offset="1" stop-color="#f08a3c"/>
+    </linearGradient>
+    <linearGradient id="road">
+      <stop stop-color="#f59e42" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#f59e42" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#ffd18b"/>
+    </linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#fff" stroke-opacity="0.035"/>
+    </pattern>
+    <clipPath id="frame"><rect x="1" y="1" width="1278" height="418" rx="24"/></clipPath>
   </defs>
   <g clip-path="url(#frame)">
-    <rect width="1200" height="360" fill="url(#background)"/>
-    <g opacity="0.13" stroke="#87c86a" stroke-width="1">
-      <path d="M0 64H1200M0 120H1200M0 176H1200M0 232H1200M0 288H1200"/>
-      <path d="M80 0V360M176 0V360M272 0V360M368 0V360M464 0V360M560 0V360M656 0V360M752 0V360M848 0V360M944 0V360M1040 0V360M1136 0V360"/>
+    <rect width="1280" height="420" fill="url(#night)"/>
+    <rect width="1280" height="420" fill="url(#grid)"/>
+    <ellipse cx="1060" cy="250" rx="540" ry="350" fill="url(#sunset)"/>
+    <g fill="#080d15" opacity="0.6">
+      <path d="M712 310V234H750V205H774V257H804V174H840V144H850V174H874V228H903V190H940V251H968V218H995V127H1005V112H1012V127H1037V177H1055V231H1080V196H1118V148H1158V213H1186V188H1224V242H1280V420H712Z"/>
     </g>
-    <path d="M-35 331C175 210 347 182 582 241S1010 319 1240 187" fill="none" stroke="#63bc33" stroke-width="38" opacity="0.11" filter="url(#glow)"/>
-    <path d="M-35 331C175 210 347 182 582 241S1010 319 1240 187" fill="none" stroke="url(#stripe)" stroke-width="4" opacity="0.65"/>
-    <g transform="translate(1020 178)">
-      <circle r="158" fill="none" stroke="#78c643" stroke-width="1" opacity="0.12"/>
-      <circle r="126" fill="none" stroke="#85d24c" stroke-width="2" opacity="0.22"/>
-      <circle r="105" fill="none" stroke="#9ce35d" stroke-width="9" opacity="0.23" filter="url(#glow)"/>
-      <circle r="105" fill="none" stroke="#9ce35d" stroke-width="2" opacity="0.72" stroke-dasharray="280 380" transform="rotate(-38)"/>
-      <circle r="78" fill="url(#orb)" opacity="0.92"/>
-      <circle r="60" fill="none" stroke="#d8ffab" stroke-width="1.5" opacity="0.42"/>
-      <path d="M-56 34C-15-45 25-55 59-13" fill="none" stroke="#d6ffa6" stroke-width="7" stroke-linecap="round" opacity="0.43"/>
-      <path d="M-32-36C-5-53 18-53 42-39" fill="none" stroke="#efffd0" stroke-width="2" opacity="0.8"/>
+    <g fill="#f7b466" opacity="0.18">
+      <path d="M816 190H822V196H816ZM838 190H844V196H838ZM816 214H822V220H816ZM838 238H844V244H838ZM1008 150H1014V156H1008ZM1008 174H1014V180H1008ZM1008 198H1014V204H1008ZM1132 168H1138V174H1132ZM1146 192H1152V198H1146Z"/>
     </g>
-    <path d="M46 42H850" stroke="url(#stripe)" stroke-width="3" opacity="0.9"/>
-    <text x="50" y="91" fill="#9bda67" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="6">COMMUNITY PORT  /  UNOFFICIAL</text>
-    <text x="44" y="205" fill="#f4f8ef" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="900" letter-spacing="-3">MCLA RECOMP</text>
-    <text x="49" y="265" fill="#9fe15e" font-family="Arial, Helvetica, sans-serif" font-size="45" font-weight="800" letter-spacing="11">RV</text>
-    <rect x="172" y="228" width="231" height="45" rx="22" fill="#244a25" stroke="#75ba4c"/>
-    <text x="194" y="257" fill="#e6f8d8" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="2">ANDROID ARM64</text>
-    <rect x="415" y="228" width="194" height="45" rx="22" fill="#1b2e22" stroke="#51835a"/>
-    <text x="442" y="257" fill="#c0dbbf" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="2">VULKAN  /  SDL3</text>
-    <text x="50" y="325" fill="#92aa91" font-family="Arial, Helvetica, sans-serif" font-size="15" letter-spacing="2">STATIC RECOMPILATION  •  EXPERIMENTAL BUILD</text>
+    <g fill="none">
+      <circle cx="1045" cy="207" r="166" stroke="#f6ae62" stroke-opacity="0.1"/>
+      <circle cx="1045" cy="207" r="142" stroke="#f6ae62" stroke-opacity="0.2" stroke-dasharray="2 12"/>
+      <circle cx="1045" cy="207" r="119" stroke="#f6ae62" stroke-opacity="0.32" stroke-width="2" stroke-dasharray="160 590" transform="rotate(-65 1045 207)"/>
+      <path d="M610 450C780 270 1070 440 1330 130" stroke="url(#road)" stroke-width="2"/>
+      <path d="M680 450C850 285 1100 440 1330 180" stroke="url(#road)" stroke-width="1" opacity="0.4"/>
+      <path d="M-20 398H1300" stroke="#ffffff" stroke-opacity="0.06"/>
+    </g>
+    <g font-family="Arial, Helvetica, sans-serif">
+      <rect x="60" y="52" width="30" height="4" rx="2" fill="url(#amber)"/>
+      <text x="104" y="60" fill="#e9b77b" font-size="13" font-weight="700" letter-spacing="4">UNOFFICIAL COMMUNITY PORT</text>
+      <text x="55" y="179" fill="#f3f4f7" font-size="83" font-weight="900" letter-spacing="-4">MCLA RECOMP</text>
+      <text x="61" y="228" fill="#eab97f" font-size="22" font-weight="700" letter-spacing="5">LOS ANGELES, RECOMPILED.</text>
+      <text x="62" y="274" fill="#99a3b4" font-size="17">Midnight Club: Los Angeles Complete Edition</text>
+      <rect x="60" y="313" width="158" height="35" rx="8" fill="#f5a34d" fill-opacity="0.1" stroke="#f5a34d" stroke-opacity="0.3"/>
+      <text x="139" y="336" fill="#f1c38a" font-size="12" font-weight="700" text-anchor="middle" letter-spacing="1.5">ANDROID ARM64</text>
+      <text x="242" y="336" fill="#99a3b4" font-size="12" font-weight="700" letter-spacing="2">VULKAN / SDL3 / ReXGlue</text>
+      <g transform="translate(1045 207) skewX(-12)">
+        <text y="24" fill="url(#amber)" font-size="104" font-weight="900" text-anchor="middle" letter-spacing="-7">RV</text>
+      </g>
+      <text x="1045" y="266" fill="#a99b8c" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="4">STATIC RECOMPILATION</text>
+      <text x="62" y="389" fill="#748094" font-size="10" font-weight="700" letter-spacing="2">EXPERIMENTAL SOFTWARE. ORIGINAL GAME FILES REQUIRED.</text>
+    </g>
   </g>
+  <rect x="1" y="1" width="1278" height="418" rx="24" fill="none" stroke="#7d899f" stroke-opacity="0.2"/>
 </svg>
