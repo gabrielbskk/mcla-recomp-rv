@@ -74,6 +74,7 @@ public final class MclaActivity extends SDLActivity {
     @Override
     protected void onCreate(Bundle state) {
         applyAudioEnvironment();
+        applyRedMagicShaderEnvironment();
         applyLogEnvironment();
         applyDriverDebugEnvironment();
         File source = new File(getApplicationInfo().nativeLibraryDir, "librexgpu-xenos.so");
@@ -138,9 +139,14 @@ public final class MclaActivity extends SDLActivity {
         try {
             if (stereoTest) {
                 Os.setenv("REX_AUDIO_ANDROID_FORCE_STEREO", "true", true);
-                Log.i(TAG, "RedMagic audio diagnostic: stereo output, normal mixer");
+                boolean adaptive = getSharedPreferences("redmagic_diagnostics", MODE_PRIVATE)
+                        .getBoolean("adaptive_queue", false);
+                Os.setenv("REX_AUDIO_ADAPTIVE_QUEUE", adaptive ? "true" : "false", true);
+                Log.i(TAG, "RedMagic audio diagnostic: stereo output, normal mixer, adaptive queue="
+                        + adaptive);
             } else {
                 Os.unsetenv("REX_AUDIO_ANDROID_FORCE_STEREO");
+                Os.unsetenv("REX_AUDIO_ADAPTIVE_QUEUE");
             }
             if (lowLatency) {
                 Os.setenv("REX_MCLA_AUDIO_LOW_LATENCY", "true", true);
@@ -149,6 +155,22 @@ public final class MclaActivity extends SDLActivity {
             }
         } catch (Exception e) {
             Log.e(TAG, "Could not apply the audio mode", e);
+        }
+    }
+
+    private void applyRedMagicShaderEnvironment() {
+        try {
+            if (MclaBuildVariant.isRedMagicAudioTest(this)) {
+                boolean enabled = getSharedPreferences("redmagic_diagnostics", MODE_PRIVATE)
+                        .getBoolean("shader_pack_auto", true);
+                Os.setenv("REX_MCLA_SHADER_PACK_AUTO", enabled ? "true" : "false", true);
+                Log.i(TAG, "RedMagic shader pack auto-import=" + enabled
+                        + "; existing shader storage is retained");
+            } else {
+                Os.unsetenv("REX_MCLA_SHADER_PACK_AUTO");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Could not apply the shader pack import mode", e);
         }
     }
 

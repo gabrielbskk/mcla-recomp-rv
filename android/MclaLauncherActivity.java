@@ -57,7 +57,9 @@ public final class MclaLauncherActivity extends Activity {
     private Button driverButton;
     private Button systemButton;
     private Button shaderButton;
+    private Button shaderImportButton;
     private Button audioButton;
+    private Button adaptiveQueueButton;
     private Spinner turnipDebugSpinner;
     private TextView driverStatus;
     private boolean isMaliBuild;
@@ -236,16 +238,28 @@ public final class MclaLauncherActivity extends Activity {
         extrasCard.addView(shaderStatus);
         updateShaderPackStatus();
 
-        shaderButton = new Button(this);
-        shaderButton.setText("Select shader pack (.shaderpack)");
-        shaderButton.setOnClickListener(view -> {
+        shaderImportButton = new Button(this);
+        shaderImportButton.setText("Select shader pack (.shaderpack)");
+        shaderImportButton.setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("*/*");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivityForResult(intent, PICK_SHADER_PACK);
         });
-        addAction(extrasCard, shaderButton, false);
+        addAction(extrasCard, shaderImportButton, false);
+
+        if (MclaBuildVariant.isRedMagicAudioTest(this)) {
+            shaderButton = new Button(this);
+            shaderButton.setOnClickListener(view -> {
+                boolean enabled = !shaderPackAuto();
+                getSharedPreferences("redmagic_diagnostics", MODE_PRIVATE).edit()
+                        .putBoolean("shader_pack_auto", enabled).apply();
+                updateShaderPackStatus();
+            });
+            addAction(extrasCard, shaderButton, false);
+            updateShaderPackStatus();
+        }
 
         Button touchEditor = new Button(this);
         touchEditor.setText("Customize touch controls");
@@ -263,6 +277,18 @@ public final class MclaLauncherActivity extends Activity {
         });
         addAction(extrasCard, audioButton, false);
         updateAudioStatus();
+
+        if (MclaBuildVariant.isRedMagicAudioTest(this)) {
+            adaptiveQueueButton = new Button(this);
+            adaptiveQueueButton.setOnClickListener(view -> {
+                boolean enabled = !adaptiveQueue();
+                getSharedPreferences("redmagic_diagnostics", MODE_PRIVATE).edit()
+                        .putBoolean("adaptive_queue", enabled).apply();
+                updateAdaptiveQueueStatus();
+            });
+            addAction(extrasCard, adaptiveQueueButton, false);
+            updateAdaptiveQueueStatus();
+        }
 
         playButton = new Button(this);
         playButton.setText("Play");
@@ -285,6 +311,22 @@ public final class MclaLauncherActivity extends Activity {
     private boolean audioLowLatency() {
         return getSharedPreferences("audio", MODE_PRIVATE)
                 .getBoolean("low_latency", false);
+    }
+
+    private boolean shaderPackAuto() {
+        return getSharedPreferences("redmagic_diagnostics", MODE_PRIVATE)
+                .getBoolean("shader_pack_auto", true);
+    }
+
+    private boolean adaptiveQueue() {
+        return getSharedPreferences("redmagic_diagnostics", MODE_PRIVATE)
+                .getBoolean("adaptive_queue", false);
+    }
+
+    private void updateAdaptiveQueueStatus() {
+        adaptiveQueueButton.setText(adaptiveQueue()
+                ? "Adaptive audio queue: ON (next Play)"
+                : "Adaptive audio queue: OFF (next Play)");
     }
 
     private void updateAudioStatus() {
@@ -328,9 +370,14 @@ public final class MclaLauncherActivity extends Activity {
     }
 
     private void updateShaderPackStatus() {
-        shaderStatus.setText(shaderPackFile().isFile()
-                ? "Shader pack: installed (optional)"
-                : "Shader pack: not installed (optional)");
+        boolean installed = shaderPackFile().isFile();
+        shaderStatus.setText(installed ? "Shader pack: imported privately (optional)"
+                : "Shader pack: not imported (select your own pack)");
+        if (shaderButton != null) {
+            shaderButton.setText(shaderPackAuto()
+                    ? "Shader pack import: ON (next Play)"
+                    : "Shader pack import: OFF (next Play; cached shaders remain)");
+        }
     }
 
     private boolean hasGameFiles() {
@@ -382,7 +429,7 @@ public final class MclaLauncherActivity extends Activity {
         if (requestCode == PICK_SHADER_PACK) {
             Uri uri = data.getData();
             if (uri == null) return;
-            shaderButton.setEnabled(false);
+            shaderImportButton.setEnabled(false);
             status.setText("Importing shader pack...");
             new Thread(() -> importShaderPack(uri), "MCLA shader pack import").start();
             return;
@@ -594,14 +641,16 @@ public final class MclaLauncherActivity extends Activity {
                 throw new Exception("Could not save the shader pack.");
             mainHandler.post(() -> {
                 updateShaderPackStatus();
-                status.setText("Shader pack imported. It will be added on the next start.");
+                status.setText(shaderPackAuto() || !MclaBuildVariant.isRedMagicAudioTest(this)
+                        ? "Shader pack imported. It can be added on the next start."
+                        : "Shader pack saved privately. Enable import to use it on the next start.");
             });
         } catch (Exception e) {
             Log.e(TAG, "Shader pack import failed", e);
             mainHandler.post(() -> status.setText("Shader pack import failed: " + e.getMessage()));
         } finally {
             part.delete();
-            mainHandler.post(() -> shaderButton.setEnabled(true));
+            mainHandler.post(() -> shaderImportButton.setEnabled(true));
         }
     }
 
