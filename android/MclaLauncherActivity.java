@@ -260,13 +260,14 @@ public final class MclaLauncherActivity extends Activity {
         boolean lowLatency = audioLowLatency();
         audioButton.setText(lowLatency
                 ? "Audio: low-latency (best performance, may be silent)"
-                : "Audio: compatibility (normal mixer, always audible)");
+                : "Audio: compatibility (normal mixer)");
     }
 
     private void updateDriverStatus() {
         boolean custom = new File(driverFolder(), "selected.txt").isFile();
         String driverLabel = isMaliBuild ? "PanVK" : "Turnip";
-        driverStatus.setText(custom ? "Selected driver: " + driverLabel + " (custom)" :
+        driverStatus.setText(custom ? "Selected driver: " + driverLabel +
+                (isMaliBuild ? " (custom)" : " (custom, syncdraw by default)") :
                 "Selected driver: system");
         if (systemButton != null) systemButton.setEnabled(custom);
     }

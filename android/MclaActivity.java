@@ -154,16 +154,21 @@ public final class MclaActivity extends SDLActivity {
                     }
                 }
             }
-            if (debug == null) {
-                // Activities can start again in the same process after changing
-                // driver.env. Never carry the previous test into the next run.
-                if (Os.getenv("TU_DEBUG") != null) {
-                    Os.unsetenv("TU_DEBUG");
-                    Log.i(TAG, "Driver debug: TU_DEBUG cleared");
-                }
-            } else {
+            CharSequence label = getPackageManager().getApplicationLabel(getApplicationInfo());
+            boolean snapdragon = label == null || !label.toString().contains("Mali");
+            if (debug == null && snapdragon &&
+                    new File(getFilesDir(), "gpu-drivers/selected.txt").isFile()) {
+                // On Snapdragon, Turnip needs draw synchronization to avoid
+                // rear-light and wheel flicker on the tested Adreno device.
+                // An explicit driver.env remains an opt-in override.
+                debug = "syncdraw";
+            }
+            if (debug != null) {
                 Os.setenv("TU_DEBUG", debug, true);
                 Log.i(TAG, "Driver debug: TU_DEBUG=" + Os.getenv("TU_DEBUG"));
+            } else if (Os.getenv("TU_DEBUG") != null) {
+                Os.unsetenv("TU_DEBUG");
+                Log.i(TAG, "Driver debug: TU_DEBUG cleared");
             }
         } catch (Exception e) {
             Log.e(TAG, "Could not apply driver.env; no driver debug test is active", e);

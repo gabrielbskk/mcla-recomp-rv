@@ -772,19 +772,12 @@ void mcla_frame_start(PPCRegister& r3) {
 }
 
 void mcla_frame_delta(PPCRegister& r8) {
+  mcla::RecordGameUpdate();
   MclaProfileCountUpdate();
   MclaTickButtonPrompts();
   MclaTickPerfOptions();
   MclaTickSettingsMenu();
 
-  // FPS counter integration (lazy init on first call)
-  static bool fps_counter_init = false;
-  if (!fps_counter_init) {
-    fps_counter_init = true;
-    REXLOG_INFO("FPS counter initialized in mcla_frame_delta");
-  }
-  mcla::FpsCounter_StartFrame(0, 0);
-  mcla::FpsCounter_EndCpuWork();
 #if !REX_PLATFORM_PS5
   MclaPcTriggersFrame();  // the DualSense's adaptive triggers (src/pc_triggers.cpp)
 #endif
@@ -807,8 +800,6 @@ void mcla_frame_delta(PPCRegister& r8) {
     r8.u64 = max_ticks;
   }
 
-  mcla::FpsCounter_EndGpuWork();
-  mcla::FpsCounter_Present();
 }
 
 bool mcla_use_real_delta() {

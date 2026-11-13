@@ -3,6 +3,7 @@
 #include "mcla_app.h"
 #include "automatic_api.h"
 #include "pc_triggers.h"
+#include "fps_counter.h"
 
 #include <cstdint>
 #include <chrono>
@@ -1221,13 +1222,9 @@ class FpsCounter final : public rex::ui::ImGuiDialog {
   }
 
  protected:
-    protected:
   void OnDraw(ImGuiIO&) override {
-    REXLOG_INFO("FpsCounter OnDraw called");
     const bool overlay = REXCVAR_GET(mcla_fps_overlay);
     const bool logging = REXCVAR_GET(mcla_fps_log);
-    REXLOG_INFO("FpsCounter: overlay={} logging={}", overlay, logging);
-    
     if (!overlay && !logging) return;
     const auto now = std::chrono::steady_clock::now();
     if (now - sampled_ >= std::chrono::milliseconds(500)) {
@@ -1260,16 +1257,12 @@ class FpsCounter final : public rex::ui::ImGuiDialog {
     }
     if (overlay) {
       char text[80];
-      // The loading path can run uncapped, and UI-only host paints can repeat
-      // the same guest frame. Do not present those as a higher gameplay FPS.
-      // Keep the uncapped host-present value in the log for investigation.
-      const int32_t target_fps = REXCVAR_GET(mcla_fps);
-      if (target_fps > 0 && fps_ > target_fps) {
-        std::snprintf(text, sizeof(text), "Host FPS %d+ (target %d)", target_fps, target_fps);
-      } else if (target_fps > 0) {
-        std::snprintf(text, sizeof(text), "Host FPS %.1f (target %d)", fps_, target_fps);
+      const auto game = mcla::GetGameUpdateStats();
+      if (game.samples) {
+        std::snprintf(text, sizeof(text), "Game updates %.1f FPS  p95 %.0f ms",
+                      game.fps, game.p95_ms);
       } else {
-        std::snprintf(text, sizeof(text), "Host FPS %.1f", fps_);
+        std::snprintf(text, sizeof(text), "Game updates --");
       }
       auto* draw = ImGui::GetForegroundDrawList();
       const ImVec2 size = ImGui::CalcTextSize(text);
@@ -1313,18 +1306,8 @@ class VideoBorders final : public rex::ui::ImGuiDialog {
 }
 
 void MclaApp::OnCreateDialogs(rex::ui::ImGuiDrawer* drawer) {
-#if defined(__ANDROID__)
-#include <android/log.h>
-__android_log_write(ANDROID_LOG_INFO, "MCLA", "OnCreateDialogs called from native");
-#endif
-REXLOG_INFO("#################################### OnCreateDialogs START, drawer={}", (void*)drawer);
 #ifdef __ANDROID__
-  if (drawer) {
-    REXLOG_INFO(">>> Creating FpsCounter");
-    fps_counter_ = std::make_unique<FpsCounter>(drawer);
-  } else {
-    REXLOG_WARN(">>> OnCreateDialogs: drawer is null!");
-  }
+  fps_counter_ = std::make_unique<FpsCounter>(drawer);
 #endif
   const auto* display = window();
   if (display && display->GetActualPhysicalHeight() &&
