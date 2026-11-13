@@ -1,6 +1,6 @@
 # Android ARM64 release notes
 
-> **Current public release:** [Android ARM64: Snapdragon v0.1.45 + Mali diagnostic v0.1.23](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap). The `stable-snap` tag is not proof of regression-free gameplay. RedMagic / 8 Elite v0.1.47 is withheld because audio cuts remain unresolved. The previously recommended v0.1.24 is retained as an unpublished historical release.
+> **Current public release:** [Android ARM64: Snapdragon v0.1.45 + Mali diagnostic v0.1.23](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap). The maintainer reports good results with the current Snapdragon APK on a Galaxy S23, but has not provided a controlled FPS comparison or broad device validation. RedMagic / 8 Elite v0.1.47 is withheld because audio cuts remain unresolved. The previously recommended v0.1.24 is retained as an unpublished historical release.
 
 ## Current APKs and functions
 
@@ -13,8 +13,8 @@ library generated from the game executable; the source repository does not.
 
 | APK asset | Version | SHA-256 | Scope |
 | --- | --- | --- | --- |
-| `stable-snap.apk` | 0.1.45 | `7c8200593fd59c1ab4ffae307175fe85cc783535debd5f92d3e0ba3e54bc3910` | Snapdragon/Adreno candidate; not revalidated as a new stable baseline |
-| `mali-experimental.apk` | 0.1.23 | `98e2c1a0edb0ef1dbd02fd42af4ce2be6aa792bc6060f7add528102b1d9f49d5` | Mali-G52/PanVK diagnostic only; no working gameplay validated |
+| `stable-snap.apk` | 0.1.45 | `7c8200593fd59c1ab4ffae307175fe85cc783535debd5f92d3e0ba3e54bc3910` | Galaxy S23: positive maintainer report; no controlled FPS benchmark |
+| `mali-experimental.apk` | 0.1.23 | `98e2c1a0edb0ef1dbd02fd42af4ce2be6aa792bc6060f7add528102b1d9f49d5` | Galaxy A06 tester report; Mali-G52/PanVK diagnostic only, no working gameplay validated |
 
 In the launcher's **Graphics** card, use **Use system driver** or import a
 trusted Vulkan ZIP; custom drivers execute native code. The Turnip debug

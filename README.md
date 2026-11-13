@@ -22,13 +22,13 @@ Static recompilation brings the Xbox 360 game to native ARM64 using C++23,
 SDL3, Vulkan and the ReXGlue runtime. This is **not** an x86 emulator, a
 Linux compatibility layer, or an official release.
 
-| Device reported/tested | Graphics | Did it run? / compatibility |
+| Device / evidence | Graphics | Did it run? / compatibility |
 | :--- | :--- | :--- |
-| Galaxy S23 · Snapdragon 8 Gen 2 · Adreno 740 · 8 GB RAM | System Vulkan / Turnip 27 | **Yes, on older builds:** menus, audio and driving. System Vulkan avoided tested Turnip visual artifacts but was slower in those runs. v0.1.45 has no equivalent controlled gameplay retest. |
-| [Zenfone 9 (issue #5)](https://github.com/gabrielbskk/mcla-recomp-rv/issues/5) · Snapdragon 8+ Gen 1 · Adreno 730 · 6 GB RAM · Android 14 | Turnip 27 on v0.1.25; later system driver on v0.1.24/25 | **Reported to run, but poorly:** tester estimated 5–15 FPS with the system driver and reported freezes/lag. The displayed 60 FPS appeared inaccurate; there is no validated benchmark or v0.1.45 retest. |
-| [Galaxy Z Fold 5 (issue #6)](https://github.com/gabrielbskk/mcla-recomp-rv/issues/6) · Snapdragon 8 Gen 2 · Adreno 740 · 12 GB RAM · Android 16 | Driver not established | **No confirmed gameplay:** v0.1.24 reached a file-I/O error screen. The tester reported trying three game copies; the cause remains unverified. No v0.1.45 retest. |
-| Galaxy A06 · Helio G85 · Mali-G52 MC2 | Stock Arm / tested PanVK | **No validated gameplay:** stock driver lacks a required Vulkan feature; PanVK failed swapchain creation. The Mali APK is diagnostic, not a compatibility claim. |
-| RedMagic 11 Air · Snapdragon 8 Elite (tester report) | Adreno | **Audio test only:** stereo output confirmed in logs, but cuts reported. Gameplay performance/compatibility is not established; its APK is withheld. |
+| Galaxy S23 · Snapdragon 8 Gen 2 · Adreno 740 · 8 GB RAM (**maintainer test**) | System Vulkan / Turnip 27 | **Yes:** the maintainer reports that the current Snapdragon v0.1.45 performed well on this phone. Earlier builds reached menus, audio and driving; the current report has no comparable FPS/driver benchmark. |
+| [Zenfone 9 (tester report, issue #5)](https://github.com/gabrielbskk/mcla-recomp-rv/issues/5) · Snapdragon 8+ Gen 1 · Adreno 730 · 6 GB RAM · Android 14 | Turnip 27 on v0.1.25; later system driver on v0.1.24/25 | **Reported to run, but poorly:** tester estimated 5–15 FPS with the system driver and reported freezes/lag. The displayed 60 FPS appeared inaccurate; there is no validated benchmark or v0.1.45 retest. |
+| [Galaxy Z Fold 5 (tester report, issue #6)](https://github.com/gabrielbskk/mcla-recomp-rv/issues/6) · Snapdragon 8 Gen 2 · Adreno 740 · 12 GB RAM · Android 16 | Driver not established | **No confirmed gameplay:** v0.1.24 reached a file-I/O error screen. The tester reported trying three game copies; the cause remains unverified. No v0.1.45 retest. |
+| Galaxy A06 · Helio G85 · Mali-G52 MC2 (**tester report**) | Stock Arm / tested PanVK | **No validated gameplay:** stock driver lacks a required Vulkan feature; PanVK failed swapchain creation. The Mali APK is diagnostic, not a compatibility claim. |
+| RedMagic 11 Air · Snapdragon 8 Elite (**tester report**) | Adreno | **Audio test only:** stereo output confirmed in logs, but cuts reported. Gameplay performance/compatibility is not established; its APK is withheld. |
 
 **Performance evidence (Galaxy S23, older test builds; not v0.1.45 benchmarks):**
 a 150-second `0.1.6` drive with system Vulkan and no shader pack averaged
@@ -41,6 +41,8 @@ warm-up, shader compilation and thermal throttling can cause substantial
 stutter. No comparable gameplay FPS measurement is available for the Fold 5,
 Mali or RedMagic. See [Android test evidence](docs/android-status.md)
 and [performance methodology](docs/android-performance-handoff.md).
+The maintainer's positive v0.1.45 S23 result is qualitative; do not infer a
+specific FPS from it.
 
 **Likely requirements, not a verified minimum specification:** ARM64 Android
 (APK declares API 23 / Android 6.0 as its *installation* minimum), a working
@@ -73,7 +75,7 @@ The `stable-snap` tag is not a new gameplay validation.
 
 ### 02 / GET ON THE ROAD
 
-1. Choose [Snapdragon v0.1.45 or Mali diagnostic v0.1.23 from the same release](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap). Mali gameplay is not validated. The older v0.1.24 was the previously recommended Snapdragon build; v0.1.45 has not been revalidated as an equivalent stable baseline.
+1. Choose [Snapdragon v0.1.45 or Mali diagnostic v0.1.23 from the same release](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap). Mali gameplay is not validated. The maintainer reports good results with v0.1.45 on the Galaxy S23, but there is no controlled FPS comparison with the previously recommended v0.1.24.
 2. Supply the 13 extracted files from **your own legally obtained Xbox 360 copy**.
    The game data is not included; the import needs about 6.2 GB of free
    destination space in addition to your extracted source files.
