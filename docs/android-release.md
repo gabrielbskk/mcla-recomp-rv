@@ -1,6 +1,37 @@
 # Android ARM64 release notes
 
-> **Recommended stable build:** v0.1.24
+> **Current public choices:** [Snapdragon v0.1.45](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap), [RedMagic / 8 Elite experimental v0.1.47](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/8elite-experimental-build), and [Mali diagnostic v0.1.23](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/mali-experimental). "Stable-snap" is a release label, not proof of regression-free gameplay. The previously recommended v0.1.24 is retained as an unpublished historical release.
+
+## Current APKs and functions
+
+All variants share the package name `org.mcla.recomp`; they cannot be installed
+side by side. Upgrade with the matching signing certificate and `pm install -r`;
+do not uninstall or clear data if you want to preserve imported files and saves.
+No game files, shader pack, driver ZIP, saves or signing key are included in
+the APKs. Supply your own legally obtained game files. The APKs include a native
+library generated from the game executable; the source repository does not.
+
+| Release | APK version | SHA-256 | Scope |
+| --- | --- | --- | --- |
+| `stable-snap` | 0.1.45 | `7c8200593fd59c1ab4ffae307175fe85cc783535debd5f92d3e0ba3e54bc3910` | Snapdragon/Adreno candidate; not revalidated as a new stable baseline |
+| `8elite-experimental-build` | 0.1.47 | `d079e31d090049216ae0ec02e342047df668888487c493cb8aef16c3e5e87f9c` | RedMagic 11 Air audio diagnostic; stereo and normal mixer |
+| `mali-experimental` | 0.1.23 | `98e2c1a0edb0ef1dbd02fd42af4ce2be6aa792bc6060f7add528102b1d9f49d5` | Mali-G52/PanVK diagnostic only; no working gameplay validated |
+
+In the launcher's **Graphics** card, use **Use system driver** or import a
+trusted Vulkan ZIP; custom drivers execute native code. The Turnip debug
+selector is for Adreno only, and each setting takes effect on the next Play.
+Change the game's visual settings inside its own **Options / Display** menu;
+driver selection is separate from those settings. **Extras** contains the
+optional private shader-pack import, touch editor and audio-path selector.
+The RedMagic variant fixes stereo output/normal mixer and adds two restart-time
+toggles: shader-pack *auto-import* (turning it off does not remove shaders
+already cached) and `audio_adaptive_queue` (off by default; may add latency).
+These are diagnostics, not demonstrated audio fixes. Compare one setting at a
+time and include times of audio cuts with exported logs.
+
+Mali's stock Arm driver lacks `vertexPipelineStoresAndAtomics` and the tested
+PanVK Android path failed to create the swapchain with
+`VK_ERROR_INVALID_EXTERNAL_HANDLE`. See [the Mali investigation](android-mali-driver.md).
 
 ## Version 0.1.24
 

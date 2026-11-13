@@ -7,7 +7,11 @@
 An unofficial Android ARM64 port of <em>Midnight Club: Los Angeles Complete Edition</em> for Xbox 360.</p>
 
 <p align="center">
-  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/android-arm64-v0.1.24"><strong>DOWNLOAD v0.1.24 (recommended — most stable)</strong></a>
+  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap"><strong>SNAPDRAGON v0.1.45</strong></a>
+  &nbsp; · &nbsp;
+  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/8elite-experimental-build">REDMAGIC / 8 ELITE EXPERIMENTAL</a>
+  &nbsp; · &nbsp;
+  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/mali-experimental">MALI DIAGNOSTIC</a>
   &nbsp; · &nbsp;
   <a href="docs/android-testing.md">INSTALL &amp; PLAY</a>
   &nbsp; · &nbsp;
@@ -29,16 +33,18 @@ Linux compatibility layer, or an official release.
 The system Vulkan driver avoids the artifacts seen with Turnip on this device,
 but was slower in tested runs. With the tested Turnip 27 build, rear lights and
 wheels flicker unless the diagnostic `TU_DEBUG=syncdraw` switch is applied
-before launch; it is **not enabled by default** and currently requires access
-to the app-private `files/driver.env` (typically root). Stutters and thermal
+before launch; v0.1.45 offers a launcher selector for this diagnostic switch.
+Compare one setting at a time. Stutters and thermal
 slowdown remain. See the [A740 test matrix](docs/turnip-a740-rendering-artifacts.md),
 [known issues](KNOWN-ISSUES.md) and [Android status](docs/android-status.md).
 
-Mali support is being worked on; there is no supported Mali build yet.
+The Mali APK is diagnostic only: gameplay is **not validated**. The RedMagic
+11 Air / 8 Elite APK is an audio experiment; reported cuts remain under
+investigation. The `stable-snap` label is not a new gameplay validation.
 
 ### 02 / GET ON THE ROAD
 
-1. Download the **ARM64 APK** from the [v0.1.24 release](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/android-arm64-v0.1.24) — this is the recommended, most stable build.
+1. Download the APK for your device: [Snapdragon v0.1.45](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap), [RedMagic diagnostic v0.1.47](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/8elite-experimental-build), or [Mali diagnostic v0.1.23](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/mali-experimental). The older v0.1.24 was the previously recommended Snapdragon build; v0.1.45 has not been revalidated as an equivalent stable baseline.
 2. Supply the 13 extracted files from **your own legally obtained Xbox 360 copy**.
    The game data is not included; the import needs about 6.2 GB of free
    destination space in addition to your extracted source files.
@@ -51,7 +57,9 @@ sticks, buttons, triggers and a HUD editor; it is included but not yet
 validated in gameplay. The overlay hides when a gamepad connects and, without
 a gamepad, hides after six seconds of inactivity and returns on touch. The
 launcher has a new card layout and a generic **Select Vulkan driver (.zip)**
-button for compatible driver packages.
+button for compatible driver packages. Use the launcher's **Graphics** card
+to choose a driver; change visual settings inside the game's **Options / Display**
+menu. Driver selection does not replace the in-game graphics settings.
 
 The APK is **debug-signed** and includes a native library generated from the
 game executable, but no extracted game assets, saves, Turnip package, shader
@@ -72,7 +80,7 @@ The [Android build recipe](docs/android-build.md) pins ReXGlue SDK commit
 patches in `patches/`. Push CI checks the repository; pull requests and manual
 CI runs also build the patched SDK and check the host source without game
 files. See the [release notes](docs/android-release.md)
-for the APK hash, device test scope and remaining limitations.
+for APK hashes, device test scope and remaining limitations.
 
 ---
 
