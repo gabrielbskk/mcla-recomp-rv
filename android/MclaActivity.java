@@ -74,6 +74,7 @@ public final class MclaActivity extends SDLActivity {
     @Override
     protected void onCreate(Bundle state) {
         applyAudioEnvironment();
+        applyLogEnvironment();
         applyDriverDebugEnvironment();
         File source = new File(getApplicationInfo().nativeLibraryDir, "librexgpu-xenos.so");
         File target = new File(getFilesDir(), "librexgpu-xenos.so");
@@ -109,6 +110,23 @@ public final class MclaActivity extends SDLActivity {
             }
         }
         applyImmersiveMode();
+    }
+
+    private void applyLogEnvironment() {
+        // One stable log basename across launches; bounded rotation keeps
+        // warnings from consuming unlimited private storage.
+        File directory = new File(getFilesDir(), "logs");
+        if (!directory.isDirectory() && !directory.mkdirs()) {
+            Log.e(TAG, "Could not create log directory");
+            return;
+        }
+        try {
+            Os.setenv("REX_LOG_FILE", new File(directory, "mcla.log").getAbsolutePath(), true);
+            Os.setenv("REX_LOG_MAX_FILES", "1", true);
+            Os.setenv("REX_LOG_MAX_FILE_SIZE_MB", "10", true);
+        } catch (Exception e) {
+            Log.e(TAG, "Could not configure the single log", e);
+        }
     }
 
     private void applyAudioEnvironment() {

@@ -39,6 +39,25 @@ final class MclaLogExporter {
             if (logs == null) return;
             Arrays.sort(logs, (left, right) -> left.getName().compareTo(right.getName()));
             SharedPreferences state = context.getSharedPreferences("exported-logs", Context.MODE_PRIVATE);
+            File current = new File(source, "mcla.log");
+            if (current.isFile()) {
+                // Export the bounded rotation and current log as ONE document,
+                // oldest first. Preserve historical exports from older builds.
+                File backup = new File(source, "mcla.1.log");
+                File[] parts = backup.isFile() ? new File[]{backup, current} :
+                        new File[]{current};
+                String stamp = "";
+                for (File part : parts) stamp += part.length() + ":" + part.lastModified() + ";";
+                if (!stamp.equals(state.getString("mcla-current.log.stamp", ""))) {
+                    try {
+                        exportOne(context.getContentResolver(), state, "mcla-current.log", parts);
+                        state.edit().putString("mcla-current.log.stamp", stamp).apply();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Could not export current log", e);
+                    }
+                }
+                return;
+            }
             for (File log : logs) {
                 if (!log.isFile()) continue;
                 String name = log.getName();
@@ -46,7 +65,7 @@ final class MclaLogExporter {
                 if (stamp.equals(state.getString(name + ".stamp", "")) &&
                         "txt".equals(state.getString(name + ".format", ""))) continue;
                 try {
-                    exportOne(context.getContentResolver(), state, log);
+                    exportOne(context.getContentResolver(), state, name, new File[]{log});
                     state.edit().putString(name + ".stamp", stamp)
                             .putString(name + ".format", "txt").apply();
                 } catch (Exception e) {
@@ -56,9 +75,8 @@ final class MclaLogExporter {
         }
     }
 
-    private static void exportOne(ContentResolver resolver, SharedPreferences state, File log)
-            throws Exception {
-        String name = log.getName();
+    private static void exportOne(ContentResolver resolver, SharedPreferences state,
+            String name, File[] parts) throws Exception {
         String exportName = name.substring(0, name.length() - 4) + ".txt";
         String saved = state.getString(name + ".uri", null);
         Uri target = saved == null ? null : Uri.parse(saved);
@@ -80,12 +98,15 @@ final class MclaLogExporter {
                 throw new Exception("Could not rename exported log " + name);
             }
         }
-        try (InputStream input = new FileInputStream(log);
-             OutputStream output = resolver.openOutputStream(target, "wt")) {
+        try (OutputStream output = resolver.openOutputStream(target, "wt")) {
             if (output == null) throw new Exception("Cannot open Documents output");
             byte[] buffer = new byte[64 * 1024];
-            int count;
-            while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+            for (File part : parts) {
+                try (InputStream input = new FileInputStream(part)) {
+                    int count;
+                    while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+                }
+            }
             output.flush();
         } catch (Exception e) {
             if (fresh) resolver.delete(target, null, null);
