@@ -25,6 +25,8 @@ Linux compatibility layer, or an official release.
 | Device reported/tested | Graphics | Did it run? / compatibility |
 | :--- | :--- | :--- |
 | Galaxy S23 · Snapdragon 8 Gen 2 · Adreno 740 · 8 GB RAM | System Vulkan / Turnip 27 | **Yes, on older builds:** menus, audio and driving. System Vulkan avoided tested Turnip visual artifacts but was slower in those runs. v0.1.45 has no equivalent controlled gameplay retest. |
+| [Zenfone 9 (issue #5)](https://github.com/gabrielbskk/mcla-recomp-rv/issues/5) · Snapdragon 8+ Gen 1 · Adreno 730 · 6 GB RAM · Android 14 | Turnip 27 on v0.1.25; later system driver on v0.1.24/25 | **Reported to run, but poorly:** tester estimated 5–15 FPS with the system driver and reported freezes/lag. The displayed 60 FPS appeared inaccurate; there is no validated benchmark or v0.1.45 retest. |
+| [Galaxy Z Fold 5 (issue #6)](https://github.com/gabrielbskk/mcla-recomp-rv/issues/6) · Snapdragon 8 Gen 2 · Adreno 740 · 12 GB RAM · Android 16 | Driver not established | **No confirmed gameplay:** v0.1.24 reached a file-I/O error screen. The tester reported trying three game copies; the cause remains unverified. No v0.1.45 retest. |
 | Galaxy A06 · Helio G85 · Mali-G52 MC2 | Stock Arm / tested PanVK | **No validated gameplay:** stock driver lacks a required Vulkan feature; PanVK failed swapchain creation. The Mali APK is diagnostic, not a compatibility claim. |
 | RedMagic 11 Air · Snapdragon 8 Elite (tester report) | Adreno | **Audio test only:** stereo output confirmed in logs, but cuts reported. Gameplay performance/compatibility is not established; its APK is withheld. |
 
@@ -32,19 +34,23 @@ Linux compatibility layer, or an official release.
 a 150-second `0.1.6` drive with system Vulkan and no shader pack averaged
 **14.223 presented FPS** (p95 frame interval 110 ms). A separate Turnip 27
 run measured **22–24 presented FPS**, with different settings and thermal
-limits. These are not a controlled driver comparison or a prediction for the
-current APK: cache warm-up, shader compilation and thermal throttling can
-cause substantial stutter. The Mali and RedMagic devices have **no validated
-comparable gameplay FPS measurement**. See [Android test evidence](docs/android-status.md)
+limits. The Zenfone 9 tester's **5–15 FPS** is an estimate, not a measured
+comparison; its reported 60 FPS display was suspect. These are not a
+controlled driver comparison or a prediction for the current APK: cache
+warm-up, shader compilation and thermal throttling can cause substantial
+stutter. No comparable gameplay FPS measurement is available for the Fold 5,
+Mali or RedMagic. See [Android test evidence](docs/android-status.md)
 and [performance methodology](docs/android-performance-handoff.md).
 
 **Likely requirements, not a verified minimum specification:** ARM64 Android
 (APK declares API 23 / Android 6.0 as its *installation* minimum), a working
 Vulkan driver with `vertexPipelineStoresAndAtomics` and compatible Android
 swapchain support, and your own legally obtained Xbox 360 game files. The
-only demonstrated playable phone here has Snapdragon 8 Gen 2 / Adreno 740
-and 8 GB RAM: this is a **tested reference**, not proof that weaker devices
-or less memory cannot run it. Plan for about **6.2 GB free for the app's
+maintainer's measured playable reference is a Snapdragon 8 Gen 2 / Adreno 740
+phone with 8 GB RAM. A Zenfone 9 tester with **6 GB RAM** reported that older
+builds ran, but slowly; a Fold 5 tester with **12 GB RAM** encountered a
+file-I/O error. Neither establishes a reliable RAM minimum, and more RAM
+alone does not guarantee compatibility. Plan for about **6.2 GB free for the app's
 imported copy**, plus space for your extracted source files, shader caches
 and Android itself; roughly **13 GB free** is a cautious starting estimate
 when the source files are also stored on the device, not a measured hard
