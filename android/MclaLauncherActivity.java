@@ -19,6 +19,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -56,6 +58,7 @@ public final class MclaLauncherActivity extends Activity {
     private Button systemButton;
     private Button shaderButton;
     private Button audioButton;
+    private Spinner turnipDebugSpinner;
     private TextView driverStatus;
     private boolean isMaliBuild;
     private TextView shaderStatus;
@@ -198,6 +201,40 @@ public final class MclaLauncherActivity extends Activity {
         });
         addAction(graphicsCard, systemButton, false);
 
+        if (!isMaliBuild) {
+            graphicsCard.addView(label("Turnip debug (applies on next Play; one at a time)",
+                    13, 0xFFA8B9C4, false));
+            final String[] options = {"syncdraw (recommended)", "No switch", "noubwc",
+                    "flushall", "nolrz", "sysmem"};
+            turnipDebugSpinner = new Spinner(this);
+            turnipDebugSpinner.setAdapter(new ArrayAdapter<>(this,
+                    android.R.layout.simple_spinner_dropdown_item, options));
+            String current = getSharedPreferences("driver_debug", MODE_PRIVATE)
+                    .getString("tu_debug", "syncdraw");
+            int selected = 0;
+            for (int i = 2; i < options.length; i++) {
+                if (options[i].equals(current)) selected = i;
+            }
+            if (current.isEmpty()) selected = 1;
+            turnipDebugSpinner.setSelection(selected);
+            turnipDebugSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(android.widget.AdapterView<?> parent,
+                        View view, int position, long id) {
+                    String value = position == 0 ? "syncdraw" :
+                            position == 1 ? "" : options[position];
+                    getSharedPreferences("driver_debug", MODE_PRIVATE).edit()
+                            .putString("tu_debug", value).apply();
+                    updateDriverStatus();
+                }
+                @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+            });
+            LinearLayout.LayoutParams spinnerParams = new LinearLayout.LayoutParams(-1, -2);
+            spinnerParams.topMargin = dp(9);
+            graphicsCard.addView(turnipDebugSpinner, spinnerParams);
+            updateDriverStatus();
+        }
+
         LinearLayout extrasCard = card(layout, "03  Extras", "Optional graphics assets and touch layout.");
 
         shaderStatus = new TextView(this);
@@ -266,10 +303,20 @@ public final class MclaLauncherActivity extends Activity {
     private void updateDriverStatus() {
         boolean custom = new File(driverFolder(), "selected.txt").isFile();
         String driverLabel = isMaliBuild ? "PanVK" : "Turnip";
-        driverStatus.setText(custom ? "Selected driver: " + driverLabel +
-                (isMaliBuild ? " (custom)" : " (custom, syncdraw by default)") :
+        String suffix = "";
+        if (custom && !isMaliBuild) {
+            String debug = getSharedPreferences("driver_debug", MODE_PRIVATE)
+                    .getString("tu_debug", "syncdraw");
+            if (new File(getFilesDir(), "driver.env").isFile()) {
+                suffix = " (driver.env override)";
+            } else {
+                suffix = debug.isEmpty() ? " (no debug switch)" : " (" + debug + ")";
+            }
+        }
+        driverStatus.setText(custom ? "Selected driver: " + driverLabel + suffix :
                 "Selected driver: system");
         if (systemButton != null) systemButton.setEnabled(custom);
+        if (turnipDebugSpinner != null) turnipDebugSpinner.setEnabled(custom);
     }
 
     private File shaderPackFolder() {

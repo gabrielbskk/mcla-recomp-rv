@@ -155,13 +155,20 @@ public final class MclaActivity extends SDLActivity {
                 }
             }
             CharSequence label = getPackageManager().getApplicationLabel(getApplicationInfo());
-            boolean snapdragon = label == null || !label.toString().contains("Mali");
-            if (debug == null && snapdragon &&
-                    new File(getFilesDir(), "gpu-drivers/selected.txt").isFile()) {
-                // On Snapdragon, Turnip needs draw synchronization to avoid
-                // rear-light and wheel flicker on the tested Adreno device.
-                // An explicit driver.env remains an opt-in override.
-                debug = "syncdraw";
+            boolean snapdragon = label != null && !label.toString().contains("Mali");
+            boolean customDriver = new File(getFilesDir(), "gpu-drivers/selected.txt").isFile();
+            if (!snapdragon || !customDriver) {
+                // Turnip debug flags must never leak to system Vulkan or PanVK.
+                debug = null;
+            } else if (debug == null) {
+                // Launcher setting; explicit driver.env takes precedence.
+                debug = getSharedPreferences("driver_debug", MODE_PRIVATE)
+                        .getString("tu_debug", "syncdraw");
+                if (!debug.equals("syncdraw") && !debug.equals("noubwc") &&
+                        !debug.equals("flushall") && !debug.equals("nolrz") &&
+                        !debug.equals("sysmem")) {
+                    debug = null;  // Includes the explicit "No switch" selection.
+                }
             }
             if (debug != null) {
                 Os.setenv("TU_DEBUG", debug, true);
