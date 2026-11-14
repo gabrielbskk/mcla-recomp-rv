@@ -236,6 +236,29 @@ public final class MclaLauncherActivity extends Activity {
         extrasCard.addView(shaderStatus);
         updateShaderPackStatus();
 
+        extrasCard.addView(label("Keyboard / mouse (experimental; next Play)",
+                13, 0xFFA8B9C4, false));
+        Spinner keyboardMouse = new Spinner(this);
+        keyboardMouse.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item,
+                new String[]{"Off (touch / gamepad)", "Keyboard driving", "Keyboard + mouse camera"}));
+        keyboardMouse.setSelection(MclaKeyboardMouse.mode(this));
+        keyboardMouse.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(android.widget.AdapterView<?> parent,
+                    View view, int position, long id) {
+                getSharedPreferences(MclaKeyboardMouse.PREFS, MODE_PRIVATE).edit()
+                        .putInt(MclaKeyboardMouse.KEY, MclaKeyboardMouse.normalize(position)).apply();
+            }
+            @Override public void onNothingSelected(android.widget.AdapterView<?> parent) { }
+        });
+        extrasCard.addView(keyboardMouse);
+        extrasCard.addView(label("W/S gas/brake, A/D steering; arrows menus; Space=A, " +
+                "Backspace/Esc=B, R=X, F=Y, Q/E=LB/RB, Enter=Start, Tab=Back, " +
+                "I/J/K/L camera. Mouse mode: move to look, left/right click=A/B. " +
+                "Android Home releases capture. Touch HUD hides when an enabled external device " +
+                "is connected. Keyboard triggers are digital, not pressure-sensitive.",
+                12, 0xFFA8B9C4, false));
+
         shaderImportButton = new Button(this);
         shaderImportButton.setText("Select shader pack (.shaderpack)");
         shaderImportButton.setOnClickListener(view -> {
@@ -336,7 +359,7 @@ public final class MclaLauncherActivity extends Activity {
         }
         boolean lowLatency = audioLowLatency();
         audioButton.setText(lowLatency
-                ? "Audio: low-latency (best performance, may be silent)"
+                ? "Audio: low-latency (experimental; may be silent)"
                 : "Audio: compatibility (normal mixer)");
     }
 

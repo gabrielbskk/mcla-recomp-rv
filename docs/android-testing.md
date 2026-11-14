@@ -4,6 +4,10 @@ This experimental build uses the extracted files from the user's own copy of
 *Midnight Club: Los Angeles Complete Edition* for Xbox 360 (Title ID
 `545407F8`). The APK contains the ARM64 program; game data remains outside it.
 
+Optional [keyboard/mouse driving bindings](android-keyboard-mouse.md) are
+available in the common launcher. They default OFF; basic operation was reported
+on Galaxy S23, with broader peripheral and focus/reconnect testing still needed.
+
 ## Installation without root
 
 1. Install the ARM64 APK produced by `scripts/build_android_apk.sh`.

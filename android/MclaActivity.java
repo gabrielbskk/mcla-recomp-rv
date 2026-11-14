@@ -49,7 +49,11 @@ public final class MclaActivity extends SDLActivity {
             if (device == null || device.isVirtual()) continue;
             int sources = device.getSources();
             if ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD ||
-                    (sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
+                    (sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK ||
+                    (MclaKeyboardMouse.mode(this) != 0 &&
+                     (device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC ||
+                      (MclaKeyboardMouse.mode(this) == 2 &&
+                       (sources & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE)))) {
                 connected = true;
                 break;
             }
@@ -74,6 +78,7 @@ public final class MclaActivity extends SDLActivity {
     @Override
     protected void onCreate(Bundle state) {
         applyAudioEnvironment();
+        MclaKeyboardMouse.apply(this);
         applyRedMagicShaderEnvironment();
         applyLogEnvironment();
         applyDriverDebugEnvironment();
