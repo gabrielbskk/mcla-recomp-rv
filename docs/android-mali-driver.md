@@ -1,4 +1,26 @@
-# Mali-G52 Vulkan investigation (diagnostic only)
+# Mali support discontinued
+
+As of 2026-11-14 this Android project targets Snapdragon / Adreno. The Mali
+diagnostic APK has been withdrawn from distribution and the Mali-specific
+launcher/importer and feature-relaxation build path have been retired.
+There is no supported Mali/Immortalis build or PanVK integration roadmap.
+
+The tested stock driver lacked a Vulkan feature required by the current Xenos
+renderer, and the tested PanVK build failed Android swapchain creation. A
+correct solution would require significant renderer/feature-fallback and
+Android driver/WSI integration work, followed by device validation. It is not
+a matter of selecting a different ZIP or adjusting performance variables.
+
+This is a project-scope and maintenance decision. The evidence does **not**
+prove Mali support is impossible in principle or that the entire recompilation
+project must be rewritten. No experimental APK established correct gameplay.
+
+The evidence below is retained for historical reference only. Its descriptions
+of a separate launcher, importer, and proposed tests are not current support
+instructions. No downloaded driver can turn the supported Adreno build into a
+validated Mali build. Do not uninstall or clear app data to switch variants.
+
+## Archived Mali-G52 investigation
 
 The Galaxy A06 / Helio G85 / Mali-G52 MC2 tester reported failure both with
 the stock Arm Vulkan driver and with the tested Mesa PanVK 26.3.0-devel build.

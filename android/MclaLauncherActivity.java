@@ -62,7 +62,6 @@ public final class MclaLauncherActivity extends Activity {
     private Button adaptiveQueueButton;
     private Spinner turnipDebugSpinner;
     private TextView driverStatus;
-    private boolean isMaliBuild;
     private TextView shaderStatus;
     private ProgressBar progress;
     private boolean playPending;
@@ -121,7 +120,6 @@ public final class MclaLauncherActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        isMaliBuild = MclaBuildVariant.isMali(this);
         MclaLogExporter.exportAsync(this);
         getWindow().setNavigationBarColor(0xFF0B161F);
         LinearLayout layout = new LinearLayout(this);
@@ -174,7 +172,7 @@ public final class MclaLauncherActivity extends Activity {
         updateDriverStatus();
 
         driverButton = new Button(this);
-        driverButton.setText(isMaliBuild ? "Select PanVK driver (.zip)" : "Select Turnip driver (.zip)");
+        driverButton.setText("Select Turnip driver (.zip)");
         driverButton.setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -197,7 +195,7 @@ public final class MclaLauncherActivity extends Activity {
         });
         addAction(graphicsCard, systemButton, false);
 
-        if (!isMaliBuild) {
+        {
             graphicsCard.addView(label("Turnip debug (applies on next Play; one at a time)",
                     13, 0xFFA8B9C4, false));
             final String[] options = {"syncdraw (recommended)", "No switch", "noubwc",
@@ -344,9 +342,9 @@ public final class MclaLauncherActivity extends Activity {
 
     private void updateDriverStatus() {
         boolean custom = new File(driverFolder(), "selected.txt").isFile();
-        String driverLabel = isMaliBuild ? "PanVK" : "Turnip";
+        String driverLabel = "Turnip";
         String suffix = "";
-        if (custom && !isMaliBuild) {
+        if (custom) {
             String debug = getSharedPreferences("driver_debug", MODE_PRIVATE)
                     .getString("tu_debug", "syncdraw");
             if (new File(getFilesDir(), "driver.env").isFile()) {
@@ -422,7 +420,7 @@ public final class MclaLauncherActivity extends Activity {
             if (uri == null) return;
             driverButton.setEnabled(false);
             playButton.setEnabled(false);
-            status.setText("Importing " + (isMaliBuild ? "PanVK" : "Turnip") + " driver...");
+            status.setText("Importing Turnip driver...");
             new Thread(() -> importDriver(uri), "MCLA driver import").start();
             return;
         }
@@ -543,7 +541,7 @@ public final class MclaLauncherActivity extends Activity {
 
     private void importDriver(Uri uri) {
         File folder = driverFolder();
-        String driverName = isMaliBuild ? "libvulkan_panfrost.so" : "libvulkan_freedreno.so";
+        String driverName = "libvulkan_freedreno.so";
         File part = new File(folder, driverName + ".partial");
         File target = new File(folder, driverName);
         try {
@@ -557,9 +555,7 @@ public final class MclaLauncherActivity extends Activity {
                     while ((entry = zip.getNextEntry()) != null) {
                         String name = entry.getName();
                         if (entry.isDirectory() || name == null ||
-                                !(name.equals(driverName) || name.endsWith("/" + driverName) ||
-                                  (isMaliBuild && (name.equals("libvulkan_freedreno.so") ||
-                                  name.endsWith("/libvulkan_freedreno.so"))))) continue;
+                                !(name.equals(driverName) || name.endsWith("/" + driverName))) continue;
                         if (found) throw new Exception("The ZIP contains more than one driver.");
                         found = true;
                         long copied = 0;
@@ -587,7 +583,7 @@ public final class MclaLauncherActivity extends Activity {
             }
             mainHandler.post(() -> {
                 updateDriverStatus();
-                status.setText((isMaliBuild ? "PanVK" : "Turnip") + " driver imported. Tap Play to test it.");
+                status.setText("Turnip driver imported. Tap Play to test it.");
             });
         } catch (Exception e) {
             Log.e(TAG, "Driver import failed", e);

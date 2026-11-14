@@ -1,5 +1,10 @@
 # Android ARM64 status
 
+> **2026-11-14 scope update:** Mali/Immortalis diagnostics and PanVK distribution
+> have been discontinued. Current development targets Snapdragon/Adreno.
+> Historical Mali investigation notes below are not support instructions.
+> See [the retirement rationale](android-mali-driver.md).
+
 Last reviewed: 2026-11-12. This is the canonical handoff for the Android port.
 The important historical decisions are summarized in
 [android-history.md](android-history.md); the detailed build recipe is in

@@ -307,3 +307,10 @@ No build is performed by this documentation page. The source recipe is in
 [android-build.md](android-build.md), and CI builds the patched SDK and host
 stub without game data. The APK includes AdrenoTools and its hooks, but no
 third-party Turnip driver.
+# Current GPU scope
+
+Mali/Immortalis and PanVK are unsupported. The Mali diagnostic APK has been
+withdrawn; do not follow historical Mali build/import instructions. Current
+Android development targets Snapdragon/Adreno. See
+[the retirement note](android-mali-driver.md). This does not change save/data
+preservation requirements for existing installations.

@@ -177,12 +177,6 @@ public final class MclaActivity extends SDLActivity {
     private void applyDriverDebugEnvironment() {
         // The Vulkan driver is loaded during SDLActivity.onCreate. Keep this
         // private, opt-in diagnostic setting outside mcla.toml and apply it first.
-        if (MclaBuildVariant.isMali(this)) {
-            try { Os.unsetenv("TU_DEBUG"); } catch (Exception e) {
-                Log.e(TAG, "Could not clear Turnip debug flags on Mali", e);
-            }
-            return;
-        }
         File config = new File(getFilesDir(), "driver.env");
         String debug = null;
         try {

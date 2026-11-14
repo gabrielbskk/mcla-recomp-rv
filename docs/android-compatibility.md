@@ -8,7 +8,7 @@ same GPU. Other than the S23, the entries below are **tester reports**.
 | Galaxy S23 · Snapdragon 8 Gen 2 · Adreno 740 · 8 GB | Maintainer reports good results with Snapdragon v0.1.45. | Earlier builds reached menus, audio and driving; no controlled v0.1.45 FPS benchmark. |
 | Zenfone 9 · Snapdragon 8+ Gen 1 · Adreno 730 · 6 GB | Older v0.1.24/25 builds ran, but the tester reported freezes and lag. | [Issue #5](https://github.com/gabrielbskk/mcla-recomp-rv/issues/5): estimated 5–15 FPS with system Vulkan, not a measured benchmark; the displayed 60 FPS appeared inaccurate. No v0.1.45 retest. |
 | Galaxy Z Fold 5 · Snapdragon 8 Gen 2 · Adreno 740 · 12 GB | No confirmed gameplay. | [Issue #6](https://github.com/gabrielbskk/mcla-recomp-rv/issues/6): v0.1.24 reached a file-I/O error; cause and v0.1.45 behavior unverified. |
-| Galaxy A06 · Helio G85 · Mali-G52 MC2 | No validated gameplay. | Stock Arm driver lacked a required feature; tested PanVK failed swapchain creation. The [Mali APK is diagnostic](android-mali-driver.md), not supported gameplay. |
+| Mali / Immortalis | Unsupported; diagnostic APK withdrawn. | Tested Mali-G52 stock driver lacked a required feature; tested PanVK failed swapchain creation. [Support discontinued](android-mali-driver.md). |
 | RedMagic 11 Air · Snapdragon 8 Elite | Stereo output confirmed in diagnostic logs; tester reported audio cuts. | Gameplay compatibility and FPS are unverified. The RedMagic diagnostic APK is withheld while cuts are investigated. |
 
 ## Measured performance: Galaxy S23, earlier builds

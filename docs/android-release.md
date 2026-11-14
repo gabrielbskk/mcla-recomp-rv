@@ -1,11 +1,11 @@
 # Android ARM64 release notes
 
-> **Current public release:** [Android ARM64: Snapdragon v0.1.45 + Mali diagnostic v0.1.23](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap). The maintainer reports good results with the current Snapdragon APK on a Galaxy S23, but has not provided a controlled FPS comparison or broad device validation. RedMagic / 8 Elite v0.1.47 is withheld because audio cuts remain unresolved. The previously recommended v0.1.24 is retained as an unpublished historical release.
+> **Current public release:** [Android ARM64: Snapdragon v0.1.45](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap). The maintainer reports good results with this APK on a Galaxy S23, but has not provided a controlled FPS comparison or broad device validation. **Mali diagnostic distribution has been discontinued**; see the [retirement note](android-mali-driver.md). RedMagic / 8 Elite v0.1.47 is withheld because audio cuts remain unresolved. The previously recommended v0.1.24 is retained as an unpublished historical release.
 
 ## Current APKs and functions
 
-All variants share the package name `org.mcla.recomp`; they cannot be installed
-side by side. Upgrade with the matching signing certificate and `pm install -r`;
+The APK uses the package name `org.mcla.recomp`. Upgrade with the matching
+signing certificate and `pm install -r`;
 do not uninstall or clear data if you want to preserve imported files and saves.
 No game files, shader pack, driver ZIP, saves or signing key are included in
 the APKs. Supply your own legally obtained game files. The APKs include a native
@@ -14,7 +14,6 @@ library generated from the game executable; the source repository does not.
 | APK asset | Version | SHA-256 | Scope |
 | --- | --- | --- | --- |
 | `stable-snap.apk` | 0.1.45 | `7c8200593fd59c1ab4ffae307175fe85cc783535debd5f92d3e0ba3e54bc3910` | Galaxy S23: positive maintainer report; no controlled FPS benchmark |
-| `mali-experimental.apk` | 0.1.23 | `98e2c1a0edb0ef1dbd02fd42af4ce2be6aa792bc6060f7add528102b1d9f49d5` | Galaxy A06 tester report; Mali-G52/PanVK diagnostic only, no working gameplay validated |
 
 In the launcher's **Graphics** card, use **Use system driver** or import a
 trusted Vulkan ZIP; custom drivers execute native code. The Turnip debug
@@ -26,9 +25,11 @@ The RedMagic variant is not available in the public release while audio cuts
 remain unresolved. Its stereo and adaptive-queue controls are not demonstrated
 fixes. Future tests must compare one setting at a time with times of cuts and logs.
 
-Mali's stock Arm driver lacks `vertexPipelineStoresAndAtomics` and the tested
-PanVK Android path failed to create the swapchain with
-`VK_ERROR_INVALID_EXTERNAL_HANDLE`. See [the Mali investigation](android-mali-driver.md).
+The tested stock Mali driver lacked `vertexPipelineStoresAndAtomics` and the
+tested PanVK Android path failed swapchain creation with
+`VK_ERROR_INVALID_EXTERNAL_HANDLE`. These are device/driver-specific findings,
+not universal statements about all Mali drivers. No Mali APK is distributed or
+maintained; see [why support was discontinued](android-mali-driver.md).
 
 ## Version 0.1.24
 

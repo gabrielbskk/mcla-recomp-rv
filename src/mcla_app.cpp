@@ -1109,15 +1109,6 @@ void MclaApp::ApplyPcDefaults() {
       // the experimental 644-line mode repeatedly faulted during loading;
       // forcing 720 in mcla.toml allowed gameplay to start.
       {"mcla_render_height", "720"},
-#if defined(MCLA_MALI_DIAGNOSTIC_APK)
-      // Mali probes: the system driver lacks vertexPipelineStoresAndAtomics and
-      // fillModeNonSolid; Mesa PanVK on Mali also reports geometryShader=false.
-      // The SDK has downlevel paths for all three (vertex-shader primitive
-      // expansion, solid fill, diagnostic vertex-store bypass), but none of
-      // this is validated rendering or gameplay. Local Mali diagnostic APK only.
-      {"vulkan_require_fill_mode_non_solid", "false"},
-      {"vulkan_require_geometry_shader", "false"},
-#endif
 #endif
 #if REX_PLATFORM_WIN32
       {"d3d12_hoist_shared_memory_uploads", "true"},

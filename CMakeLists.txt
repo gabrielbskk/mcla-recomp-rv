@@ -73,11 +73,9 @@ set(MCLA_SOURCES
 
 if(ANDROID)
     list(APPEND MCLA_SOURCES src/touch_controls.cpp)
-    # Local diagnostic APK only. Keep the normal Snapdragon build unchanged.
-    option(MCLA_MALI_DIAGNOSTIC_APK "Allow experimental Mali Vulkan feature fallbacks" OFF)
+    # Reject obsolete build recipes instead of silently producing an Adreno APK.
     if(MCLA_MALI_DIAGNOSTIC_APK)
-        set_source_files_properties(src/mcla_app.cpp PROPERTIES
-            COMPILE_DEFINITIONS MCLA_MALI_DIAGNOSTIC_APK=1)
+        message(FATAL_ERROR "Mali diagnostics have been retired; Android targets Snapdragon/Adreno")
     endif()
 endif()
 

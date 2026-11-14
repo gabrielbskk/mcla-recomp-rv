@@ -35,34 +35,39 @@
 > **Early Android port — compatibility and performance vary.** You need your
 > own legally obtained Xbox 360 game files; they are not included.
 
-## 01 · Choose your build
+## 01 · Snapdragon / Adreno build
 
-Both APKs are available in the [same release](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap):
+Download the APK from the [Snapdragon release](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap):
 
 | APK | Intended device | Status |
 | --- | --- | --- |
 | **stable-snap.apk** · v0.1.45 | Snapdragon / Adreno | Maintainer reports good results on Galaxy S23; broader compatibility and controlled FPS are unverified. |
-| **mali-experimental.apk** · v0.1.23 | Mali diagnostic | **Experimental only:** no validated gameplay on the tested Mali-G52. |
+
+**Mali support has been discontinued.** The diagnostic APK has been withdrawn;
+Mali/Immortalis and PanVK are outside this project's supported scope. Tested
+devices hit required Vulkan-feature and Android swapchain incompatibilities.
+Supporting them would require substantial renderer/platform work, not just a
+driver switch. This is a development-scope decision, not proof that the entire
+project must be rewritten. See the [retirement note](docs/android-mali-driver.md).
 
 The RedMagic / 8 Elite diagnostic is withheld while reported audio cuts are
 investigated. See [release details and hashes](docs/android-release.md).
 
 ## 02 · Get on the road
 
-1. **Install.** Download the appropriate APK from [Releases](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap).
+1. **Install.** Download the Snapdragon APK from [Releases](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap).
 2. **Import.** Extract the 13 files from your own game copy and select their folder
    in the launcher. Allow about **6.2 GB** for the imported copy, plus source files
    and cache space. Follow the [installation guide](docs/android-testing.md).
 3. **Launch.** Start with the **system Vulkan driver**. Optionally import a
-   **trusted** Turnip ZIP for Adreno or PanVK ZIP for Mali; imported drivers run
-   native code. Mali gameplay is not validated.
+    **trusted** Turnip ZIP for Adreno; imported drivers run native code.
 4. **Tune.** Adjust visual settings in the game's **Options / Display** menu.
    The launcher's driver selector is separate. Touch controls and their editor
    are experimental; one gamepad is the validated input method.
 
 > [!WARNING]
-> **Keep your game files and saves:** both APKs share a package ID and replace
-> each other. For compatible updates use `pm install -r`; **do not uninstall or
+> **Keep your game files and saves:** compatible updates replace the existing
+> app. Use `pm install -r`; **do not uninstall or
 > clear data**. Downgrades can be rejected by Android.
 
 ## Compatibility
@@ -75,7 +80,7 @@ from community reports.
 | Galaxy S23 · Snapdragon 8 Gen 2 · 8 GB | Current v0.1.45 reportedly performed well; no controlled FPS measurement. | Maintainer test |
 | Zenfone 9 · Snapdragon 8+ Gen 1 · 6 GB | Older builds ran with reported freezes and lag; 5–15 FPS estimated, not benchmarked. | [Tester · #5](https://github.com/gabrielbskk/mcla-recomp-rv/issues/5) |
 | Galaxy Z Fold 5 · Snapdragon 8 Gen 2 · 12 GB | v0.1.24 reached a file-I/O error; no confirmed gameplay or v0.1.45 retest. | [Tester · #6](https://github.com/gabrielbskk/mcla-recomp-rv/issues/6) |
-| Galaxy A06 · Helio G85 · Mali-G52 | Stock driver lacks a required Vulkan feature; tested PanVK failed swapchain creation. | Tester report |
+| Mali / Immortalis devices | Unsupported; diagnostic distribution discontinued. | [Technical note](docs/android-mali-driver.md) |
 | RedMagic 11 Air · Snapdragon 8 Elite | Stereo audio logged, but cuts reported; gameplay and FPS unverified. | Tester report |
 
 <details>
@@ -106,7 +111,7 @@ launcher after a crash if necessary. Never upload game files or saves.
 | --- | --- |
 | [Installation and testing](docs/android-testing.md) | [Build from source](docs/android-build.md) |
 | [Compatibility and performance](docs/android-compatibility.md) | [Android status](docs/android-status.md) |
-| [Release notes and hashes](docs/android-release.md) | [Mali investigation](docs/android-mali-driver.md) |
+| [Release notes and hashes](docs/android-release.md) | [Mali support discontinued](docs/android-mali-driver.md) |
 | [Known issues](KNOWN-ISSUES.md) | [Security policy](SECURITY.md) |
 
 ## About the project

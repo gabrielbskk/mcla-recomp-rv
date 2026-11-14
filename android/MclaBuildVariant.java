@@ -7,10 +7,6 @@ import android.os.Bundle;
 final class MclaBuildVariant {
     private MclaBuildVariant() {}
 
-    static boolean isMali(Context context) {
-        return "mali".equals(name(context));
-    }
-
     static boolean isRedMagicAudioTest(Context context) {
         return "redmagic-audio-test".equals(name(context));
     }
