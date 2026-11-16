@@ -7,8 +7,8 @@
 
 Last reviewed: 2026-11-12. This is the canonical handoff for the Android port.
 The important historical decisions are summarized in
-[android-history.md](android-history.md); the detailed build recipe is in
-[android-build.md](android-build.md).
+[android-history.md](android-history.md). The build recipe is maintained in the
+private source repository and is not published here.
 
 ## Scope
 
@@ -123,8 +123,8 @@ change subsequent wakeups or polling intervals. It was a code candidate when
 first documented and is not a measured performance fix.
 
 The first patch is a reviewed combined SDK/fork delta, not an Android-only
-patch. The source strategy and future dedicated-fork option are documented in
-[android-sdk-source.md](android-sdk-source.md).
+patch. The source strategy and the future dedicated-fork option are maintained
+in the private source repository.
 
 The Java launcher imports the 13 extracted game files into app-private storage,
 loads an optional user-selected ARM64 Vulkan driver through AdrenoTools, imports

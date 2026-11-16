@@ -70,5 +70,5 @@
   extracted file may pass import.
 
 See [android-status.md](docs/android-status.md) for evidence and verification
-boundaries. The inherited Windows/PS5 issue catalogue is archived in
-[`docs/fork-base/KNOWN-ISSUES.md`](docs/fork-base/KNOWN-ISSUES.md).
+boundaries. The inherited Windows/PS5 issue catalogue belongs to the upstream
+fork (`holdmysocks/mcla-recomp`) and is not republished here.

@@ -1,5 +1,11 @@
 # Third-party notices
 
+> **About the file paths below.** They refer to files in the project source,
+> which is not published in this repository (see
+> [Source availability](README.md#source-availability)). They are kept verbatim
+> so the attribution stays traceable against the source made available on
+> request.
+
 This fork is GPL-3.0-or-later (see [`LICENSE`](LICENSE)). Some of its changes are
 ported from, or follow, projects under the MIT and zlib licences, whose notice
 has to travel with the code. They are listed here with that notice, along with

@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap"><img src="https://img.shields.io/badge/Download-Android%20APK-F0A35A?style=for-the-badge&amp;logo=android&amp;logoColor=white" alt="Download Android APK"></a>
+  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases"><img src="https://img.shields.io/badge/Download-Android%20APK-F0A35A?style=for-the-badge&amp;logo=android&amp;logoColor=white" alt="Download Android APK"></a>
   &nbsp;
   <a href="docs/android-testing.md"><img src="https://img.shields.io/badge/Read-Install%20guide-242B38?style=for-the-badge&amp;logo=readthedocs&amp;logoColor=white" alt="Read the installation guide"></a>
 </p>
@@ -24,12 +24,18 @@
   <a href="#compatibility">Compatibility</a> &nbsp; / &nbsp;
   <a href="#need-help">Support</a> &nbsp; / &nbsp;
   <a href="#documentation">Documentation</a> &nbsp; / &nbsp;
-  <a href="docs/android-build.md">Build from source</a>
+  <a href="CHANGELOG.md">Changelog</a>
 </p>
 
 <p align="center"><sub>Maintainer: <a href="https://github.com/gabrielbskk">gabrielbskk</a> · Discord: <strong>gabrielbskk</strong></sub></p>
 
 ---
+
+> [!NOTE]
+> **This repository is the distribution channel.** It hosts releases, the
+> changelog, player documentation and issue tracking. Application and SDK source
+> code are maintained privately and are not published here; see
+> [Source availability](#source-availability).
 
 > [!IMPORTANT]
 > **Early Android port — compatibility and performance vary.** You need your
@@ -37,7 +43,7 @@
 
 ## 01 · Snapdragon / Adreno build
 
-Download the APK from the [Snapdragon release](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap):
+Download the APK from [Releases](https://github.com/gabrielbskk/mcla-recomp-rv/releases):
 
 | APK | Intended device | Status |
 | --- | --- | --- |
@@ -55,7 +61,7 @@ investigated. See [release details and hashes](docs/android-release.md).
 
 ## 02 · Get on the road
 
-1. **Install.** Download the Snapdragon APK from [Releases](https://github.com/gabrielbskk/mcla-recomp-rv/releases/tag/stable-snap).
+1. **Install.** Download the Android ARM64 APK from [Releases](https://github.com/gabrielbskk/mcla-recomp-rv/releases).
 2. **Import.** Extract the 13 files from your own game copy and select their folder
    in the launcher. Allow about **6.2 GB** for the imported copy, plus source files
    and cache space. Follow the [installation guide](docs/android-testing.md).
@@ -107,9 +113,9 @@ launcher after a crash if necessary. Never upload game files or saves.
 
 ## Documentation
 
-| For players | For contributors |
+| For players | Project |
 | --- | --- |
-| [Installation and testing](docs/android-testing.md) | [Build from source](docs/android-build.md) |
+| [Installation and testing](docs/android-testing.md) | [Changelog](CHANGELOG.md) |
 | [Compatibility and performance](docs/android-compatibility.md) | [Android status](docs/android-status.md) |
 | [Release notes and hashes](docs/android-release.md) | [Mali support discontinued](docs/android-mali-driver.md) |
 | [Known issues](KNOWN-ISSUES.md) | [Security policy](SECURITY.md) |
@@ -119,14 +125,26 @@ launcher after a crash if necessary. Never upload game files or saves.
 This project uses static recompilation, C++23, SDL3, Vulkan and ReXGlue; it is
 not an x86 emulator or an official release. APKs are debug-signed and contain a
 native library generated from the game executable, but no extracted game
-assets, saves, shader pack, driver ZIP or signing key. The source repository
-does not contain game data or generated game code. See the [security policy](SECURITY.md)
-before importing third-party drivers or sharing logs.
+assets, saves, shader pack, driver ZIP or signing key. See the
+[security policy](SECURITY.md) before importing third-party drivers or sharing
+logs.
 
 Built on [holdmysocks/mcla-recomp](https://github.com/holdmysocks/mcla-recomp),
 the [RenanQueiroz fork](https://github.com/RenanQueiroz/mcla-recomp), ReXGlue,
 SDL3 and AdrenoTools. This unofficial project is not affiliated with the game's
-rights holders. Source code is licensed under [GPL-3.0-or-later](LICENSE).
+rights holders. The project is licensed under [GPL-3.0-or-later](LICENSE).
+
+## Source availability
+
+Application and SDK source code are not published in this repository. The
+project is licensed under GPL-3.0-or-later, so the corresponding source for
+every published build is available on written request: open an issue titled
+`Source request` (or contact the maintainer on Discord, `gabrielbskk`) and
+include the release version you downloaded. Requests are honoured for at least
+three years from the release date, as required by GPLv3 §6(b).
+
+Game assets, extracted game files, saves, shader packs, driver ZIPs and signing
+keys are never part of any build and are never distributed.
 
 [Credits](CREDITS.md) · [Third-party notices](THIRD-PARTY-NOTICES.md)
 

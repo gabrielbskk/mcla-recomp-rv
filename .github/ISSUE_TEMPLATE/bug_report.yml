@@ -1,0 +1,87 @@
+name: Bug report
+description: Report a crash, visual bug, audio problem or control issue
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read [KNOWN-ISSUES.md](../../blob/main/KNOWN-ISSUES.md) first — the
+        problem may already be documented.
+
+        **Never attach game files, extracted assets, saves, driver ZIPs or
+        signing keys.** An exported log is enough.
+
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: Phone model, SoC and RAM
+      placeholder: Galaxy S23, Snapdragon 8 Gen 2, 8 GB
+    validations:
+      required: true
+
+  - type: input
+    id: android
+    attributes:
+      label: Android version
+      placeholder: Android 14 (One UI 6.1)
+    validations:
+      required: true
+
+  - type: input
+    id: apk
+    attributes:
+      label: APK version
+      description: Shown in the launcher footer, e.g. 0.1.64
+      placeholder: 0.1.64
+    validations:
+      required: true
+
+  - type: input
+    id: driver
+    attributes:
+      label: Vulkan driver
+      description: System driver, or the imported driver name and version
+      placeholder: System driver / Turnip 25.0.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the launcher
+        2. Select the imported game folder
+        3. Drive to the first race
+        4. Crash when the race starts
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual result
+    validations:
+      required: true
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: |
+        Export the log from the launcher (`Documents/MCLA/logs/`) and review it
+        for personal information before pasting. Paste the relevant section or
+        attach the file.
+      render: text
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: I am not attaching game files, saves, driver ZIPs or signing keys.
+          required: true

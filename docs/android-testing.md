@@ -307,9 +307,8 @@ setting at a time, and keep the same driver, temperature and cache state.
 
 ## Rebuilding the APK
 
-No build is performed by this documentation page. The source recipe is in
-[android-build.md](android-build.md), and CI builds the patched SDK and host
-stub without game data. The APK includes AdrenoTools and its hooks, but no
+No build is performed by this documentation page, and this repository does not
+distribute source code. The APK includes AdrenoTools and its hooks, but no
 third-party Turnip driver.
 # Current GPU scope
 

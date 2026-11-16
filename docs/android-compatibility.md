@@ -20,8 +20,7 @@ same GPU. Other than the S23, the entries below are **tester reports**.
 - The positive v0.1.45 S23 result is qualitative; no FPS can be inferred.
   Thermal limits, scene, cache state and shader compilation affect results.
 
-Full measurements and caveats: [Android status](android-status.md),
-[performance handoff](android-performance-handoff.md), and
+Full measurements and caveats: [Android status](android-status.md) and
 [A740 driver investigation](turnip-a740-rendering-artifacts.md).
 
 ## Requirements and uncertainty

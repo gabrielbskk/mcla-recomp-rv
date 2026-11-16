@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Installation and troubleshooting guide
+    url: https://github.com/gabrielbskk/mcla-recomp-rv/blob/main/docs/android-testing.md
+    about: Install steps, game-file import, drivers and log export.
+  - name: Compatibility and performance
+    url: https://github.com/gabrielbskk/mcla-recomp-rv/blob/main/docs/android-compatibility.md
+    about: What is measured, what is only reported, and what is unknown.
+  - name: Known issues
+    url: https://github.com/gabrielbskk/mcla-recomp-rv/blob/main/KNOWN-ISSUES.md
+    about: Check here before opening a bug report.
