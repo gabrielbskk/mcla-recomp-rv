@@ -11,10 +11,14 @@ the APK `versionCode`.
 > the maintainer; include phone model, SoC, Android version, driver and APK
 > version, plus the log from `Documents/MCLA/logs/MCLA-diagnostic.txt`.
 >
-> > **Development has slowed down.** v0.1.61 is likely the last public release
-> > for a while. The recompilation work continues privately at a slower pace.
-> > Frame generation (LSFG 2×) and other improvements will be finished and
-> > published when time allows. No ETA.
+> > **This is the final public release.** Development is paused indefinitely.
+> > I'm stepping away from recompilation work and AI-related projects due to
+> > internal circumstances. The private repository will remain but no further
+> > public builds are planned. No ETA for any future work.
+> >
+> > The current build (v0.1.61) is stable for daily use on supported devices.
+> > Frame generation (LSFG 2×) was experimentally integrated but remains
+> > unpublished and incomplete.
 
 ## 0.1.61 — automatic log export and launcher cleanup
 

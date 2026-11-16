@@ -10,7 +10,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Android-ARM64-3DDC84?style=flat-square&amp;logo=android&amp;logoColor=white" alt="Android ARM64">
   <img src="https://img.shields.io/badge/Renderer-Vulkan-F0A35A?style=flat-square&amp;logo=vulkan&amp;logoColor=white" alt="Vulkan renderer">
-  <img src="https://img.shields.io/badge/Status-Early%20port-E9B77B?style=flat-square" alt="Early port">
+  <img src="https://img.shields.io/badge/Status-Final%20release%20%7C%20Paused-E53935?style=flat-square" alt="Final release - Paused">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0--or--later-8995AA?style=flat-square" alt="GPL-3.0-or-later license"></a>
 </p>
 
@@ -32,10 +32,13 @@
 ---
 
 > [!NOTE]
-> **This repository is the distribution channel.** It hosts releases, the
+> **This repository is the distribution channel.** It hosts the final release,
 > changelog, player documentation and issue tracking. Application and SDK source
 > code are maintained privately and are not published here; see
 > [Source availability](#source-availability).
+>
+> > **Development is paused.** I'm stepping away from recompilation and AI work
+> > due to internal circumstances. No further public updates are planned.
 
 > [!IMPORTANT]
 > **Early Android port — compatibility and performance vary.** You need your
@@ -47,7 +50,17 @@ Download the APK from [Releases](https://github.com/gabrielbskk/mcla-recomp-rv/r
 
 | APK | Intended device | Status |
 | --- | --- | --- |
-| **stable-snap.apk** · v0.1.45 | Snapdragon / Adreno | Maintainer reports good results on Galaxy S23; broader compatibility and controlled FPS are unverified. |
+| **v0.1.61** · normal | Snapdragon / Adreno | Auto log export, launcher cleanup. No frame generation. Maintainer reports good results on Galaxy S23; broader compatibility and controlled FPS are unverified. |
+
+> [!WARNING]
+> **This is the final public release.** Development is paused indefinitely.
+> I'm stepping away from recompilation work and AI-related projects due to
+> internal circumstances. The private repository will remain but no further
+> public builds are planned. No ETA for any future work.
+>
+> The current build (v0.1.61) is stable for daily use on supported devices.
+> Frame generation (LSFG 2×) was experimentally integrated but remains
+> unpublished and incomplete.
 
 **Mali support has been discontinued.** The diagnostic APK has been withdrawn;
 Mali/Immortalis and PanVK are outside this project's supported scope. Tested
@@ -83,9 +96,9 @@ from community reports.
 
 | Device | Result | Source |
 | --- | --- | --- |
-| Galaxy S23 · Snapdragon 8 Gen 2 · 8 GB | Current v0.1.45 reportedly performed well; no controlled FPS measurement. | Maintainer test |
+| Galaxy S23 · Snapdragon 8 Gen 2 · 8 GB | v0.1.61 reportedly performs well; no controlled FPS measurement. | Maintainer test |
 | Zenfone 9 · Snapdragon 8+ Gen 1 · 6 GB | Older builds ran with reported freezes and lag; 5–15 FPS estimated, not benchmarked. | [Tester · #5](https://github.com/gabrielbskk/mcla-recomp-rv/issues/5) |
-| Galaxy Z Fold 5 · Snapdragon 8 Gen 2 · 12 GB | v0.1.24 reached a file-I/O error; no confirmed gameplay or v0.1.45 retest. | [Tester · #6](https://github.com/gabrielbskk/mcla-recomp-rv/issues/6) |
+| Galaxy Z Fold 5 · Snapdragon 8 Gen 2 · 12 GB | v0.1.24 reached a file-I/O error; no confirmed gameplay or v0.1.61 retest. | [Tester · #6](https://github.com/gabrielbskk/mcla-recomp-rv/issues/6) |
 | Mali / Immortalis devices | Unsupported; diagnostic distribution discontinued. | [Technical note](docs/android-mali-driver.md) |
 | RedMagic 11 Air · Snapdragon 8 Elite | Stereo audio logged, but cuts reported; gameplay and FPS unverified. | Tester report |
 
@@ -94,7 +107,7 @@ from community reports.
 
 Older S23 runs measured 14.223 presented FPS on system Vulkan and 22–24 FPS
 in a separate Turnip run. They used different settings and thermal conditions:
-**they are not a controlled comparison or v0.1.45 benchmarks**. For evidence,
+**they are not a controlled comparison or v0.1.61 benchmarks**. For evidence,
 device details and likely requirements, see [compatibility and performance](docs/android-compatibility.md).
 
 </details>
