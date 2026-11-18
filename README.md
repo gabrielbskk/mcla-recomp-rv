@@ -131,7 +131,7 @@ Built upon [holdmysocks/mcla-recomp](https://github.com/holdmysocks/mcla-recomp)
 <a id="source-availability"></a>
 ## Source Availability
 
-Application and patched SDK source code are maintained in a separate repository while experimental Android iteration continues. Under **GPL-3.0-or-later**, complete corresponding source code for every published APK is provided upon request: open an issue titled `Source request` (or contact `gabrielbskk` on Discord) specifying the build version. Requests are honoured for at least three years from each release date per GPLv3 §6(b).
+Complete host application, Android launcher/HUD, build scripts, and the 14-patch ReXGlue SDK series are publicly available under **GPL-3.0-or-later** at [**gabrielbskk/mcla-recomp-source**](https://github.com/gabrielbskk/mcla-recomp-source). GitHub Issues are disabled on the source repository so all bug reports, logs, and player discussions remain centralized in [**mcla-recomp-rv/issues**](https://github.com/gabrielbskk/mcla-recomp-rv/issues).
 
 [Credits](CREDITS.md) &nbsp;·&nbsp; [Third-Party Notices](THIRD-PARTY-NOTICES.md)
 

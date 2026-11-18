@@ -1,8 +1,8 @@
 # Changelog
 
 Public build notes for the Android ARM64 port. Entries describe what changed for
-players and community testers; internal engineering detail stays in the private
-source repository.
+players and community testers; full source code and SDK patches live in
+[gabrielbskk/mcla-recomp-source](https://github.com/gabrielbskk/mcla-recomp-source).
 
 Versioning follows the APK `versionName` (`0.1.<build>`); the build number is
 the APK `versionCode`.

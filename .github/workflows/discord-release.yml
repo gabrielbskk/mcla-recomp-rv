@@ -1,19 +1,51 @@
 name: Discord Release
+
 on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+
 jobs:
   notify:
-    runs-on: ubuntu-latest
+    if: github.repository == 'gabrielbskk/mcla-recomp-rv'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
       - name: Post to Discord
-        uses: sarisia/actions-status-discord@v1
-        with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_RELEASES }}
-          title: "🚀 Novo release: ${{ github.event.release.tag_name }}"
-          description: "${{ github.event.release.body || 'Sem descrição' }}"
-          color: 5814783
-          fields: '[{"name": "Repo", "value": "${{ github.repository }}", "inline": true}, {"name": "📥 Download APK", "value": "[Assets do release](${{ github.event.release.html_url }})", "inline": true}]'
-          username: "GitHub Releases"
-          avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_RELEASES }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          REPO_NAME: ${{ github.repository }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DISCORD_WEBHOOK}" ]; then
+            echo "DISCORD_WEBHOOK_RELEASES is not configured; skipping notification."
+            exit 0
+          fi
+          payload="$(jq -n \
+            --arg title "🚀 Novo release: ${TAG_NAME}" \
+            --arg desc "${RELEASE_BODY:0:3500}" \
+            --arg repo "${REPO_NAME}" \
+            --arg dl "[Assets do release](${RELEASE_URL})" \
+            '{
+              username: "GitHub Releases",
+              avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+              allowed_mentions: { parse: [] },
+              embeds: [{
+                title: $title,
+                description: (if ($desc | length) > 0 then $desc else "Sem descrição" end),
+                color: 5814783,
+                fields: [
+                  { name: "Repo", value: $repo, inline: true },
+                  { name: "📥 Download APK", value: $dl, inline: true }
+                ]
+              }]
+            }')"
+          curl --fail-with-body --silent --show-error --max-time 15 \
+            -H "Content-Type: application/json" \
+            -d "${payload}" \
+            "${DISCORD_WEBHOOK}" >/dev/null
