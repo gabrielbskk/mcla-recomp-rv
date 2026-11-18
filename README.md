@@ -1,165 +1,152 @@
+<a id="top"></a>
+
 <p align="center">
-  <img src="docs/assets/mcla-rv-banner.svg" alt="MCLA Recomp RV — Los Angeles, recompiled. Unofficial Android ARM64 port." width="100%">
+  <img src="docs/assets/mcla-rv-banner.svg" alt="MCLA Recomp RV — Midnight Club: Los Angeles Complete Edition for Android ARM64" width="100%">
 </p>
 
 <p align="center">
-  <strong>From Xbox 360 to Android. A community-driven recompilation.</strong><br>
-  <sub>Native ARM64 code · Vulkan graphics · Controller support · Experimental touch controls</sub>
+  <img src="docs/assets/mcla-app-icon.png" alt="MCLA Recomp Android App Icon" width="112">
+</p>
+
+<h3 align="center">Midnight Club: Los Angeles Complete Edition — Recompiled for Android</h3>
+
+<p align="center">
+  <sub>Native C++23 ARM64 Recompilation &nbsp;•&nbsp; Adreno / Turnip Vulkan &nbsp;•&nbsp; Xbox 360 Touch HUD + Analog <code>%</code> Pedals &nbsp;•&nbsp; Stereo Anti-Cut Audio</sub>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Android-ARM64-3DDC84?style=flat-square&amp;logo=android&amp;logoColor=white" alt="Android ARM64">
-  <img src="https://img.shields.io/badge/Renderer-Vulkan-F0A35A?style=flat-square&amp;logo=vulkan&amp;logoColor=white" alt="Vulkan renderer">
-  <img src="https://img.shields.io/badge/Status-Active%20development-3DDC84?style=flat-square" alt="Active development">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0--or--later-8995AA?style=flat-square" alt="GPL-3.0-or-later license"></a>
+  <img src="https://img.shields.io/badge/Android-ARM64-22C55E?style=flat-square&amp;logo=android&amp;logoColor=white" alt="Android ARM64">
+  <img src="https://img.shields.io/badge/GPU-Snapdragon%20%2F%20Adreno-38BDF8?style=flat-square" alt="Snapdragon Adreno">
+  <img src="https://img.shields.io/badge/Renderer-Vulkan-F59E0B?style=flat-square&amp;logo=vulkan&amp;logoColor=white" alt="Vulkan renderer">
+  <img src="https://img.shields.io/badge/Build-v0.1.64%20Experimental-F97316?style=flat-square" alt="v0.1.64 Experimental">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0--or--later-64748B?style=flat-square" alt="GPL-3.0-or-later license"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases"><img src="https://img.shields.io/badge/Download-Android%20APK-F0A35A?style=for-the-badge&amp;logo=android&amp;logoColor=white" alt="Download Android APK"></a>
+  <a href="https://github.com/gabrielbskk/mcla-recomp-rv/releases"><img src="https://img.shields.io/badge/Download-Android%20APK-38BDF8?style=for-the-badge&amp;logo=android&amp;logoColor=06131F" alt="Download Android APK"></a>
   &nbsp;
-  <a href="docs/android-testing.md"><img src="https://img.shields.io/badge/Read-Install%20guide-242B38?style=for-the-badge&amp;logo=readthedocs&amp;logoColor=white" alt="Read the installation guide"></a>
+  <a href="docs/android-testing.md"><img src="https://img.shields.io/badge/Guide-Installation%20%26%20Setup-162536?style=for-the-badge&amp;logo=readthedocs&amp;logoColor=white" alt="Installation guide"></a>
+  &nbsp;
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Notes-Experimental%20Changelog-2A1D12?style=for-the-badge" alt="Changelog"></a>
 </p>
 
 <p align="center">
-  <a href="#compatibility">Compatibility</a> &nbsp; / &nbsp;
-  <a href="#need-help">Support</a> &nbsp; / &nbsp;
-  <a href="#documentation">Documentation</a> &nbsp; / &nbsp;
-  <a href="CHANGELOG.md">Changelog</a>
+  <a href="#highlights">Highlights</a> &nbsp;•&nbsp;
+  <a href="#releases">Builds</a> &nbsp;•&nbsp;
+  <a href="#quick-start">Quick Start</a> &nbsp;•&nbsp;
+  <a href="#compatibility">Compatibility</a> &nbsp;•&nbsp;
+  <a href="#need-help">Support &amp; Logs</a> &nbsp;•&nbsp;
+  <a href="#documentation">Docs</a> &nbsp;•&nbsp;
+  <a href="#source-availability">Source</a>
 </p>
 
-<p align="center"><sub>Maintainer: <a href="https://github.com/gabrielbskk">gabrielbskk</a> · Discord: <strong>gabrielbskk</strong></sub></p>
+<p align="center"><sub>Maintainer: <a href="https://github.com/gabrielbskk"><strong>gabrielbskk</strong></a> &nbsp;·&nbsp; Discord: <code>gabrielbskk</code></sub></p>
 
 ---
 
 > [!NOTE]
-> **Active development has resumed.** This repository is the public distribution
-> channel hosting Android releases, [changelogs](CHANGELOG.md), player
-> documentation, and issue tracking. Current work focuses on Snapdragon / Adreno
-> performance, thermal stability, and Vulkan rendering fixes (tested primarily on
-> Galaxy S23). Application and SDK source code are maintained separately; see
-> [Source availability](#source-availability).
+> **Active development is live.** This repository is the public distribution hub for Android builds, [experimental changelogs](CHANGELOG.md), setup guides, and community bug reports. Current engineering focuses on **Snapdragon / Adreno** frame pacing, **Turnip `syncdraw`** draw-call reduction, **Galaxy S23 & RedMagic 11 Air** audio stability, and responsive **Xbox 360 touch + analog pedal** controls.
 
 > [!IMPORTANT]
-> **Early Android port — compatibility and performance vary.** You need your
-> own legally obtained Xbox 360 game files; they are not included.
+> **Bring your own legally obtained Xbox 360 game files.** This APK contains only recompiled native ARM64 host code and launcher UI — no game assets, RPF/BIK archives, shader packs, or Turnip drivers are bundled.
 
-## 01 · Snapdragon / Adreno build
+<a id="highlights"></a>
+## What's New in `v0.1.64` *(Experimental)*
 
-Download the APK from [Releases](https://github.com/gabrielbskk/mcla-recomp-rv/releases):
+| Area | What Changed |
+| :--- | :--- |
+| **Snapdragon FPS Presets & Empty Streets** | Selectable **S23 Balanced** *(default)*, **Max FPS / Low Draw-Call**, and **Console Visuals** profiles + one-tap **Empty Streets** toggle (`mcla_empty_streets`) to eliminate heavy off-screen shadow cascades, blurs, and ambient traffic stalls under Turnip `syncdraw`. |
+| **Qualcomm System Vulkan Fix** | Disabled unconditional `VK_EXT_debug_utils` messenger attachment when validation is off — eliminating the **1,000+ `VKDBGUTILWARN003` callbacks/sec** driver & I/O storm found in Snapdragon system-driver logs (Zenfone 9, S23, 8 Elite). |
+| **S23 & RedMagic 11 Air Audio Engine** | Host `setpriority` boost for **Audio Worker** & **XMA Decoder**, lock-free 6ch → 2ch stereo SDL3 callback, and dedicated **RedMagic / 8 Elite Safe (`20–32` frames)** & **S23 Adaptive (`16–28` frames)** anti-cut profiles. |
+| **Xbox 360 HUD & `%` Pedals** | Redesigned Midnight LA Launcher, official **MCLA Recomp Android** app icon, authentic Xbox 360 `A`/`B`/`X`/`Y` jewel buttons & concave 4-dot sticks, plus **vertical `GAS` (`RT`) / `BRK` (`LT`) pedals** with live `0%–100%` pressure readout (higher = stronger force, lower = gentler throttle). |
+| **Self-Healing Diagnostic Logs** | Automatic 15-second background export + pause/exit flush to `Documents/MCLA/logs/MCLA-diagnostic.txt` and `mcla-current.txt`, plus a manual **Export Diagnostic Log Now** button. |
 
-| APK | Intended device | Status |
-| --- | --- | --- |
-| **v0.1.63** · experimental | Snapdragon / Adreno | **Experimental test build.** Full-screen presentation restored, Turnip `syncdraw` default restored (fixes wheel & headlight flicker), persistent Vulkan pipeline cache, native zero-Vulkan-cost FPS HUD, stereo audio, and Galaxy S23 thermal/GPU fixes. |
-| **v0.1.61** · normal | Snapdragon / Adreno | Stable baseline. Auto log export, launcher cleanup. No frame generation. |
+<a id="releases"></a>
+## 01 · Snapdragon / Adreno Builds
 
-**Mali support has been discontinued.** The diagnostic APK has been withdrawn;
-Mali/Immortalis and PanVK are outside this project's supported scope. Tested
-devices hit required Vulkan-feature and Android swapchain incompatibilities.
-Supporting them would require substantial renderer/platform work, not just a
-driver switch. This is a development-scope decision, not proof that the entire
-project must be rewritten. See the [retirement note](docs/android-mali-driver.md).
+Download APKs from [Releases](https://github.com/gabrielbskk/mcla-recomp-rv/releases):
 
-The RedMagic / 8 Elite diagnostic is withheld while reported audio cuts are
-investigated. See [release details and hashes](docs/android-release.md).
+| Build | Target Hardware | Summary |
+| :--- | :--- | :--- |
+| **`v0.1.64`** · *Experimental* | Snapdragon / Adreno *(8 GB+ RAM recommended)* | **Latest community test build.** Redesigned Launcher & Xbox 360 `%` pedals, `S23 Balanced` / `Max FPS` / `Empty Streets` modes, RedMagic 11 Air + S23 anti-cut audio fix, Qualcomm `VKDBGUTILWARN003` fix, repaired live log exporter, and new app icon. |
+| **`v0.1.63`** · *Experimental* | Snapdragon / Adreno | Restored 720p full-screen scaling, Turnip `TU_DEBUG=syncdraw` wheel/light flicker fix, persistent `VkPipelineCache`, and S23 thermal mode. |
+| **`v0.1.61`** · *Baseline* | Snapdragon / Adreno | Earlier snapshot prior to the `v0.1.62+` renderer, audio, and HUD overhaul. |
 
-## 02 · Get on the road
+**Mali / Immortalis / PanVK support is discontinued.** Tested non-Adreno GPUs lack required Vulkan pipeline features and hit Android swapchain incompatibilities outside this port's scope; see the [Mali technical note](docs/android-mali-driver.md) and [release details](docs/android-release.md).
 
-1. **Install.** Download the Android ARM64 APK from [Releases](https://github.com/gabrielbskk/mcla-recomp-rv/releases).
-2. **Import.** Extract the 13 files from your own game copy and select their folder
-   in the launcher. Allow about **6.2 GB** for the imported copy, plus source files
-   and cache space. Follow the [installation guide](docs/android-testing.md).
-3. **Launch.** Start with the **system Vulkan driver**. Optionally import a
-    **trusted** Turnip ZIP for Adreno; imported drivers run native code.
-4. **Tune.** Adjust visual settings in the game's **Options / Display** menu.
-   The launcher's driver selector is separate. Touch controls and their editor
-   are experimental; one gamepad is the validated input method.
+<a id="quick-start"></a>
+## 02 · Quick Start
+
+1. **Install the APK** from [Releases](https://github.com/gabrielbskk/mcla-recomp-rv/releases). Upgrading over an existing install (`pm install -r` or standard Android package update) preserves all imported game files and career saves.
+2. **Import your 13 game files** extracted from your Xbox 360 *Midnight Club: Los Angeles Complete Edition* copy (~**6.2 GB** free private storage required). Full step-by-step instructions are in [docs/android-testing.md](docs/android-testing.md).
+3. **Pick your Driver & Preset:**
+   - **Turnip Freedreno (`.zip`):** Keeps `TU_DEBUG=syncdraw` enabled by default to prevent wheel & headlight flickering on Adreno 7xx; pair with **S23 Balanced** or **Max FPS** (+ **Empty Streets** if desired).
+   - **Qualcomm System Vulkan:** Works out of the box (especially on Adreno 8xx / Snapdragon 8 Elite where Turnip support varies), now free of `VKDBGUTILWARN003` debug-callback overhead.
+4. **Customize Controls & Launch:** Adjust your Xbox 360 touch HUD, pedal size/opacity, or connect a Bluetooth/USB controller, then tap **LAUNCH MIDNIGHT CLUB: LA**.
 
 > [!WARNING]
-> **Keep your game files and saves:** compatible updates replace the existing
-> app. Use `pm install -r`; **do not uninstall or
-> clear data**. Downgrades can be rejected by Android.
+> **Never uninstall or clear app data when updating** — doing so deletes your imported `game/` folder and saves inside app-private storage. Always install updates directly on top (`pm install -r`).
 
-## Compatibility
+<a id="compatibility"></a>
+## 03 · Multi-Device Investigation & Compatibility
 
-**Device reports, not guarantees.** Results below distinguish maintainer testing
-from community reports.
+Results from maintainer testing and community diagnostic log analysis (`v0.1.24`–`v0.1.64`):
 
-| Device | Result | Source |
-| --- | --- | --- |
-| Galaxy S23 · Snapdragon 8 Gen 2 · 8 GB | v0.1.61 reportedly performs well; no controlled FPS measurement. | Maintainer test |
-| Zenfone 9 · Snapdragon 8+ Gen 1 · 6 GB | Older builds ran with reported freezes and lag; 5–15 FPS estimated, not benchmarked. | [Tester · #5](https://github.com/gabrielbskk/mcla-recomp-rv/issues/5) |
-| Galaxy Z Fold 5 · Snapdragon 8 Gen 2 · 12 GB | v0.1.24 reached a file-I/O error; no confirmed gameplay or v0.1.61 retest. | [Tester · #6](https://github.com/gabrielbskk/mcla-recomp-rv/issues/6) |
-| Mali / Immortalis devices | Unsupported; diagnostic distribution discontinued. | [Technical note](docs/android-mali-driver.md) |
-| RedMagic 11 Air · Snapdragon 8 Elite | Stereo audio logged, but cuts reported; gameplay and FPS unverified. | Tester report |
+| Device & SoC | RAM | Findings & `v0.1.64` Status | Source |
+| :--- | :--- | :--- | :--- |
+| **Samsung Galaxy S23** · Snapdragon 8 Gen 2 (`Adreno 740`) | 8 GB | Primary development target. Turnip `syncdraw` fixes wheel/light flicker; `v0.1.64` adds **S23 Balanced**, **Empty Streets**, lock-free stereo audio, and 240 Hz touch/pedal optimizations. | Maintainer |
+| **RedMagic 11 Air** · Snapdragon 8 Elite (`Adreno 830`) | 12–16 GB | Earlier logs showed 6-ch endpoint overhead + `8`-frame queue underruns during shader stalls and unraised audio threads. `v0.1.64` auto-enables **RedMagic Safe (`20–32` frames, `1024` buf)** + host audio priority. | Tester logs |
+| **Asus Zenfone 9** · Snapdragon 8+ Gen 1 (`Adreno 730`) | 6–8 GB | Multi-session logs (`225 MB`) revealed Qualcomm's system Vulkan firing 1,000+ `VKDBGUTILWARN003` debug callbacks/sec. **Fixed in `v0.1.64`**; use **S23 Balanced** or **Max FPS**. | [Issue #5](https://github.com/gabrielbskk/mcla-recomp-rv/issues/5) + Drive logs |
+| **Samsung Galaxy Z Fold 5** · Snapdragon 8 Gen 2 (`Adreno 740`) | 12 GB | `v0.1.24` hit an early import/file-I/O issue; retest welcome on `v0.1.64`. | [Issue #6](https://github.com/gabrielbskk/mcla-recomp-rv/issues/6) |
+| **Motorola Moto G34 5G** · Snapdragon 695 (`Adreno 619`) | 4 GB | Below practical hardware floor: `3.4 GB` usable RAM hits heavy zram swap (`<700 MB` free) and `4–6 FPS` on Vulkan `1.1`. **8 GB+ RAM & Adreno 7xx/8xx recommended.** | Drive logs |
+| **Mali / Immortalis / Xclipse** | Any | Unsupported; diagnostic builds discontinued. | [Technical note](docs/android-mali-driver.md) |
 
-<details>
-<summary><strong>About older performance measurements</strong></summary>
+For deeper historical notes and methodology, read [docs/android-compatibility.md](docs/android-compatibility.md).
 
-Older S23 runs measured 14.223 presented FPS on system Vulkan and 22–24 FPS
-in a separate Turnip run. They used different settings and thermal conditions:
-**they are not a controlled comparison or v0.1.61 benchmarks**. For evidence,
-device details and likely requirements, see [compatibility and performance](docs/android-compatibility.md).
+<a id="need-help"></a>
+## 04 · Need Help or Reporting a Bug?
 
-</details>
+Check [KNOWN-ISSUES.md](KNOWN-ISSUES.md) first, then open an [Issue](https://github.com/gabrielbskk/mcla-recomp-rv/issues) or message **`gabrielbskk`** on Discord with:
 
-## Need help?
+1. **Device model, SoC, RAM, Android version**, and **APK version** (`v0.1.64`).
+2. **Active Vulkan driver** (`System Vulkan` or exact `Turnip` ZIP version + `TU_DEBUG` mode) and selected **Performance / Audio preset**.
+3. **Diagnostic log:** attach `Documents/MCLA/logs/MCLA-diagnostic.txt` (or tap **Export Diagnostic Log Now** inside the launcher). Never share copyrighted game files or personal data.
 
-Check the [known issues](KNOWN-ISSUES.md) before opening a
-[bug report](https://github.com/gabrielbskk/mcla-recomp-rv/issues). Include:
+<a id="documentation"></a>
+## 05 · Documentation
 
-- Phone model, GPU, Android version and APK version.
-- Driver name/version and a short description of how to reproduce the problem.
-- An exported log; review it for personal information before sharing.
+| Player Guides | Project Reference |
+| :--- | :--- |
+| [Installation & Folder Import](docs/android-testing.md) | [Experimental Changelog](CHANGELOG.md) |
+| [Compatibility & Hardware Notes](docs/android-compatibility.md) | [Android Port Status](docs/android-status.md) |
+| [Release Notes & SHA-256 Hashes](docs/android-release.md) | [Why Mali Support Ended](docs/android-mali-driver.md) |
+| [Known Issues](KNOWN-ISSUES.md) | [Security Policy](SECURITY.md) |
 
-Shared logs are exported to `Documents/MCLA/logs/` on Android 10+; reopen the
-launcher after a crash if necessary. Never upload game files or saves.
+## About the Project
 
-## Documentation
+**MCLA Recomp RV** uses static Xbox 360 PowerPC → C++23 recompilation powered by **ReXGlue**, **SDL3**, **Vulkan**, and **AdrenoTools** — it is not an x86/PC emulator or an official Rockstar release. Review [SECURITY.md](SECURITY.md) before loading third-party `.zip` GPU drivers.
 
-| For players | Project |
-| --- | --- |
-| [Installation and testing](docs/android-testing.md) | [Changelog](CHANGELOG.md) |
-| [Compatibility and performance](docs/android-compatibility.md) | [Android status](docs/android-status.md) |
-| [Release notes and hashes](docs/android-release.md) | [Mali support discontinued](docs/android-mali-driver.md) |
-| [Known issues](KNOWN-ISSUES.md) | [Security policy](SECURITY.md) |
+Built upon [holdmysocks/mcla-recomp](https://github.com/holdmysocks/mcla-recomp), the [RenanQueiroz fork](https://github.com/RenanQueiroz/mcla-recomp), ReXGlue, SDL3, and AdrenoTools under [GPL-3.0-or-later](LICENSE).
 
-## About the project
+<a id="source-availability"></a>
+## Source Availability
 
-This project uses static recompilation, C++23, SDL3, Vulkan and ReXGlue; it is
-not an x86 emulator or an official release. APKs are debug-signed and contain a
-native library generated from the game executable, but no extracted game
-assets, saves, shader pack, driver ZIP or signing key. See the
-[security policy](SECURITY.md) before importing third-party drivers or sharing
-logs.
+Application and patched SDK source code are maintained in a separate repository while experimental Android iteration continues. Under **GPL-3.0-or-later**, complete corresponding source code for every published APK is provided upon request: open an issue titled `Source request` (or contact `gabrielbskk` on Discord) specifying the build version. Requests are honoured for at least three years from each release date per GPLv3 §6(b).
 
-Built on [holdmysocks/mcla-recomp](https://github.com/holdmysocks/mcla-recomp),
-the [RenanQueiroz fork](https://github.com/RenanQueiroz/mcla-recomp), ReXGlue,
-SDL3 and AdrenoTools. This unofficial project is not affiliated with the game's
-rights holders. The project is licensed under [GPL-3.0-or-later](LICENSE).
-
-## Source availability
-
-Application and SDK source code are not published in this repository. The
-project is licensed under GPL-3.0-or-later, so the corresponding source for
-every published build is available on written request: open an issue titled
-`Source request` (or contact the maintainer on Discord, `gabrielbskk`) and
-include the release version you downloaded. Requests are honoured for at least
-three years from the release date, as required by GPLv3 §6(b).
-
-Game assets, extracted game files, saves, shader packs, driver ZIPs and signing
-keys are never part of any build and are never distributed.
-
-[Credits](CREDITS.md) · [Third-party notices](THIRD-PARTY-NOTICES.md)
+[Credits](CREDITS.md) &nbsp;·&nbsp; [Third-Party Notices](THIRD-PARTY-NOTICES.md)
 
 <details>
-<summary>Project cover artwork</summary>
+<summary><strong>Full Project Cover Artwork</strong></summary>
 
 <p align="center">
-  <img src="docs/assets/mcla-recomp-project-cover.png" alt="Midnight Club Los Angeles Complete Edition — Recomp / Android project cover" width="360">
+  <img src="docs/assets/mcla-recomp-project-cover.png" alt="Midnight Club Los Angeles Complete Edition — Recomp Android project cover" width="340">
 </p>
 
 </details>
 
 ---
 
-<p align="center"><sub>Built by the community. Not affiliated with Rockstar Games or the game's rights holders.</sub><br><a href="#top">Back to top ↑</a></p>
+<p align="center">
+  <sub>Community static recompilation project. Not affiliated with Rockstar Games, Take-Two Interactive, or the game's rights holders.</sub><br>
+  <a href="#top">Back to top ↑</a>
+</p>

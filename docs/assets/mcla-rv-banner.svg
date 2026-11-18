@@ -1,63 +1,109 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-labelledby="title desc">
-  <title id="title">MCLA Recomp RV — Los Angeles, recompiled.</title>
-  <desc id="desc">A midnight graphite and sunset amber banner with a city skyline, sweeping road lines and a racing-inspired RV emblem. Unofficial Android ARM64 community port.</desc>
+  <title id="title">MCLA Recomp — Midnight Club: Los Angeles Complete Edition for Android ARM64</title>
+  <desc id="desc">Midnight Los Angeles skyline with Hollywood hills, neon cyan and sunset amber speed trails, tachometer dial, and MCLA Recomp Android ARM64 emblem.</desc>
   <defs>
-    <linearGradient id="night" x2="1" y2="1">
-      <stop stop-color="#171b24"/>
-      <stop offset="0.6" stop-color="#0c1018"/>
-      <stop offset="1" stop-color="#24202a"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#060B12"/>
+      <stop offset="0.52" stop-color="#0D1826"/>
+      <stop offset="1" stop-color="#1D1524"/>
     </linearGradient>
-    <radialGradient id="sunset">
-      <stop stop-color="#f59e42" stop-opacity="0.23"/>
-      <stop offset="1" stop-color="#f59e42" stop-opacity="0"/>
+    <radialGradient id="cyanGlow" cx="0.22" cy="0.18" r="0.55">
+      <stop offset="0" stop-color="#38BDF8" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#38BDF8" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="amber">
-      <stop stop-color="#ffd18b"/>
-      <stop offset="1" stop-color="#f08a3c"/>
+    <radialGradient id="sunsetGlow" cx="0.82" cy="0.58" r="0.52">
+      <stop offset="0" stop-color="#F59E0B" stop-opacity="0.26"/>
+      <stop offset="0.55" stop-color="#EF4444" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.55" stop-color="#E2E8F0"/>
+      <stop offset="1" stop-color="#94A3B8"/>
     </linearGradient>
-    <linearGradient id="road">
-      <stop stop-color="#f59e42" stop-opacity="0"/>
-      <stop offset="0.55" stop-color="#f59e42" stop-opacity="0.6"/>
-      <stop offset="1" stop-color="#ffd18b"/>
+    <linearGradient id="amberAccent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FBBF24"/>
+      <stop offset="1" stop-color="#F97316"/>
     </linearGradient>
-    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
-      <path d="M48 0H0V48" fill="none" stroke="#fff" stroke-opacity="0.035"/>
+    <linearGradient id="cyanTrail" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#38BDF8" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#38BDF8" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+    <linearGradient id="amberTrail" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#F59E0B" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#F59E0B" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#FDE68A"/>
+    </linearGradient>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M44 0H0V44" fill="none" stroke="#38BDF8" stroke-opacity="0.04"/>
     </pattern>
-    <clipPath id="frame"><rect x="1" y="1" width="1278" height="418" rx="24"/></clipPath>
+    <clipPath id="cardClip">
+      <rect x="1" y="1" width="1278" height="418" rx="26"/>
+    </clipPath>
   </defs>
-  <g clip-path="url(#frame)">
-    <rect width="1280" height="420" fill="url(#night)"/>
+
+  <g clip-path="url(#cardClip)">
+    <rect width="1280" height="420" fill="url(#bg)"/>
     <rect width="1280" height="420" fill="url(#grid)"/>
-    <ellipse cx="1060" cy="250" rx="540" ry="350" fill="url(#sunset)"/>
-    <g fill="#080d15" opacity="0.6">
-      <path d="M712 310V234H750V205H774V257H804V174H840V144H850V174H874V228H903V190H940V251H968V218H995V127H1005V112H1012V127H1037V177H1055V231H1080V196H1118V148H1158V213H1186V188H1224V242H1280V420H712Z"/>
+    <rect width="1280" height="420" fill="url(#cyanGlow)"/>
+    <rect width="1280" height="420" fill="url(#sunsetGlow)"/>
+
+    <!-- Downtown LA Skyline Silhouette -->
+    <path fill="#050910" opacity="0.78" d="M640 336L690 302L735 308V238H772V208H798V256H826V168H864V138H876V168H902V226H934V184H972V246H998V208H1028V118H1038V100H1046V118H1074V174H1096V228H1124V188H1164V142H1204V210H1234V182H1280V420H640Z"/>
+
+    <!-- Skyline Windows -->
+    <g fill="#FBBF24" opacity="0.22">
+      <rect x="838" y="184" width="6" height="6"/><rect x="854" y="184" width="6" height="6"/>
+      <rect x="838" y="204" width="6" height="6"/><rect x="854" y="224" width="6" height="6"/>
+      <rect x="1038" y="138" width="6" height="6"/><rect x="1054" y="158" width="6" height="6"/>
+      <rect x="1038" y="178" width="6" height="6"/><rect x="1176" y="162" width="6" height="6"/>
+      <rect x="1190" y="182" width="6" height="6"/>
     </g>
-    <g fill="#f7b466" opacity="0.18">
-      <path d="M816 190H822V196H816ZM838 190H844V196H838ZM816 214H822V220H816ZM838 238H844V244H838ZM1008 150H1014V156H1008ZM1008 174H1014V180H1008ZM1008 198H1014V204H1008ZM1132 168H1138V174H1132ZM1146 192H1152V198H1146Z"/>
-    </g>
-    <g fill="none">
-      <circle cx="1045" cy="207" r="166" stroke="#f6ae62" stroke-opacity="0.1"/>
-      <circle cx="1045" cy="207" r="142" stroke="#f6ae62" stroke-opacity="0.2" stroke-dasharray="2 12"/>
-      <circle cx="1045" cy="207" r="119" stroke="#f6ae62" stroke-opacity="0.32" stroke-width="2" stroke-dasharray="160 590" transform="rotate(-65 1045 207)"/>
-      <path d="M610 450C780 270 1070 440 1330 130" stroke="url(#road)" stroke-width="2"/>
-      <path d="M680 450C850 285 1100 440 1330 180" stroke="url(#road)" stroke-width="1" opacity="0.4"/>
-      <path d="M-20 398H1300" stroke="#ffffff" stroke-opacity="0.06"/>
-    </g>
-    <g font-family="Arial, Helvetica, sans-serif">
-      <rect x="60" y="52" width="30" height="4" rx="2" fill="url(#amber)"/>
-      <text x="104" y="60" fill="#e9b77b" font-size="13" font-weight="700" letter-spacing="4">UNOFFICIAL COMMUNITY PORT</text>
-      <text x="55" y="179" fill="#f3f4f7" font-size="83" font-weight="900" letter-spacing="-4">MCLA RECOMP</text>
-      <text x="61" y="228" fill="#eab97f" font-size="22" font-weight="700" letter-spacing="5">LOS ANGELES, RECOMPILED.</text>
-      <text x="62" y="274" fill="#99a3b4" font-size="17">Midnight Club: Los Angeles Complete Edition</text>
-      <rect x="60" y="313" width="158" height="35" rx="8" fill="#f5a34d" fill-opacity="0.1" stroke="#f5a34d" stroke-opacity="0.3"/>
-      <text x="139" y="336" fill="#f1c38a" font-size="12" font-weight="700" text-anchor="middle" letter-spacing="1.5">ANDROID ARM64</text>
-      <text x="242" y="336" fill="#99a3b4" font-size="12" font-weight="700" letter-spacing="2">VULKAN / SDL3 / ReXGlue</text>
-      <g transform="translate(1045 207) skewX(-12)">
-        <text y="24" fill="url(#amber)" font-size="104" font-weight="900" text-anchor="middle" letter-spacing="-7">RV</text>
+
+    <!-- Sweeping Highway Speed Trails -->
+    <path d="M520 432C735 280 1015 415 1310 148" fill="none" stroke="url(#amberTrail)" stroke-width="3"/>
+    <path d="M585 438C790 300 1045 425 1315 190" fill="none" stroke="url(#cyanTrail)" stroke-width="2.2"/>
+    <path d="M0 386H1280" stroke="#38BDF8" stroke-opacity="0.10" stroke-width="1"/>
+
+    <!-- Right Tachometer Dial Emblem -->
+    <g transform="translate(1055 206)">
+      <circle r="154" fill="#070D16" fill-opacity="0.62" stroke="#38BDF8" stroke-opacity="0.18" stroke-width="1.5"/>
+      <circle r="134" fill="none" stroke="#94A3B8" stroke-opacity="0.22" stroke-width="2" stroke-dasharray="3 11"/>
+      <circle r="114" fill="none" stroke="url(#cyanTrail)" stroke-width="5" stroke-linecap="round" stroke-dasharray="250 520" transform="rotate(138)"/>
+      <circle r="114" fill="none" stroke="url(#amberAccent)" stroke-width="5" stroke-linecap="round" stroke-dasharray="95 660" transform="rotate(25)"/>
+      <g transform="skewX(-11)">
+        <text y="18" fill="url(#chrome)" font-family="Arial, Helvetica, sans-serif" font-size="88" font-weight="900" text-anchor="middle" letter-spacing="-5">RV</text>
       </g>
-      <text x="1045" y="266" fill="#a99b8c" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="4">STATIC RECOMPILATION</text>
-      <text x="62" y="389" fill="#748094" font-size="10" font-weight="700" letter-spacing="2">EXPERIMENTAL SOFTWARE. ORIGINAL GAME FILES REQUIRED.</text>
+      <text y="52" fill="#38BDF8" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="800" text-anchor="middle" letter-spacing="3.5">ARM64 · VULKAN</text>
+      <text y="72" fill="#FBBF24" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" text-anchor="middle" letter-spacing="2.5">SNAPDRAGON EDITION</text>
+    </g>
+
+    <!-- Left Typography & Feature Pills -->
+    <g font-family="Arial, Helvetica, sans-serif">
+      <rect x="58" y="46" width="10" height="22" rx="3" fill="#38BDF8"/>
+      <rect x="74" y="46" width="218" height="22" rx="6" fill="#38BDF8" fill-opacity="0.12" stroke="#38BDF8" stroke-opacity="0.35"/>
+      <text x="183" y="61" fill="#7DD3FC" font-size="10.5" font-weight="800" text-anchor="middle" letter-spacing="2.2">EXPERIMENTAL ANDROID PORT</text>
+
+      <text x="56" y="156" fill="url(#chrome)" font-size="82" font-weight="900" letter-spacing="-3.5">MCLA RECOMP</text>
+      <text x="60" y="198" fill="url(#amberAccent)" font-size="21" font-weight="800" letter-spacing="4.8">MIDNIGHT CLUB: LOS ANGELES</text>
+      <text x="60" y="232" fill="#CBD5E1" font-size="16" font-weight="600">Complete Edition · Static Xbox 360 → Android ARM64 Recompilation</text>
+
+      <!-- Capability Chips -->
+      <g transform="translate(58 268)">
+        <rect width="162" height="34" rx="9" fill="#0F2438" stroke="#38BDF8" stroke-opacity="0.45"/>
+        <text x="81" y="21" fill="#E0F2FE" font-size="11.5" font-weight="800" text-anchor="middle" letter-spacing="1.2">ADRENO / TURNIP</text>
+
+        <rect x="174" width="186" height="34" rx="9" fill="#112924" stroke="#22C55E" stroke-opacity="0.45"/>
+        <text x="267" y="21" fill="#DCFCE7" font-size="11.5" font-weight="800" text-anchor="middle" letter-spacing="1.2">XBOX 360 + % PEDALS</text>
+
+        <rect x="372" width="188" height="34" rx="9" fill="#2A1D12" stroke="#F59E0B" stroke-opacity="0.45"/>
+        <text x="466" y="21" fill="#FEF3C7" font-size="11.5" font-weight="800" text-anchor="middle" letter-spacing="1.2">STEREO ANTI-CUT</text>
+      </g>
+
+      <text x="60" y="346" fill="#94A3B8" font-size="12.5" font-weight="600" letter-spacing="1">C++23  ·  ReXGlue SDK  ·  SDL3  ·  AdrenoTools  ·  Native 720p Full-Screen</text>
+      <text x="60" y="403" fill="#64748B" font-size="10.5" font-weight="700" letter-spacing="1.8">UNOFFICIAL COMMUNITY PROJECT · BRING YOUR OWN LEGALLY OBTAINED XBOX 360 GAME FILES</text>
     </g>
   </g>
-  <rect x="1" y="1" width="1278" height="418" rx="24" fill="none" stroke="#7d899f" stroke-opacity="0.2"/>
+  <rect x="1" y="1" width="1278" height="418" rx="26" fill="none" stroke="#38BDF8" stroke-opacity="0.24" stroke-width="1.5"/>
 </svg>
