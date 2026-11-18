@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/Android-ARM64-22C55E?style=flat-square&amp;logo=android&amp;logoColor=white" alt="Android ARM64">
   <img src="https://img.shields.io/badge/GPU-Snapdragon%20%2F%20Adreno-38BDF8?style=flat-square" alt="Snapdragon Adreno">
   <img src="https://img.shields.io/badge/Renderer-Vulkan-F59E0B?style=flat-square&amp;logo=vulkan&amp;logoColor=white" alt="Vulkan renderer">
-  <img src="https://img.shields.io/badge/Build-v0.1.64%20Experimental-F97316?style=flat-square" alt="v0.1.64 Experimental">
+  <img src="https://img.shields.io/badge/Build-v0.1.65%20Experimental-F97316?style=flat-square" alt="v0.1.65 Experimental">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0--or--later-64748B?style=flat-square" alt="GPL-3.0-or-later license"></a>
 </p>
 

@@ -15,6 +15,45 @@ the APK `versionCode`.
 > **Active development has resumed**, focusing on Snapdragon / Adreno performance,
 > audio stability, touch controls, and Turnip / Vulkan rendering refinements.
 
+## 0.1.65 — Performance Optimization, APK Rebrand & Preset Consolidation *(Experimental)*
+
+> **Experimental build (`v0.1.65` / `versionCode 65`).** Addresses desktop
+> defaults leaking into mobile, removes S23-specific branding, and consolidates
+> Android runtime defaults for all Snapdragon / Adreno devices.
+
+- **Renamed APK to `Midnight-Recomp.apk`.**
+  Dropped the `MCLA-S23-Snapdragon-vX.Y.Z.apk` naming convention in favour of a
+  universal identifier that is device-agnostic.
+- **Removed S23-specific branding from all presets and UI.**
+  - `S23 Balanced` → **Balanced (Recommended)**
+  - `S23 Adaptive` audio → **Adaptive**
+  - `RedMagic Safe` audio → **Safe / Anti-Cut**
+  - SharedPrefs keys migrated from `perf_preset_v64` / `audio_profile_v64` to
+    `perf_preset_v65` / `audio_profile_v65` with automatic migration of old
+    values.
+- **Fixed desktop defaults leaking to Android.**
+  Consolidated two separate `#if REX_PLATFORM_ANDROID` blocks into a single
+  block, preventing stale cached object files from shipping desktop values:
+  - `render_target_trim_seconds`: 60 → 15 (idle VRAM freed faster)
+  - `gpu_memory_pressure_percent`: 90 → 75 (earlier LPDDR5X pressure relief)
+  - `anisotropic_override`: 5× → off (saves TMU power)
+- **Disabled game-side 4× MSAA EDRAM pass (`mcla_msaa = false`).**
+  The Xbox 360 MSAA resolve persisted even when `mcla_anti_aliasing = off`,
+  doubling tile-pass overhead on Adreno.  Now force-off on Android.
+- **Added CPU scheduling defaults for Android.**
+  `mcla_pump_wake_on_demand`, `mcla_poll_wait`, and `mcla_fence_sleep_us = 50`
+  were previously Windows-only; they are now enabled on Android, reducing idle
+  spin power and improving frame pacing.
+- **Elevated audio thread priority to `nice -16` (priority 2).**
+  Was `nice -8` (priority 1); stronger priority holds the Audio Worker and XMA
+  Decoder above GPU-bound threads during shader stalls, reducing underruns.
+- **256 KiB write-watch pages and direct unscaled texture loads.**
+  `shared_memory_invalidation_pages_log2 = 6` (64× fewer `mprotect` faults)
+  and `texture_load_direct_unscaled = true` (skip staging copy for 2-D EDRAM
+  textures) are now Android defaults.
+- **SDL hints added:** `SDL_RENDER_BATCHING = 1` and
+  `SDL_ANDROID_TRAP_BACK_BUTTON = 1`.
+
 ## 0.1.64 — Launcher & Xbox 360 % Pedals Redesign, Snapdragon FPS Profiles, RedMagic/S23 Audio Fix, and Log Recorder Repair *(Experimental)*
 
 > **Experimental build (`v0.1.64` / `versionCode 64`).** Active community test
