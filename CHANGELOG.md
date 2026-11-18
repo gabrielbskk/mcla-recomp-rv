@@ -14,10 +14,10 @@ the APK `versionCode`.
 > **Active development has resumed**, focusing on Snapdragon / Adreno performance,
 > thermal stability, and Turnip / Vulkan rendering refinements.
 
-## 0.1.63 — full-screen restoration, Turnip syncdraw stability, and S23 performance fixes
+## 0.1.63 — full-screen restoration, Turnip syncdraw stability, and S23 performance fixes *(Experimental)*
 
-Follow-up release addressing Galaxy S23 test feedback and diagnostic telemetry
-from experimental build `0.1.62`.
+Experimental follow-up build addressing Galaxy S23 test feedback and diagnostic
+telemetry from experimental build `0.1.62`. Still under active device validation.
 
 - **Full-screen presentation restored.** Removed `SurfaceHolder` hardware scaler
   overrides so SDL3 / Vulkan presents across the full native display panel while

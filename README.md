@@ -49,7 +49,8 @@ Download the APK from [Releases](https://github.com/gabrielbskk/mcla-recomp-rv/r
 
 | APK | Intended device | Status |
 | --- | --- | --- |
-| **v0.1.63** · normal | Snapdragon / Adreno | Full-screen presentation restored, Turnip `syncdraw` default restored (fixes wheel & headlight flicker), persistent Vulkan pipeline cache, native zero-Vulkan-cost FPS HUD, stereo audio, and Galaxy S23 thermal/GPU stability fixes. |
+| **v0.1.63** · experimental | Snapdragon / Adreno | **Experimental test build.** Full-screen presentation restored, Turnip `syncdraw` default restored (fixes wheel & headlight flicker), persistent Vulkan pipeline cache, native zero-Vulkan-cost FPS HUD, stereo audio, and Galaxy S23 thermal/GPU fixes. |
+| **v0.1.61** · normal | Snapdragon / Adreno | Stable baseline. Auto log export, launcher cleanup. No frame generation. |
 
 **Mali support has been discontinued.** The diagnostic APK has been withdrawn;
 Mali/Immortalis and PanVK are outside this project's supported scope. Tested
