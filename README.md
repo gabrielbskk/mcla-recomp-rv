@@ -44,8 +44,8 @@
 
 ---
 
-> [!NOTE]
-> **Active development is live.** This repository is the public distribution hub for Android builds, [experimental changelogs](CHANGELOG.md), setup guides, and community bug reports. Current engineering focuses on **Snapdragon / Adreno** frame pacing, **Turnip `syncdraw`** draw-call reduction, **Galaxy S23 & RedMagic 11 Air** audio stability, and responsive **Xbox 360 touch + analog pedal** controls.
+> [!WARNING]
+> **Development is paused and this repository is archived.** I have made no further progress and may return to the project someday, but there is no restart timeline. The project required substantial time and expenses without the positive results I had hoped for. This repository remains as an archive; active development and support have stopped.
 
 > [!IMPORTANT]
 > **Bring your own legally obtained Xbox 360 game files.** This APK contains only recompiled native ARM64 host code and launcher UI — no game assets, RPF/BIK archives, shader packs, or Turnip drivers are bundled.
